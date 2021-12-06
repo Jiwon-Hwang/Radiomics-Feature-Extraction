@@ -1,0 +1,12 @@
+Intensity histogram,mean,15.5894
+Intensity histogram,variance,29.5586
+Intensity histogram,skewness,-2.46
+Intensity histogram,kurtosis,5.9
+Intensity histogram,median,22
+Intensity histogram,minimum,1
+Intensity histogram,maximum,32
+Local Intensity,local intensity peak,124.803
+Local Intensity,global intensity peak,124.803
+GLCM,joint maximum,0.109
+GLCM,joint average,20.6
+GLCM,joint entropy,5.82

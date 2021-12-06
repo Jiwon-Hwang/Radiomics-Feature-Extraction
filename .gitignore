@@ -1,0 +1,12 @@
+#file
+*.pptx
+*.dcm
+*.bmp
+*.png
+*.jpg
+*.suo
+*.db
+
+#folder
+#cv and dcmtk
+3rdparty/

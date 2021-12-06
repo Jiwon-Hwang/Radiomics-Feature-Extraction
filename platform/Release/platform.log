@@ -1,0 +1,19 @@
+﻿  Moc'ing platform.h...
+  Uic'ing platform.ui...
+C:\Users\jiwon\Desktop\[jiwon]\dilab\Lab Projects\5. Radiomics\Lab Platform(2018-07-13)\platform\platform.ui : warning : The name 'layoutWidget' (QWidget) is already in use, defaulting to 'layoutWidget1'.
+  Moc'ing image.h...
+  Rcc'ing platform.qrc...
+  platform.cpp
+c:\users\jiwon\desktop\[jiwon]\dilab\lab projects\5. radiomics\lab platform(2018-07-13)\3rdparty\cv\include\opencv2\flann\dist.h : warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  data.cpp
+c:\users\jiwon\desktop\[jiwon]\dilab\lab projects\5. radiomics\lab platform(2018-07-13)\3rdparty\cv\include\opencv2\flann\dist.h : warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  moc_image.cpp
+  moc_platform.cpp
+c:\users\jiwon\desktop\[jiwon]\dilab\lab projects\5. radiomics\lab platform(2018-07-13)\3rdparty\cv\include\opencv2\flann\dist.h : warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  main.cpp
+c:\users\jiwon\desktop\[jiwon]\dilab\lab projects\5. radiomics\lab platform(2018-07-13)\3rdparty\cv\include\opencv2\flann\dist.h : warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  image.cpp
+c:\users\jiwon\desktop\[jiwon]\dilab\lab projects\5. radiomics\lab platform(2018-07-13)\3rdparty\cv\include\opencv2\flann\dist.h : warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+  코드를 생성하고 있습니다...
+  qrc_platform.cpp
+  platform.vcxproj -> C:\Users\jiwon\Desktop\[jiwon]\dilab\Lab Projects\5. Radiomics\Lab Platform(2018-07-13)\Win32\Release\platform.exe
