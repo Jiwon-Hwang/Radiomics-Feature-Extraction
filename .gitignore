@@ -6,6 +6,7 @@
 *.jpg
 *.suo
 *.db
+*.sdf
 
 #folder
 #cv and dcmtk
