@@ -800,7 +800,7 @@ void CPlatform::run()
 	cout << "nHeight2 : " << nHeight2 << endl;
 	cout << "nImageCnt : " << nImageCnt << endl;
 	*/
-
+	cout << "submodule test" << endl;
 
 	/* [3.2] Local Intensity Features */
 	// calcLocalIntensityPeak(pusImage, pucMask, nHeight, nWidth); // 3.2.1 Local Intensity Peak
