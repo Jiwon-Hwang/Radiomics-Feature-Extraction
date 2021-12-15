@@ -151,6 +151,13 @@
                  </property>
                 </widget>
                </item>
+               <item>
+                <widget class="QRadioButton" name="radioButton_LoG_2">
+                 <property name="text">
+                  <string>None</string>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </widget>
             </widget>

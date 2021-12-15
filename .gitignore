@@ -7,6 +7,12 @@
 *.suo
 *.db
 *.sdf
+*.obj
+*.log
+*.tlog
+*.pdb
+*.ilk
+*.opendb
 
 #folder
 #cv and dcmtk

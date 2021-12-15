@@ -19,6 +19,10 @@
 #include <algorithm>
 #include <numeric>
 
+// for M_PI
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include <opencv2/opencv.hpp>
 #include <opencv2\core\core.hpp>
 #include <opencv2\highgui\highgui.hpp>

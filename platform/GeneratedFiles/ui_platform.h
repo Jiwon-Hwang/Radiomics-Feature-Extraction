@@ -57,6 +57,7 @@ public:
     QVBoxLayout *verticalLayout_6;
     QRadioButton *radioButton_Gaussian;
     QRadioButton *radioButton_LoG;
+    QRadioButton *radioButton_LoG_2;
     QGroupBox *groupBox_features;
     QWidget *layoutWidget1;
     QVBoxLayout *verticalLayout_7;
@@ -191,6 +192,11 @@ public:
 
         verticalLayout_6->addWidget(radioButton_LoG);
 
+        radioButton_LoG_2 = new QRadioButton(layoutWidget);
+        radioButton_LoG_2->setObjectName(QStringLiteral("radioButton_LoG_2"));
+
+        verticalLayout_6->addWidget(radioButton_LoG_2);
+
 
         verticalLayout_4->addWidget(groupBox_filters);
 
@@ -269,6 +275,7 @@ public:
         groupBox_filters->setTitle(QApplication::translate("platformClass", "Filters", Q_NULLPTR));
         radioButton_Gaussian->setText(QApplication::translate("platformClass", "Gaussian", Q_NULLPTR));
         radioButton_LoG->setText(QApplication::translate("platformClass", "LoG (Laplacian-of-Gaussian)", Q_NULLPTR));
+        radioButton_LoG_2->setText(QApplication::translate("platformClass", "None", Q_NULLPTR));
         groupBox_features->setTitle(QApplication::translate("platformClass", "Radiomics Features", Q_NULLPTR));
         checkBox_Histogram->setText(QApplication::translate("platformClass", "Intensity Histogram Features", Q_NULLPTR));
         checkBox_GLCM->setText(QApplication::translate("platformClass", "Local Intensity Features", Q_NULLPTR));

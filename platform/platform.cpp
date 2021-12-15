@@ -449,7 +449,11 @@ void CPlatform::scrollChangeImage(int nValue)
 	showImage(nValue);
 }
 
+// Filter //
 
+
+
+// Feature Extraction //
 // ***아직 9번 슬라이스 1장에 대해서만 구현됨***
 short CPlatform::calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth) {
 
@@ -677,6 +681,7 @@ float calcDiscretisedIntensityVariance(vector<unsigned short> vectorOfDiscretize
 }
 
 
+// Save Result //
 // ***추후 GUI 체크박스 상태(true, false)에 따라서 for문 안에 if문 넣어서 출력할지말지(<< or continue) 결정
 void defineIntenseFeatures(vector<string> &features) {
 	features.push_back("mean");
@@ -787,20 +792,47 @@ void CPlatform::run()
 	m_ciData.copyImage(9, psImage, nWidth, nHeight); // DCM
 	m_ciData.copyMask(9, pucMask, nWidth, nHeight); // label image
 
+
+	// Filtering
+	Mat img(nWidth, nHeight, CV_16SC1, psImage); // convert Arr(short) to Mat(short) 
+
+	double minVal;
+	double maxVal;
+	Point minLoc;
+	Point maxLoc;
+	minMaxLoc(img, &minVal, &maxVal, &minLoc, &maxLoc);
+
+	Mat img_filtered;
+	GaussianBlur(img, img_filtered, Size(7, 7), 0);
+
+	Mat img_8UC1 = img.clone();
+	Mat img_filtered_8UC1 = img_filtered.clone();
+	img_8UC1 -= minVal;
+	img_filtered_8UC1 -= minVal;
+	img_8UC1.convertTo(img_8UC1, CV_8U, 255.0 / (maxVal - minVal)); // normalization (16bit to 8bit)
+	img_filtered_8UC1.convertTo(img_filtered_8UC1, CV_8U, 255.0 / (maxVal - minVal));
+
+	imshow("before filtering", img_8UC1);
+	imshow("after filtering", img_filtered_8UC1);
+	waitKey(0);
+	destroyAllWindows();
+
 	
+	/*
 	// ***여러 file들 copy***
 	int nWidth2 = 0;
 	int nHeight2 = 0;
 	int nImageCnt = 0; // copyImages()에서 nImageCnt 계산 후 반환
 	short** ppsImages = NULL;
 	m_ciData.copyImages(0, ppsImages, nImageCnt, nWidth2, nHeight2); // 한 그룹의 여러 dcm들 깊은 복사 => copyImage 호출
-	
+	*/
+
 	/*
 	cout << "nWidth2 : " << nWidth2 << endl;
 	cout << "nHeight2 : " << nHeight2 << endl;
 	cout << "nImageCnt : " << nImageCnt << endl;
 	*/
-	cout << "submodule test" << endl;
+
 
 	/* [3.2] Local Intensity Features */
 	// calcLocalIntensityPeak(pusImage, pucMask, nHeight, nWidth); // 3.2.1 Local Intensity Peak
@@ -847,7 +879,7 @@ void CPlatform::run()
 	SAFE_DELETE_ARRAY(psImage);
 	SAFE_DELETE_ARRAY(pucMask);
 	// 2차원 배열 일 땐, SAFE_DELETE_VOLUME(배열명, 1차원 배열 수)
-	SAFE_DELETE_VOLUME(ppsImages, nImageCnt);
+	//SAFE_DELETE_VOLUME(ppsImages, nImageCnt);
 	
 }
 
