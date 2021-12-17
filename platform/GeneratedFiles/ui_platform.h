@@ -55,9 +55,9 @@ public:
     QGroupBox *groupBox_filters;
     QWidget *layoutWidget;
     QVBoxLayout *verticalLayout_6;
+    QRadioButton *radioButton_LoG_2;
     QRadioButton *radioButton_Gaussian;
     QRadioButton *radioButton_LoG;
-    QRadioButton *radioButton_LoG_2;
     QGroupBox *groupBox_features;
     QWidget *layoutWidget1;
     QVBoxLayout *verticalLayout_7;
@@ -182,6 +182,11 @@ public:
         verticalLayout_6->setContentsMargins(11, 11, 11, 11);
         verticalLayout_6->setObjectName(QStringLiteral("verticalLayout_6"));
         verticalLayout_6->setContentsMargins(0, 0, 0, 0);
+        radioButton_LoG_2 = new QRadioButton(layoutWidget);
+        radioButton_LoG_2->setObjectName(QStringLiteral("radioButton_LoG_2"));
+
+        verticalLayout_6->addWidget(radioButton_LoG_2);
+
         radioButton_Gaussian = new QRadioButton(layoutWidget);
         radioButton_Gaussian->setObjectName(QStringLiteral("radioButton_Gaussian"));
 
@@ -191,11 +196,6 @@ public:
         radioButton_LoG->setObjectName(QStringLiteral("radioButton_LoG"));
 
         verticalLayout_6->addWidget(radioButton_LoG);
-
-        radioButton_LoG_2 = new QRadioButton(layoutWidget);
-        radioButton_LoG_2->setObjectName(QStringLiteral("radioButton_LoG_2"));
-
-        verticalLayout_6->addWidget(radioButton_LoG_2);
 
 
         verticalLayout_4->addWidget(groupBox_filters);
@@ -273,9 +273,9 @@ public:
         pushButton_2->setText(QApplication::translate("platformClass", "multiple cases", Q_NULLPTR));
         groupBox->setTitle(QString());
         groupBox_filters->setTitle(QApplication::translate("platformClass", "Filters", Q_NULLPTR));
-        radioButton_Gaussian->setText(QApplication::translate("platformClass", "Gaussian", Q_NULLPTR));
-        radioButton_LoG->setText(QApplication::translate("platformClass", "LoG (Laplacian-of-Gaussian)", Q_NULLPTR));
         radioButton_LoG_2->setText(QApplication::translate("platformClass", "None", Q_NULLPTR));
+        radioButton_Gaussian->setText(QApplication::translate("platformClass", "Gaussian", Q_NULLPTR));
+        radioButton_LoG->setText(QApplication::translate("platformClass", "Laplacian", Q_NULLPTR));
         groupBox_features->setTitle(QApplication::translate("platformClass", "Radiomics Features", Q_NULLPTR));
         checkBox_Histogram->setText(QApplication::translate("platformClass", "Intensity Histogram Features", Q_NULLPTR));
         checkBox_GLCM->setText(QApplication::translate("platformClass", "Local Intensity Features", Q_NULLPTR));

@@ -48,6 +48,9 @@ using namespace std;
 #define SAFE_DELETE_ARRAY(p)	{ if(p) delete[](p); p = NULL;}
 #define SAFE_DELETE_VOLUME(p, depth)	{ if(p) {for (int i=0;i<depth;i++)	if(p[i]) delete[](p[i]); } delete[] p; p=NULL;};
 
+#define FILTER_NONE 0
+#define FILTER_GAUSSIAN 1 
+#define FILTER_LAPLACIAN 2
 
 class CPlatform : public QMainWindow
 {

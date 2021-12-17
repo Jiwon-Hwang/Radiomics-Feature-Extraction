@@ -320,7 +320,6 @@ void CPlatform::dragEnterEvent(QDragEnterEvent* event)
         event->acceptProposedAction();
     }
 }
-
 void CPlatform::dropEvent(QDropEvent* event)
 {
 	QStringList list;
@@ -432,7 +431,6 @@ void CPlatform::showImage(int nFrameIdx)
 		m_ciImage->setImageScreenSize(nWidth, nHeight); // 창 크기 변경함에 따라 image 크기도 변하도록 다시 세팅
 	}
 }
-
 void CPlatform::showImage(QTreeWidgetItem* item, int column)
 {
 	if(item->text(1) != 0) {
@@ -441,20 +439,45 @@ void CPlatform::showImage(QTreeWidgetItem* item, int column)
 	}
 }
 
-
-// 알고리즘 //
+// scroll //
 void CPlatform::scrollChangeImage(int nValue)
 {
 	//cout << "nValue : " << nValue << endl;
 	showImage(nValue);
 }
 
-// Filter //
 
+// Algorithms ------------------------------------------------------------------------------------------------------------------------------
+
+// Filter //
+void filtering(short* psImage, Mat &img_filtered, int nWidth, int nHeight, int FILTER_MODE) {
+	
+	Mat img(nWidth, nHeight, CV_16SC1, psImage);
+
+	switch (FILTER_MODE) 
+	{
+		case FILTER_NONE:
+			break;
+		
+		case FILTER_GAUSSIAN: 
+		{
+			GaussianBlur(img, img_filtered, Size(7, 7), 0); 
+			break;
+		}
+			
+		case FILTER_LAPLACIAN: 
+		{
+			Laplacian(img, img_filtered, CV_16S, 7);
+			break;
+		}
+
+		default:
+			cout << "error : Unknown Filter Mode!" << endl;
+	}
+}
 
 
 // Feature Extraction //
-// ***아직 9번 슬라이스 1장에 대해서만 구현됨***
 short CPlatform::calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth) {
 
 	// 1. get center pos of max (intensity peak in ROI)
@@ -578,7 +601,6 @@ vector<short> getVectorOfPixelsInROI(short* pusImage, unsigned char* pucMask, in
 	
 	return vectorOfOriPixels;
 }
-
 vector<unsigned short> getVectorOfDiscretizedPixels_nBins(vector<short> vectorOfOriPixels, int nBins = 32) {
 	
 	float minimumValue = (float)*min_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end()); // min_element() : pointer return
@@ -616,7 +638,6 @@ vector<unsigned short> getVectorOfDiscretizedPixels_nBins(vector<short> vectorOf
 
 	return vectorOfDiscretizedPixels;
 }
-
 vector<unsigned short> getVectorOfDiffGreyLevels(vector<unsigned short> vectorOfDiscretizedPixels) {
 
 	vector<unsigned short> diffGreyLevels(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end()); // 1~nbins 사이 값으로 양자화된 픽셀값들
@@ -624,7 +645,6 @@ vector<unsigned short> getVectorOfDiffGreyLevels(vector<unsigned short> vectorOf
 
 	return diffGreyLevels;
 }
-
 vector<unsigned int> getHistogram(vector<unsigned short> vectorOfDiscretizedPixels) {
 
 	vector<unsigned short> diffGreyLevels = getVectorOfDiffGreyLevels(vectorOfDiscretizedPixels); 
@@ -651,7 +671,6 @@ float calcMeanDiscretisedIntensity(vector<unsigned short> vectorOfDiscretizedPix
 
 	return mean;
 }
-
 float calcDiscretisedIntensityVariance(vector<unsigned short> vectorOfDiscretizedPixels) {
 	unsigned int size = vectorOfDiscretizedPixels.size(); // size_t : unsigned int
 	float mean = accumulate(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), 0.0) / size;
@@ -712,7 +731,6 @@ void defineIntenseFeatures(vector<string> &features) {
 	*/
 	
 }
-
 void extractIntenseData(vector<float> &intenseData, vector<float> intenseFeatures) {
 	//intenseData.push_back(intenseFeatures.meanValue);
 	//intenseData.push_back(intenseFeatures.varianceValue);
@@ -741,7 +759,6 @@ void extractIntenseData(vector<float> &intenseData, vector<float> intenseFeature
 	intenseData.push_back(intenseFeatures.minHistGradGreyValue);
 	*/
 }
-
 void writeCSVFileIntensity(vector<float> intense, string outputFolder)
 {
 	string csvName = outputFolder + "_intensityHistogram.csv"; // Result/ICC_01_001_intensityHistogram.csv
@@ -770,7 +787,87 @@ void writeCSVFileIntensity(vector<float> intense, string outputFolder)
 	intenseCSV.close();
 }
 
-//template <typename T>
+
+// Normalize and 16 bit Image Show //
+void RescaleIntensityFilter(short* sIN_OUT_img, int nWidth, int nHeight, int nSetMax, int nSetMin)
+{
+	int nMin = INT_MAX;
+	int nMax = INT_MIN;
+
+	for (int i = 0; i<nWidth; i++) {
+		for (int j = 0; j<nHeight; j++) {
+			if (sIN_OUT_img[j*nWidth + i] > nMax) {
+				nMax = sIN_OUT_img[j*nWidth + i];
+			}
+
+			if (sIN_OUT_img[j*nWidth + i] < nMin) {
+				nMin = sIN_OUT_img[j*nWidth + i];
+			}
+		}
+	}
+
+	//normalization
+	if (nMax - nMin != 0) {
+		for (int i = 0; i<nWidth; i++) {
+			for (int j = 0; j<nHeight; j++) {
+				sIN_OUT_img[j*nWidth + i] = (sIN_OUT_img[j*nWidth + i] - nMin) * (nSetMax - nSetMin) / (nMax - nMin) + nSetMin;
+			}
+		}
+	}
+}
+void ShowShortImage(short* sImg, int nWidth, int nHeight, char* cWindowName)
+{
+	int nImgSize = nWidth*nHeight;
+	short* sCopyImg = new short[nImgSize];
+	memcpy(sCopyImg, sImg, sizeof(short)*nImgSize);
+
+	RescaleIntensityFilter(sCopyImg, nWidth, nHeight, 255, 0);
+
+	IplImage* img = cvCreateImage(cvSize(nWidth, nHeight), 8, 1);
+
+	for (int row = 0; row< nHeight; row++) {
+		for (int col = 0; col < nWidth; col++) {
+			img->imageData[img->widthStep*row + col] = (char)sCopyImg[row*nWidth + col];
+		}
+	}
+
+	if (cWindowName == NULL) {
+		cWindowName = "test";
+	}
+
+	cvShowImage(cWindowName, img);
+	cvWaitKey(0);
+
+	cvReleaseImage(&img);
+
+
+	delete[] sCopyImg;
+}
+
+
+// Get min, max of Mat //
+double getMinOfMat(Mat m) {
+	double minVal;
+	double maxVal;
+	Point minLoc;
+	Point maxLoc;
+	minMaxLoc(m, &minVal, &maxVal, &minLoc, &maxLoc);
+
+	return minVal;
+}
+double getMaxOfMat(Mat m) {
+	double minVal;
+	double maxVal;
+	Point minLoc;
+	Point maxLoc;
+	minMaxLoc(m, &minVal, &maxVal, &minLoc, &maxLoc);
+
+	return maxVal;
+}
+
+
+
+// Run //
 void CPlatform::run()
 {
 	// paramter //
@@ -788,34 +885,21 @@ void CPlatform::run()
 	short* psImage = NULL;
 	unsigned char* pucMask = NULL;
 	
-	// ROI 있는 10번째 이미지 copy
+	// ROI 있는 10번째 이미지 copy 
 	m_ciData.copyImage(9, psImage, nWidth, nHeight); // DCM
 	m_ciData.copyMask(9, pucMask, nWidth, nHeight); // label image
 
 
-	// Filtering
-	Mat img(nWidth, nHeight, CV_16SC1, psImage); // convert Arr(short) to Mat(short) 
-
-	double minVal;
-	double maxVal;
-	Point minLoc;
-	Point maxLoc;
-	minMaxLoc(img, &minVal, &maxVal, &minLoc, &maxLoc);
-
+	// filtering
+	// filtering 함수 밖으로 나오면 내부에서 할당한 Mat은 해제되므로, 블록 밖(run)에서 call by reference로 처리해주기
 	Mat img_filtered;
-	GaussianBlur(img, img_filtered, Size(7, 7), 0);
+	int FILTER_MODE = FILTER_GAUSSIAN;
 
-	Mat img_8UC1 = img.clone();
-	Mat img_filtered_8UC1 = img_filtered.clone();
-	img_8UC1 -= minVal;
-	img_filtered_8UC1 -= minVal;
-	img_8UC1.convertTo(img_8UC1, CV_8U, 255.0 / (maxVal - minVal)); // normalization (16bit to 8bit)
-	img_filtered_8UC1.convertTo(img_filtered_8UC1, CV_8U, 255.0 / (maxVal - minVal));
+	filtering(psImage, img_filtered, nWidth, nHeight, FILTER_MODE); // 0, 1, 2 : btn
+	
+	SAFE_DELETE_ARRAY(psImage);
+	psImage = (short*)img_filtered.data; // 주소 변경
 
-	imshow("before filtering", img_8UC1);
-	imshow("after filtering", img_filtered_8UC1);
-	waitKey(0);
-	destroyAllWindows();
 
 	
 	/*
@@ -876,7 +960,6 @@ void CPlatform::run()
 	//m_ciImage->setImage(pucImage, nWidth, nHeight); // redraw call
 
 	// 메모리 소멸 //
-	SAFE_DELETE_ARRAY(psImage);
 	SAFE_DELETE_ARRAY(pucMask);
 	// 2차원 배열 일 땐, SAFE_DELETE_VOLUME(배열명, 1차원 배열 수)
 	//SAFE_DELETE_VOLUME(ppsImages, nImageCnt);

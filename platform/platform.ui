@@ -138,6 +138,13 @@
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_6">
                <item>
+                <widget class="QRadioButton" name="radioButton_LoG_2">
+                 <property name="text">
+                  <string>None</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
                 <widget class="QRadioButton" name="radioButton_Gaussian">
                  <property name="text">
                   <string>Gaussian</string>
@@ -147,14 +154,7 @@
                <item>
                 <widget class="QRadioButton" name="radioButton_LoG">
                  <property name="text">
-                  <string>LoG (Laplacian-of-Gaussian)</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QRadioButton" name="radioButton_LoG_2">
-                 <property name="text">
-                  <string>None</string>
+                  <string>Laplacian</string>
                  </property>
                 </widget>
                </item>
