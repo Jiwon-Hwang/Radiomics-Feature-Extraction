@@ -96,6 +96,7 @@ public slots:
 	void showImage(QTreeWidgetItem* item, int column);
 
 	void scrollChangeImage(int nValue);
+	void setFilterMode();
 	short calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth); // m_ciData.getPixelSpacing() call
 	
 	void run();

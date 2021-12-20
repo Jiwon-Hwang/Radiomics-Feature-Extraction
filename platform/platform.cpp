@@ -3,6 +3,8 @@
 using namespace std;
 using namespace cv;
 
+int FILTER_MODE; 
+
 CPlatform::CPlatform(QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -203,6 +205,9 @@ void CPlatform::setSignalSlot()
 {
 	connect(ui.pushButton_run, SIGNAL(clicked()), this, SLOT(run()));
 	connect(ui.horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(scrollChangeImage(int)));
+	connect(ui.radioButton_None, SIGNAL(clicked()), this, SLOT(setFilterMode()));
+	connect(ui.radioButton_Gaussian, SIGNAL(clicked()), this, SLOT(setFilterMode()));
+	connect(ui.radioButton_Laplacian, SIGNAL(clicked()), this, SLOT(setFilterMode()));
 }
 void CPlatform::setProgressBarValue(int nCurrentIdx, int nMaximumIdx)
 {
@@ -450,6 +455,17 @@ void CPlatform::scrollChangeImage(int nValue)
 // Algorithms ------------------------------------------------------------------------------------------------------------------------------
 
 // Filter //
+void CPlatform::setFilterMode() { // radio btn 체크될 때마다(시그널) 호출되는 슬롯 함수
+	
+	if (ui.radioButton_None->isChecked())
+		FILTER_MODE = FILTER_NONE;
+	if (ui.radioButton_Gaussian->isChecked())
+		FILTER_MODE = FILTER_GAUSSIAN;
+	if (ui.radioButton_Laplacian->isChecked())
+		FILTER_MODE = FILTER_LAPLACIAN;
+
+}
+
 void filtering(short* psImage, Mat &img_filtered, int nWidth, int nHeight, int FILTER_MODE) {
 	
 	Mat img(nWidth, nHeight, CV_16SC1, psImage);
@@ -457,6 +473,7 @@ void filtering(short* psImage, Mat &img_filtered, int nWidth, int nHeight, int F
 	switch (FILTER_MODE) 
 	{
 		case FILTER_NONE:
+			img_filtered = img.clone();
 			break;
 		
 		case FILTER_GAUSSIAN: 
@@ -478,6 +495,8 @@ void filtering(short* psImage, Mat &img_filtered, int nWidth, int nHeight, int F
 
 
 // Feature Extraction //
+
+// [ Loacl Intensity Features ] // 
 short CPlatform::calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth) {
 
 	// 1. get center pos of max (intensity peak in ROI)
@@ -580,7 +599,7 @@ short CPlatform::calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask,
 	return meanIntensity;
 }
 
-
+// [ Intensity Histogram Features ]
 vector<short> getVectorOfPixelsInROI(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth) {
 
 	vector<short> vectorOfOriPixels; // size : 3032
@@ -870,14 +889,6 @@ double getMaxOfMat(Mat m) {
 // Run //
 void CPlatform::run()
 {
-	// paramter //
-	//double fParam1 = ui.doubleSpinBox->value();
-	//double fParam2 = ui.doubleSpinBox_2->value();
-	//double fParam3 = ui.doubleSpinBox_3->value();
-
-	// mousePoint // (mouse 좌표는 이미지 크기에 맞도록 자동 변환되어서 반환) (화면크기 x)
-	// QPoint qpoint = m_ciImage->getMousePoint();	// Mouse 좌표 값 한개만 가져올때
-	// QVector<QPoint> qpoints = m_ciImage->getMousePoints();	// 드래그
 
 	// 배열 복사 //
 	int nWidth = 0; // 512
@@ -891,14 +902,18 @@ void CPlatform::run()
 
 
 	// filtering
-	// filtering 함수 밖으로 나오면 내부에서 할당한 Mat은 해제되므로, 블록 밖(run)에서 call by reference로 처리해주기
-	Mat img_filtered;
+	/*
+	for (int i = 0; i < 3; i++) {
+	if (ui.radioButton_Gaussian->isChecked()) {
 	int FILTER_MODE = FILTER_GAUSSIAN;
-
-	filtering(psImage, img_filtered, nWidth, nHeight, FILTER_MODE); // 0, 1, 2 : btn
-	
+	}
+	}
+	*/
+	Mat img_filtered;
+	filtering(psImage, img_filtered, nWidth, nHeight, FILTER_MODE); // 0, 1, 2 : radio btn
 	SAFE_DELETE_ARRAY(psImage);
 	psImage = (short*)img_filtered.data; // 주소 변경
+	
 
 
 	
@@ -909,18 +924,17 @@ void CPlatform::run()
 	int nImageCnt = 0; // copyImages()에서 nImageCnt 계산 후 반환
 	short** ppsImages = NULL;
 	m_ciData.copyImages(0, ppsImages, nImageCnt, nWidth2, nHeight2); // 한 그룹의 여러 dcm들 깊은 복사 => copyImage 호출
-	*/
-
-	/*
+	
 	cout << "nWidth2 : " << nWidth2 << endl;
 	cout << "nHeight2 : " << nHeight2 << endl;
 	cout << "nImageCnt : " << nImageCnt << endl;
 	*/
 
 
-	/* [3.2] Local Intensity Features */
+	/*
+	// [3.2] Local Intensity Features //
 	// calcLocalIntensityPeak(pusImage, pucMask, nHeight, nWidth); // 3.2.1 Local Intensity Peak
-
+	*/
 	
 
 	/* [3.4] Intensity Histogram Features */

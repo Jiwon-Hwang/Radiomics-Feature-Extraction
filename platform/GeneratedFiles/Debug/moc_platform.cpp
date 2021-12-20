@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_CPlatform_t {
-    QByteArrayData data[17];
-    char stringdata0[166];
+    QByteArrayData data[18];
+    char stringdata0[180];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -40,19 +40,20 @@ QT_MOC_LITERAL(5, 48, 4), // "item"
 QT_MOC_LITERAL(6, 53, 6), // "column"
 QT_MOC_LITERAL(7, 60, 17), // "scrollChangeImage"
 QT_MOC_LITERAL(8, 78, 6), // "nValue"
-QT_MOC_LITERAL(9, 85, 22), // "calcLocalIntensityPeak"
-QT_MOC_LITERAL(10, 108, 6), // "short*"
-QT_MOC_LITERAL(11, 115, 8), // "pusImage"
-QT_MOC_LITERAL(12, 124, 14), // "unsigned char*"
-QT_MOC_LITERAL(13, 139, 7), // "pucMask"
-QT_MOC_LITERAL(14, 147, 7), // "nHeight"
-QT_MOC_LITERAL(15, 155, 6), // "nWidth"
-QT_MOC_LITERAL(16, 162, 3) // "run"
+QT_MOC_LITERAL(9, 85, 13), // "setFilterMode"
+QT_MOC_LITERAL(10, 99, 22), // "calcLocalIntensityPeak"
+QT_MOC_LITERAL(11, 122, 6), // "short*"
+QT_MOC_LITERAL(12, 129, 8), // "pusImage"
+QT_MOC_LITERAL(13, 138, 14), // "unsigned char*"
+QT_MOC_LITERAL(14, 153, 7), // "pucMask"
+QT_MOC_LITERAL(15, 161, 7), // "nHeight"
+QT_MOC_LITERAL(16, 169, 6), // "nWidth"
+QT_MOC_LITERAL(17, 176, 3) // "run"
 
     },
     "CPlatform\0showImage\0\0nFrameIdx\0"
     "QTreeWidgetItem*\0item\0column\0"
-    "scrollChangeImage\0nValue\0"
+    "scrollChangeImage\0nValue\0setFilterMode\0"
     "calcLocalIntensityPeak\0short*\0pusImage\0"
     "unsigned char*\0pucMask\0nHeight\0nWidth\0"
     "run"
@@ -65,7 +66,7 @@ static const uint qt_meta_data_CPlatform[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       5,   14, // methods
+       6,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -73,17 +74,19 @@ static const uint qt_meta_data_CPlatform[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    1,   39,    2, 0x0a /* Public */,
-       1,    2,   42,    2, 0x0a /* Public */,
-       7,    1,   47,    2, 0x0a /* Public */,
-       9,    4,   50,    2, 0x0a /* Public */,
-      16,    0,   59,    2, 0x0a /* Public */,
+       1,    1,   44,    2, 0x0a /* Public */,
+       1,    2,   47,    2, 0x0a /* Public */,
+       7,    1,   52,    2, 0x0a /* Public */,
+       9,    0,   55,    2, 0x0a /* Public */,
+      10,    4,   56,    2, 0x0a /* Public */,
+      17,    0,   65,    2, 0x0a /* Public */,
 
  // slots: parameters
     QMetaType::Void, QMetaType::Int,    3,
     QMetaType::Void, 0x80000000 | 4, QMetaType::Int,    5,    6,
     QMetaType::Void, QMetaType::Int,    8,
-    QMetaType::Short, 0x80000000 | 10, 0x80000000 | 12, QMetaType::Int, QMetaType::Int,   11,   13,   14,   15,
+    QMetaType::Void,
+    QMetaType::Short, 0x80000000 | 11, 0x80000000 | 13, QMetaType::Int, QMetaType::Int,   12,   14,   15,   16,
     QMetaType::Void,
 
        0        // eod
@@ -98,9 +101,10 @@ void CPlatform::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 0: _t->showImage((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 1: _t->showImage((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         case 2: _t->scrollChangeImage((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 3: { short _r = _t->calcLocalIntensityPeak((*reinterpret_cast< short*(*)>(_a[1])),(*reinterpret_cast< unsigned char*(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3])),(*reinterpret_cast< int(*)>(_a[4])));
+        case 3: _t->setFilterMode(); break;
+        case 4: { short _r = _t->calcLocalIntensityPeak((*reinterpret_cast< short*(*)>(_a[1])),(*reinterpret_cast< unsigned char*(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3])),(*reinterpret_cast< int(*)>(_a[4])));
             if (_a[0]) *reinterpret_cast< short*>(_a[0]) = std::move(_r); }  break;
-        case 4: _t->run(); break;
+        case 5: _t->run(); break;
         default: ;
         }
     }
@@ -131,13 +135,13 @@ int CPlatform::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 5)
+        if (_id < 6)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 5;
+        _id -= 6;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 5)
+        if (_id < 6)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 5;
+        _id -= 6;
     }
     return _id;
 }

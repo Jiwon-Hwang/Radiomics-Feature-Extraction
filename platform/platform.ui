@@ -138,7 +138,7 @@
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_6">
                <item>
-                <widget class="QRadioButton" name="radioButton_LoG_2">
+                <widget class="QRadioButton" name="radioButton_None">
                  <property name="text">
                   <string>None</string>
                  </property>
@@ -152,13 +152,16 @@
                 </widget>
                </item>
                <item>
-                <widget class="QRadioButton" name="radioButton_LoG">
+                <widget class="QRadioButton" name="radioButton_Laplacian">
                  <property name="text">
                   <string>Laplacian</string>
                  </property>
                 </widget>
                </item>
               </layout>
+              <zorder>radioButton_Gaussian</zorder>
+              <zorder>radioButton_Laplacian</zorder>
+              <zorder>radioButton_None</zorder>
              </widget>
             </widget>
            </item>
@@ -185,9 +188,18 @@
                 </widget>
                </item>
                <item>
-                <widget class="QCheckBox" name="checkBox_GLCM">
+                <widget class="QCheckBox" name="checkBox_Intensity">
                  <property name="text">
                   <string>Local Intensity Features</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                 <property name="checked">
+                  <bool>false</bool>
+                 </property>
+                 <property name="tristate">
+                  <bool>false</bool>
                  </property>
                 </widget>
                </item>
@@ -199,18 +211,9 @@
                 </widget>
                </item>
                <item>
-                <widget class="QCheckBox" name="checkBox_Intensity">
+                <widget class="QCheckBox" name="checkBox_GLCM">
                  <property name="text">
                   <string>GLCM</string>
-                 </property>
-                 <property name="checkable">
-                  <bool>true</bool>
-                 </property>
-                 <property name="checked">
-                  <bool>false</bool>
-                 </property>
-                 <property name="tristate">
-                  <bool>false</bool>
                  </property>
                 </widget>
                </item>
