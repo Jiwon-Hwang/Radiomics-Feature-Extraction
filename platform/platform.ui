@@ -166,7 +166,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QGroupBox" name="groupBox_features">
+            <widget class="QGroupBox" name="groupBox_families">
              <property name="title">
               <string>Radiomics Features</string>
              </property>
@@ -182,8 +182,17 @@
               <layout class="QVBoxLayout" name="verticalLayout_7">
                <item>
                 <widget class="QCheckBox" name="checkBox_Histogram">
+                 <property name="autoFillBackground">
+                  <bool>false</bool>
+                 </property>
                  <property name="text">
                   <string>Intensity Histogram Features</string>
+                 </property>
+                 <property name="checked">
+                  <bool>false</bool>
+                 </property>
+                 <property name="tristate">
+                  <bool>false</bool>
                  </property>
                 </widget>
                </item>
@@ -214,6 +223,9 @@
                 <widget class="QCheckBox" name="checkBox_GLCM">
                  <property name="text">
                   <string>GLCM</string>
+                 </property>
+                 <property name="checked">
+                  <bool>false</bool>
                  </property>
                 </widget>
                </item>

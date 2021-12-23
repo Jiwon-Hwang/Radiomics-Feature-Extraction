@@ -98,7 +98,10 @@ public slots:
 	void scrollChangeImage(int nValue);
 	void setFilterMode();
 	short calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth); // m_ciData.getPixelSpacing() call
-	
+	void presetCSVFile(string csvName);
+	void writeCSVFile(int seriesIdx, string csvName);
+	void writeCSVFeatureValue(string csvName);
+	void writeCSVCaseName(int seriesIdx, string csvName);
 	void run();
 };
 

@@ -105,7 +105,7 @@ public:
 	int getInstanceNumber(int nSliceIdx);
 	int getInstanceNumber(int nSeriesIdx, int nImageIdx);
 
-private:
+public:
 	// load
 	template <typename T>
 	bool loadImage(std::string sImagePath, CSeries* &pCiSeries, CImage<T>* &pCiImage);

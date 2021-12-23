@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_CPlatform_t {
-    QByteArrayData data[18];
-    char stringdata0[180];
+    QByteArrayData data[25];
+    char stringdata0[270];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -48,7 +48,14 @@ QT_MOC_LITERAL(13, 138, 14), // "unsigned char*"
 QT_MOC_LITERAL(14, 153, 7), // "pucMask"
 QT_MOC_LITERAL(15, 161, 7), // "nHeight"
 QT_MOC_LITERAL(16, 169, 6), // "nWidth"
-QT_MOC_LITERAL(17, 176, 3) // "run"
+QT_MOC_LITERAL(17, 176, 13), // "presetCSVFile"
+QT_MOC_LITERAL(18, 190, 6), // "string"
+QT_MOC_LITERAL(19, 197, 7), // "csvName"
+QT_MOC_LITERAL(20, 205, 12), // "writeCSVFile"
+QT_MOC_LITERAL(21, 218, 9), // "seriesIdx"
+QT_MOC_LITERAL(22, 228, 20), // "writeCSVFeatureValue"
+QT_MOC_LITERAL(23, 249, 16), // "writeCSVCaseName"
+QT_MOC_LITERAL(24, 266, 3) // "run"
 
     },
     "CPlatform\0showImage\0\0nFrameIdx\0"
@@ -56,7 +63,9 @@ QT_MOC_LITERAL(17, 176, 3) // "run"
     "scrollChangeImage\0nValue\0setFilterMode\0"
     "calcLocalIntensityPeak\0short*\0pusImage\0"
     "unsigned char*\0pucMask\0nHeight\0nWidth\0"
-    "run"
+    "presetCSVFile\0string\0csvName\0writeCSVFile\0"
+    "seriesIdx\0writeCSVFeatureValue\0"
+    "writeCSVCaseName\0run"
 };
 #undef QT_MOC_LITERAL
 
@@ -66,7 +75,7 @@ static const uint qt_meta_data_CPlatform[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       6,   14, // methods
+      10,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -74,12 +83,16 @@ static const uint qt_meta_data_CPlatform[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    1,   44,    2, 0x0a /* Public */,
-       1,    2,   47,    2, 0x0a /* Public */,
-       7,    1,   52,    2, 0x0a /* Public */,
-       9,    0,   55,    2, 0x0a /* Public */,
-      10,    4,   56,    2, 0x0a /* Public */,
-      17,    0,   65,    2, 0x0a /* Public */,
+       1,    1,   64,    2, 0x0a /* Public */,
+       1,    2,   67,    2, 0x0a /* Public */,
+       7,    1,   72,    2, 0x0a /* Public */,
+       9,    0,   75,    2, 0x0a /* Public */,
+      10,    4,   76,    2, 0x0a /* Public */,
+      17,    1,   85,    2, 0x0a /* Public */,
+      20,    2,   88,    2, 0x0a /* Public */,
+      22,    1,   93,    2, 0x0a /* Public */,
+      23,    2,   96,    2, 0x0a /* Public */,
+      24,    0,  101,    2, 0x0a /* Public */,
 
  // slots: parameters
     QMetaType::Void, QMetaType::Int,    3,
@@ -87,6 +100,10 @@ static const uint qt_meta_data_CPlatform[] = {
     QMetaType::Void, QMetaType::Int,    8,
     QMetaType::Void,
     QMetaType::Short, 0x80000000 | 11, 0x80000000 | 13, QMetaType::Int, QMetaType::Int,   12,   14,   15,   16,
+    QMetaType::Void, 0x80000000 | 18,   19,
+    QMetaType::Void, QMetaType::Int, 0x80000000 | 18,   21,   19,
+    QMetaType::Void, 0x80000000 | 18,   19,
+    QMetaType::Void, QMetaType::Int, 0x80000000 | 18,   21,   19,
     QMetaType::Void,
 
        0        // eod
@@ -104,7 +121,11 @@ void CPlatform::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 3: _t->setFilterMode(); break;
         case 4: { short _r = _t->calcLocalIntensityPeak((*reinterpret_cast< short*(*)>(_a[1])),(*reinterpret_cast< unsigned char*(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3])),(*reinterpret_cast< int(*)>(_a[4])));
             if (_a[0]) *reinterpret_cast< short*>(_a[0]) = std::move(_r); }  break;
-        case 5: _t->run(); break;
+        case 5: _t->presetCSVFile((*reinterpret_cast< string(*)>(_a[1]))); break;
+        case 6: _t->writeCSVFile((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< string(*)>(_a[2]))); break;
+        case 7: _t->writeCSVFeatureValue((*reinterpret_cast< string(*)>(_a[1]))); break;
+        case 8: _t->writeCSVCaseName((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< string(*)>(_a[2]))); break;
+        case 9: _t->run(); break;
         default: ;
         }
     }
@@ -135,13 +156,13 @@ int CPlatform::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 6)
+        if (_id < 10)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 6;
+        _id -= 10;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 6)
+        if (_id < 10)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 6;
+        _id -= 10;
     }
     return _id;
 }

@@ -4,6 +4,7 @@ using namespace std;
 using namespace cv;
 
 int FILTER_MODE; 
+vector<string> featureFamilyName_list = {"Histogram", "Local Intensity", "Morphology", "GLCM"};
 
 CPlatform::CPlatform(QWidget *parent)
 	: QMainWindow(parent)
@@ -465,7 +466,6 @@ void CPlatform::setFilterMode() { // radio btn 체크될 때마다(시그널) 호출되는 슬
 		FILTER_MODE = FILTER_LAPLACIAN;
 
 }
-
 void filtering(short* psImage, Mat &img_filtered, int nWidth, int nHeight, int FILTER_MODE) {
 	
 	Mat img(nWidth, nHeight, CV_16SC1, psImage);
@@ -495,8 +495,7 @@ void filtering(short* psImage, Mat &img_filtered, int nWidth, int nHeight, int F
 
 
 // Feature Extraction //
-
-// [ Loacl Intensity Features ] // 
+// [ 3.2 Loacl Intensity Features ] // 
 short CPlatform::calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth) {
 
 	// 1. get center pos of max (intensity peak in ROI)
@@ -599,7 +598,7 @@ short CPlatform::calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask,
 	return meanIntensity;
 }
 
-// [ Intensity Histogram Features ]
+// [ 3.4 Intensity Histogram Features ] //
 vector<short> getVectorOfPixelsInROI(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth) {
 
 	vector<short> vectorOfOriPixels; // size : 3032
@@ -689,7 +688,7 @@ float calcMeanDiscretisedIntensity(vector<unsigned short> vectorOfDiscretizedPix
 	float mean = accumulate(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), 0.0) / vectorOfDiscretizedPixels.size(); // 0.0 : initial value of the sum
 
 	return mean;
-}
+} 
 float calcDiscretisedIntensityVariance(vector<unsigned short> vectorOfDiscretizedPixels) {
 	unsigned int size = vectorOfDiscretizedPixels.size(); // size_t : unsigned int
 	float mean = accumulate(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), 0.0) / size;
@@ -720,11 +719,20 @@ float calcDiscretisedIntensityVariance(vector<unsigned short> vectorOfDiscretize
 
 
 // Save Result //
-// ***추후 GUI 체크박스 상태(true, false)에 따라서 for문 안에 if문 넣어서 출력할지말지(<< or continue) 결정
-void defineIntenseFeatures(vector<string> &features) {
+// [ 3.2 Local Intensity Features ] // 
+void defineLocalIntenseFeatures(vector<string> &features)
+{
+
+}
+void extractLocalIntensityData(vector<float> &localIntensityData, vector<float> localIntensityFeatures)
+{
+
+}
+
+// [ 3.4 Intensity Histogram Features ] //
+void defineIntensityHistogramFeatures(vector<string> &features) {
 	features.push_back("mean");
 	features.push_back("variance");
-	/*
 	features.push_back("skewness");
 	features.push_back("kurtosis");
 	features.push_back("median");
@@ -746,11 +754,12 @@ void defineIntenseFeatures(vector<string> &features) {
 	features.push_back("Maximum histogram gradient");
 	features.push_back("Maximum histogram gradient grey level");
 	features.push_back("Minimum histogram gradient");
-	features.push_back("Minimum histogram gradient grey level");
-	*/
-	
+	features.push_back("Minimum histogram gradient grey level");	
 }
-void extractIntenseData(vector<float> &intenseData, vector<float> intenseFeatures) {
+void extractIntensityHistogramData(vector<float> intensityHistogramFeatures, vector<float> &intensityHistogramValues) {
+	// 일단 여기서 intensityHistogramFeatures라는 객체의 멤버변수 값들(NAN을 포함한 특징값들) 모두 한 벡터(intensityHistogramValues)에 push 
+	// 추후 밖에서 이 벡터를 세부 특징들 체크 T/F 여부 담는 bool 배열 반복문으로 체크하면서 True에 해당하는 idx의 특징값들만 뽑아서 writeCSV
+
 	//intenseData.push_back(intenseFeatures.meanValue);
 	//intenseData.push_back(intenseFeatures.varianceValue);
 	/*
@@ -778,32 +787,112 @@ void extractIntenseData(vector<float> &intenseData, vector<float> intenseFeature
 	intenseData.push_back(intenseFeatures.minHistGradGreyValue);
 	*/
 }
-void writeCSVFileIntensity(vector<float> intense, string outputFolder)
+
+
+void writeCSVCheckedValue(vector<float> extractedValues, string csvName)
 {
-	string csvName = outputFolder + "_intensityHistogram.csv"; // Result/ICC_01_001_intensityHistogram.csv
+	ofstream resultCSV(csvName, std::ios_base::app);
 
-	// remove existing file
-	remove(csvName.c_str());
-
-	char * name = new char[csvName.size() + 1];
-	copy(csvName.begin(), csvName.end(), name);
-	name[csvName.size()] = '\0';
-
-	
-
-	ofstream intenseCSV;
-	intenseCSV.open(name, std::ios_base::app);
-	vector<string> features;
-	defineIntenseFeatures(features);
-
-	//vector<float> intenseData;
-	//extractIntenseData(intenseData, intense); // ***지금은 run()에서 특징값들 intese vector에 push__back
-	for (int i = 0; i< intense.size(); i++) {
-		intenseCSV << "Intensity histogram" << "," << features[i] << ",";
-		intenseCSV << intense[i];
-		intenseCSV << "\n";
+	for (int i = 0; i< extractedValues.size(); i++) {
+		if (extractedValues[i] != NAN) { // false(not checked)면 멤버변수의 초기값 NAN
+			resultCSV << extractedValues[i] << ",";
+		}
 	}
-	intenseCSV.close();
+	resultCSV.close();
+}
+
+void CPlatform::writeCSVCaseName(int seriesIdx, string csvName) {
+	ofstream resultCSV(csvName, std::ios_base::app); // std::ios_base::app => 이어쓰기 모드로 열기(open)
+
+	// ***추후 series.h에서 멤버변수로 폴더명 접근 가능. series idx로 접근***
+	string imagePath = m_ciData.getImagePath(seriesIdx, 9); // (nSeriesIdx, nImageIdx)
+	vector<string> paths = m_ciData.splitPath(imagePath);
+
+	resultCSV << paths[paths.size() - 4] << "," << paths[paths.size() - 3] << ",";
+
+	resultCSV.close();
+}
+
+void CPlatform::writeCSVFeatureValue(string csvName) {
+
+	if (ui.checkBox_Histogram->isChecked()) {
+		//vector<float> hitogramValue; // 추출값들 push 받아올 벡터
+		//intenseHisto.extractData(hitogramValue); // ***extractData : 각 클래스별 멤버함수. 각 family class의 멤버변수들에 접근해서 vector에 push해오기(NAN 포함)***
+		//writeCSVCheckedValue(hitogramValue, csvName);
+	}
+
+	if (ui.checkBox_Intensity->isChecked()) {
+		
+	}
+
+	if (ui.checkBox_Morph->isChecked()) {
+
+	}
+
+	if (ui.checkBox_GLCM->isChecked()) {
+
+	}
+}
+
+void CPlatform::writeCSVFile(int seriesIdx, string csvName) {
+
+	writeCSVCaseName(seriesIdx, csvName); // case명 & case명_modality 저장
+	writeCSVFeatureValue(csvName); // feature values 저장 (각 family별로 호출)
+
+}
+
+
+// Preset CSV File - write checked feature family name and feature name // 
+void CPlatform::presetCSVFile(string csvName) {
+
+	ofstream resultCSV(csvName); // 파일이 없으면 새로 생성, 있으면 기존 내용 지우고 새로 작성 (remove 포함)
+
+								 // write feature family name (선택된(true) 큰 특징명들 이름 삽입)
+	resultCSV << " " << "," << " " << ","; // 맨 앞 공백 2칸
+
+	QList<QCheckBox *> checkbox_list = ui.groupBox_families->findChildren<QCheckBox *>(); // checkBoxes should be in groupBox
+
+	int nFeatures = 2; // 추후 True로 체크된 특징 개수 parameter input => ***각 family마다 다른 개수 가져오기!! (ex. int family.nCheckedFeatures)***
+	for (int i = 0; i < checkbox_list.size(); i++) {
+		if (checkbox_list.at(i)->isChecked()) {
+			for (int j = 0; j < nFeatures; j++) {
+				resultCSV << featureFamilyName_list[i] << ",";
+			}
+		}
+	}
+	resultCSV << "\n";
+
+	// write feature name (각 family마다 선택된(true) 세부 특징들 이름 삽입)
+	resultCSV << " " << "," << " " << ","; // 맨 앞 공백 2칸
+
+	if (ui.checkBox_Histogram->isChecked()) {
+		vector<string> features;
+		defineIntensityHistogramFeatures(features); // 전체 feature name들 get
+		//for (int i = 0; i < features.size(); i++) {
+		// ***여기서 해당 family에서 체크된 feature들 bool 배열 체크해서 if문 통과시키기 (true값 수정)***
+		//if (true) { 
+		for (int j = 0; j< nFeatures; j++) {
+			resultCSV << features[j] << ",";
+		}
+	//}
+	}
+
+	if (ui.checkBox_Intensity->isChecked()) {
+
+	}
+
+	if (ui.checkBox_Morph->isChecked()) {
+
+	}
+
+	if (ui.checkBox_GLCM->isChecked()) {
+
+	}
+
+	resultCSV << "\n";
+
+	resultCSV.close();
+
 }
 
 
@@ -889,6 +978,14 @@ double getMaxOfMat(Mat m) {
 // Run //
 void CPlatform::run()
 {
+	// create and preset csv file //
+	const static string outputFolder = string("Result/");
+	string csvName = outputFolder + "result.csv";
+
+	presetCSVFile(csvName);
+	
+
+	// case별 바깥 for loop 시작 (ex. ICC_01_001 - ICC_01_001_CT) //
 
 	// 배열 복사 //
 	int nWidth = 0; // 512
@@ -896,12 +993,24 @@ void CPlatform::run()
 	short* psImage = NULL;
 	unsigned char* pucMask = NULL;
 	
-	// ROI 있는 10번째 이미지 copy 
 	m_ciData.copyImage(9, psImage, nWidth, nHeight); // DCM
 	m_ciData.copyMask(9, pucMask, nWidth, nHeight); // label image
 
+	/*
+	// ***여러 file들 copy***
+	int nWidth2 = 0;
+	int nHeight2 = 0;
+	int nImageCnt = 0; // copyImages()에서 nImageCnt 계산 후 반환
+	short** ppsImages = NULL;
+	m_ciData.copyImages(0, ppsImages, nImageCnt, nWidth2, nHeight2); // 한 그룹의 여러 dcm들 깊은 복사 => copyImage 호출
 
-	// filtering
+	cout << "nWidth2 : " << nWidth2 << endl;
+	cout << "nHeight2 : " << nHeight2 << endl;
+	cout << "nImageCnt : " << nImageCnt << endl;
+	*/
+
+	
+	// filtering //
 	/*
 	for (int i = 0; i < 3; i++) {
 	if (ui.radioButton_Gaussian->isChecked()) {
@@ -911,67 +1020,62 @@ void CPlatform::run()
 	*/
 	Mat img_filtered;
 	filtering(psImage, img_filtered, nWidth, nHeight, FILTER_MODE); // 0, 1, 2 : radio btn
-	SAFE_DELETE_ARRAY(psImage);
+	SAFE_DELETE_ARRAY(psImage); // psImage 포인터가 가리키고 있던 메모리 데이터들 해제 => 이후엔 Mat 데이터를 가리키므로, 또 해제해주지 않아야 함!
 	psImage = (short*)img_filtered.data; // 주소 변경
 	
 
 
+	// feature extraction // => ***추후 feature family 각각 class로 빼기 & featureExtraction() 통합함수로 빼기***
+	// ***이부분에서 벡터 대신 객체 생성 후 값 대입***
+	vector<float> intensityHistogram;
+	vector<short> localIntensity;
+	vector<float> morphology;
+	vector<float> glcm;
+
+	//for (int i = 0; i < checkbox_list.size(); i++) { // checkbox.at(i) 이런식으로 추후 수정
+
+	if (ui.checkBox_Histogram->isChecked()) {
+		// 3.4.0 Ready for Feature Extraction
+		int nBins = 32; // user input parameter
+		vector<short> vectorOfOriPixels = getVectorOfPixelsInROI(psImage, pucMask, nHeight, nWidth);
+		vector<unsigned short> vectorOfDiscretizedPixels = getVectorOfDiscretizedPixels_nBins(vectorOfOriPixels, nBins);
+		vector<unsigned int> hist = getHistogram(vectorOfDiscretizedPixels);
+
+		// 3.4.1 Mean discretised intensity
+		float meanValue = calcMeanDiscretisedIntensity(vectorOfDiscretizedPixels); // 15.5894
+		intensityHistogram.push_back(meanValue);
+
+		// 3.4.2 Discretised intensity variance
+		float varValue = calcDiscretisedIntensityVariance(vectorOfDiscretizedPixels); // 29.5587
+		intensityHistogram.push_back(varValue);
+
+		// 3.3.3 Discretised intensity skewness
+
+
+	}
+
+
+	if (ui.checkBox_Intensity->isChecked()) {
+		short localIntensityPeak = calcLocalIntensityPeak(psImage, pucMask, nHeight, nWidth);
+		localIntensity.push_back(localIntensityPeak);
+			
+	}
+
+	if (ui.checkBox_Morph->isChecked()) {
+
+	}
+
+	if (ui.checkBox_GLCM->isChecked()) {
+
+	}
+
+
+
+	// write csv file 
+	int seriesIdx = 0; // for loop idx
+	writeCSVFile(seriesIdx, csvName);
 	
-	/*
-	// ***여러 file들 copy***
-	int nWidth2 = 0;
-	int nHeight2 = 0;
-	int nImageCnt = 0; // copyImages()에서 nImageCnt 계산 후 반환
-	short** ppsImages = NULL;
-	m_ciData.copyImages(0, ppsImages, nImageCnt, nWidth2, nHeight2); // 한 그룹의 여러 dcm들 깊은 복사 => copyImage 호출
-	
-	cout << "nWidth2 : " << nWidth2 << endl;
-	cout << "nHeight2 : " << nHeight2 << endl;
-	cout << "nImageCnt : " << nImageCnt << endl;
-	*/
 
-
-	/*
-	// [3.2] Local Intensity Features //
-	// calcLocalIntensityPeak(pusImage, pucMask, nHeight, nWidth); // 3.2.1 Local Intensity Peak
-	*/
-	
-
-	/* [3.4] Intensity Histogram Features */
-	// 3.4.0 Ready for Feature Extraction => 추후 class로 모두 빼고, public 멤버 변수, 멤버 함수로 만들기! (ex. class IntensityHistogram)
-	int nBins = 32; // user input parameter
-	vector<float> intense; // 사실 전부 float
-	vector<short> vectorOfOriPixels = getVectorOfPixelsInROI(psImage, pucMask, nHeight, nWidth);
-	vector<unsigned short> vectorOfDiscretizedPixels = getVectorOfDiscretizedPixels_nBins(vectorOfOriPixels, nBins);
-	vector<unsigned int> hist = getHistogram(vectorOfDiscretizedPixels);
-	
-	// 3.4.1 Mean discretised intensity
-	float meanValue = calcMeanDiscretisedIntensity(vectorOfDiscretizedPixels); // 15.5894
-	intense.push_back(meanValue);
-
-	// 3.4.2 Discretised intensity variance
-	float varValue = calcDiscretisedIntensityVariance(vectorOfDiscretizedPixels); // 29.5587
-	intense.push_back(varValue);
-	
-	// 3.3.3 Discretised intensity skewness
-
-
-
-
-	/* save and write extracted feature values */ 
-	const static string outputFolder = string("Result/"); 
-	string patientName = string("ICC_01_001"); // parameter
-	string outputPath = outputFolder;
-	outputPath.append(patientName); // "Result/ICC_01_001_intensityHistogram.csv"
-
-	writeCSVFileIntensity(intense, outputPath);
-	
-	cout << "writeCSVFile done!" << endl;
-
-
-
-	// 결과값 메모리에 복사 //
-	//m_ciImage->setImage(pucImage, nWidth, nHeight); // redraw call
 
 	// 메모리 소멸 //
 	SAFE_DELETE_ARRAY(pucMask);

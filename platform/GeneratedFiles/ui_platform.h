@@ -58,13 +58,13 @@ public:
     QRadioButton *radioButton_None;
     QRadioButton *radioButton_Gaussian;
     QRadioButton *radioButton_Laplacian;
-    QGroupBox *groupBox_features;
+    QGroupBox *groupBox_families;
     QWidget *layoutWidget1;
     QVBoxLayout *verticalLayout_7;
     QCheckBox *checkBox_Histogram;
-    QCheckBox *checkBox_GLCM;
-    QCheckBox *checkBox_Morph;
     QCheckBox *checkBox_Intensity;
+    QCheckBox *checkBox_Morph;
+    QCheckBox *checkBox_GLCM;
     QPushButton *pushButton_run;
     QMenuBar *menuBar;
     QStatusBar *statusBar;
@@ -203,9 +203,9 @@ public:
 
         verticalLayout_4->addWidget(groupBox_filters);
 
-        groupBox_features = new QGroupBox(groupBox);
-        groupBox_features->setObjectName(QStringLiteral("groupBox_features"));
-        layoutWidget1 = new QWidget(groupBox_features);
+        groupBox_families = new QGroupBox(groupBox);
+        groupBox_families->setObjectName(QStringLiteral("groupBox_families"));
+        layoutWidget1 = new QWidget(groupBox_families);
         layoutWidget1->setObjectName(QStringLiteral("layoutWidget1"));
         layoutWidget1->setGeometry(QRect(30, 70, 186, 171));
         verticalLayout_7 = new QVBoxLayout(layoutWidget1);
@@ -215,18 +215,11 @@ public:
         verticalLayout_7->setContentsMargins(0, 0, 0, 0);
         checkBox_Histogram = new QCheckBox(layoutWidget1);
         checkBox_Histogram->setObjectName(QStringLiteral("checkBox_Histogram"));
+        checkBox_Histogram->setAutoFillBackground(false);
+        checkBox_Histogram->setChecked(false);
+        checkBox_Histogram->setTristate(false);
 
         verticalLayout_7->addWidget(checkBox_Histogram);
-
-        checkBox_GLCM = new QCheckBox(layoutWidget1);
-        checkBox_GLCM->setObjectName(QStringLiteral("checkBox_GLCM"));
-
-        verticalLayout_7->addWidget(checkBox_GLCM);
-
-        checkBox_Morph = new QCheckBox(layoutWidget1);
-        checkBox_Morph->setObjectName(QStringLiteral("checkBox_Morph"));
-
-        verticalLayout_7->addWidget(checkBox_Morph);
 
         checkBox_Intensity = new QCheckBox(layoutWidget1);
         checkBox_Intensity->setObjectName(QStringLiteral("checkBox_Intensity"));
@@ -236,8 +229,19 @@ public:
 
         verticalLayout_7->addWidget(checkBox_Intensity);
 
+        checkBox_Morph = new QCheckBox(layoutWidget1);
+        checkBox_Morph->setObjectName(QStringLiteral("checkBox_Morph"));
 
-        verticalLayout_4->addWidget(groupBox_features);
+        verticalLayout_7->addWidget(checkBox_Morph);
+
+        checkBox_GLCM = new QCheckBox(layoutWidget1);
+        checkBox_GLCM->setObjectName(QStringLiteral("checkBox_GLCM"));
+        checkBox_GLCM->setChecked(false);
+
+        verticalLayout_7->addWidget(checkBox_GLCM);
+
+
+        verticalLayout_4->addWidget(groupBox_families);
 
 
         verticalLayout_5->addLayout(verticalLayout_4);
@@ -279,11 +283,11 @@ public:
         radioButton_None->setText(QApplication::translate("platformClass", "None", Q_NULLPTR));
         radioButton_Gaussian->setText(QApplication::translate("platformClass", "Gaussian", Q_NULLPTR));
         radioButton_Laplacian->setText(QApplication::translate("platformClass", "Laplacian", Q_NULLPTR));
-        groupBox_features->setTitle(QApplication::translate("platformClass", "Radiomics Features", Q_NULLPTR));
+        groupBox_families->setTitle(QApplication::translate("platformClass", "Radiomics Features", Q_NULLPTR));
         checkBox_Histogram->setText(QApplication::translate("platformClass", "Intensity Histogram Features", Q_NULLPTR));
-        checkBox_GLCM->setText(QApplication::translate("platformClass", "Local Intensity Features", Q_NULLPTR));
+        checkBox_Intensity->setText(QApplication::translate("platformClass", "Local Intensity Features", Q_NULLPTR));
         checkBox_Morph->setText(QApplication::translate("platformClass", "Morphological Features", Q_NULLPTR));
-        checkBox_Intensity->setText(QApplication::translate("platformClass", "GLCM", Q_NULLPTR));
+        checkBox_GLCM->setText(QApplication::translate("platformClass", "GLCM", Q_NULLPTR));
         pushButton_run->setText(QApplication::translate("platformClass", "Run", Q_NULLPTR));
     } // retranslateUi
 
