@@ -43,7 +43,7 @@
 #include "imageView.h"
 #include "data.h"
 
-using namespace std;
+
 #define MAX_FILE_LENGTH 64
 #define SAFE_DELETE_ARRAY(p)	{ if(p) delete[](p); p = NULL;}
 #define SAFE_DELETE_VOLUME(p, depth)	{ if(p) {for (int i=0;i<depth;i++)	if(p[i]) delete[](p[i]); } delete[] p; p=NULL;};
@@ -66,9 +66,11 @@ public:
 	void readImage(QStringList list);
 
 public:
-	CImageView* m_ciImage;					// image
+	CImageView* m_ciImage;				// image
 	CData m_ciData;						// data
 	int m_nActivatedFrameIdx;			// 현재 화면에 가시화된 Frame 번호
+	
+	IntensityHistogram intenseHisto; // Q. 이게 언제 소멸..? for문 마다? (여기다 선언해야 platform.cpp의 CPlatform:: 어느곳에서나 intensity 객체, 함수들 사용 가능)
 
 // QT layout, action 변수
 public:

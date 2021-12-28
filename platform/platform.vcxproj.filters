@@ -71,6 +71,9 @@
     <ClCompile Include="imageView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="intensityHistogram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="platform.h">
@@ -97,6 +100,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="series.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intensityHistogram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

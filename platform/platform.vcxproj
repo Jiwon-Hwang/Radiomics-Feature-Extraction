@@ -154,6 +154,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="imageView.cpp" />
+    <ClCompile Include="intensityHistogram.cpp" />
     <ClCompile Include="platform.cpp" />
     <ClCompile Include="data.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_image.cpp">
@@ -233,6 +234,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="intensityHistogram.h" />
     <ClInclude Include="series.h" />
     <CustomBuild Include="imageView.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

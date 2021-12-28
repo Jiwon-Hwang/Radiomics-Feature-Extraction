@@ -1,0 +1,186 @@
+#include "IntensityHistogram.h"
+
+using namespace std;
+
+IntensityHistogram::IntensityHistogram() {
+
+}
+
+IntensityHistogram::~IntensityHistogram() {
+
+}
+
+
+vector<short> getVectorOfPixelsInROI(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth) {
+
+	vector<short> vectorOfOriPixels; // size : 3032
+	for (int row = 0; row < nHeight; row++) {
+		for (int col = 0; col < nWidth; col++) {
+			int index = row * nWidth + col;
+			unsigned char maskValue = pucMask[index];
+			short imageValue = pusImage[index];
+
+			// ROI 내부값 push (ROI가 없으면 계속 pass)
+			if (maskValue >(unsigned char)0) {
+				vectorOfOriPixels.push_back(imageValue);
+			}
+		}
+	}
+
+	sort(vectorOfOriPixels.begin(), vectorOfOriPixels.end()); // min(front) : -1, max(back) : 180
+
+	return vectorOfOriPixels;
+}
+vector<unsigned short> getVectorOfDiscretizedPixels_nBins(vector<short> vectorOfOriPixels, int nBins = 32) {
+
+	float minimumValue = (float)*min_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end()); // min_element() : pointer return
+	float maximumValue = (float)*max_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end());
+	vector<float> tempFloatVec(vectorOfOriPixels.begin(), vectorOfOriPixels.end());
+
+	if (minimumValue == 0 && minimumValue == maximumValue) {
+		cout << "error in calculating discretization, VOI contains only 0" << endl;
+		exit(0);
+	}
+	else if (minimumValue > 0 && minimumValue == maximumValue) {
+		cout << "error in calculating discretization, VOI contains only one intensity value, minimum value is set to 0" << endl;
+		minimumValue = 0;
+	}
+
+	//subtract minimum value from every matrix element
+	transform(tempFloatVec.begin(), tempFloatVec.end(), tempFloatVec.begin(), bind2nd(minus<float>(), minimumValue)); // minus<T> : 이항 연산 함수 객체 (-) / bind2nd : 2번째 인수를 고정해 함수 객체로 변환 / transform : 일괄 연산
+
+																													  //get the range
+	float range = (maximumValue - minimumValue) / nBins; // range : 몫 (width of a bin) => ***float이 들어가면 / 는 몫이 아니라 진짜 "나누기" 연산!!!***
+
+	//divide every element of the matrix by the range
+	transform(tempFloatVec.begin(), tempFloatVec.end(), tempFloatVec.begin(), bind2nd(divides<float>(), range));
+
+	//replace 0 to 1 => ibsi 핑크색 마킹 부분! (min - min = 0이 되므로 최소인 1로 바꿔줘야 뒤에 ceil에서 min value of each bin : 1 유지)
+	replace(tempFloatVec.begin(), tempFloatVec.end(), 0, 1);
+
+	//do rounding
+	for (int i = 0; i < tempFloatVec.size(); i++) {
+		tempFloatVec[i] = ceil(tempFloatVec[i]);
+	}
+
+	//type casting
+	vector<unsigned short> vectorOfDiscretizedPixels(tempFloatVec.begin(), tempFloatVec.end()); // 양자화한 최종 결과 픽셀값들 담을 벡터
+
+	return vectorOfDiscretizedPixels;
+}
+vector<unsigned short> getVectorOfDiffGreyLevels(vector<unsigned short> vectorOfDiscretizedPixels) {
+
+	vector<unsigned short> diffGreyLevels(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end()); // 1~nbins 사이 값으로 양자화된 픽셀값들
+	diffGreyLevels.erase(unique(diffGreyLevels.begin(), diffGreyLevels.end()), diffGreyLevels.end()); // size : 168 => 32 bins로 나누면 한 구간 당 약 5개의 픽셀값들의 빈도수들 누적
+
+	return diffGreyLevels;
+}
+vector<unsigned int> getHistogram(vector<unsigned short> vectorOfDiscretizedPixels) {
+
+	vector<unsigned short> diffGreyLevels = getVectorOfDiffGreyLevels(vectorOfDiscretizedPixels);
+
+	vector<unsigned int> hist;
+	unsigned int nCnt;
+	unsigned short greyLevel;
+	for (int i = 0; i < diffGreyLevels.size(); i++) {
+		greyLevel = diffGreyLevels[i];
+		nCnt = 0;
+		for (int j = 0; j < vectorOfDiscretizedPixels.size(); j++) {
+			if (vectorOfDiscretizedPixels[j] == greyLevel) {
+				nCnt += 1;
+			}
+		}
+		hist.push_back(nCnt);
+	}
+
+	return hist;
+}
+
+float calcMean(vector<unsigned short> vectorOfDiscretizedPixels) {
+	float mean = accumulate(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), 0.0) / vectorOfDiscretizedPixels.size(); // 0.0 : initial value of the sum
+
+	return mean;
+}
+float calcVariance(vector<unsigned short> vectorOfDiscretizedPixels) {
+	unsigned int size = vectorOfDiscretizedPixels.size(); // size_t : unsigned int
+	float mean = accumulate(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), 0.0) / size;
+	vector<float> diff(size);
+	transform(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), diff.begin(), bind2nd(minus<float>(), mean));
+	float variance = inner_product(diff.begin(), diff.end(), diff.begin(), 0.0) / size;
+
+	/*
+	// with anonymous function : func = [capture](parameters){body}
+	auto variance_func = [&mean, &size](float accumulator, const float& val) {
+	return accumulator + ((val - mean) * (val - mean) / size);
+	};
+	variance = accumulate(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), 0.0, variance_func);
+	*/
+
+	/*
+	// with for loop
+	float variance = 0;
+	for (int n = 0; n < vectorOfDiscretizedPixels.size(); n++)
+	{
+	variance += (vectorOfDiscretizedPixels[n] - meanValue) * (vectorOfDiscretizedPixels[n] - meanValue);
+	}
+	variance /= vectorOfDiscretizedPixels.size();
+	*/
+
+	return variance;
+}
+
+
+void defineFeatures(vector<string> &features) {
+	features.push_back("mean");
+	features.push_back("variance");
+	features.push_back("skewness");
+	features.push_back("kurtosis");
+	features.push_back("median");
+	features.push_back("minimum");
+	features.push_back("10th percentile");
+	features.push_back("90th percentile");
+	features.push_back("maximum");
+	features.push_back("Interquartile range");
+	features.push_back("mode");
+	features.push_back("range");
+	features.push_back("Mean absolut deviation");
+	features.push_back("Robust mean absolute deviation");
+	features.push_back("Median absolut deviation");
+	features.push_back("Coefficient of variation");
+	features.push_back("Quartile coefficient");
+	features.push_back("Entropy");
+	features.push_back("Uniformity");
+	features.push_back("Maximum histogram gradient");
+	features.push_back("Maximum histogram gradient grey level");
+	features.push_back("Minimum histogram gradient");
+	features.push_back("Minimum histogram gradient grey level");
+}
+void extractData(IntensityHistogram intenseHisto, vector<float> &intensityHistogramValues) {
+	// 일단 여기서 intensityHistogramFeatures라는 객체의 멤버변수 값들(NAN을 포함한 특징값들) 모두 한 벡터(intensityHistogramValues)에 push 
+	// 추후 밖에서 이 벡터를 세부 특징들 체크 T/F 여부 담는 bool 배열 반복문으로 체크하면서 True에 해당하는 idx의 특징값들만 뽑아서 writeCSV
+
+	intensityHistogramValues.push_back(intenseHisto.meanValue);
+	intensityHistogramValues.push_back(intenseHisto.varianceValue);
+	intensityHistogramValues.push_back(intenseHisto.skewnessValue);
+	intensityHistogramValues.push_back(intenseHisto.kurtosisValue);
+	intensityHistogramValues.push_back(intenseHisto.medianValue);
+	intensityHistogramValues.push_back(intenseHisto.minimumValue);
+	intensityHistogramValues.push_back(intenseHisto.percentile10);
+	intensityHistogramValues.push_back(intenseHisto.percentile90);
+	intensityHistogramValues.push_back(intenseHisto.maximumValue);
+	intensityHistogramValues.push_back(intenseHisto.interquartileRange);
+	intensityHistogramValues.push_back(intenseHisto.mode);
+	intensityHistogramValues.push_back(intenseHisto.rangeValue);
+	intensityHistogramValues.push_back(intenseHisto.meanAbsDev);
+	intensityHistogramValues.push_back(intenseHisto.robustMeanAbsDev);
+	intensityHistogramValues.push_back(intenseHisto.medianAbsDev);
+	intensityHistogramValues.push_back(intenseHisto.coeffOfVar);
+	intensityHistogramValues.push_back(intenseHisto.quartileCoeff);
+	intensityHistogramValues.push_back(intenseHisto.entropy);
+	intensityHistogramValues.push_back(intenseHisto.histUniformity);
+	intensityHistogramValues.push_back(intenseHisto.maxHistGradient);
+	intensityHistogramValues.push_back(intenseHisto.maxHistGradGreyValue);
+	intensityHistogramValues.push_back(intenseHisto.minHistGradient);
+	intensityHistogramValues.push_back(intenseHisto.minHistGradGreyValue);
+
+}
