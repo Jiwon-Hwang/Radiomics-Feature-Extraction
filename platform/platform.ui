@@ -198,6 +198,9 @@
                </item>
                <item>
                 <widget class="QCheckBox" name="checkBox_Intensity">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
                  <property name="text">
                   <string>Local Intensity Features</string>
                  </property>
@@ -214,6 +217,9 @@
                </item>
                <item>
                 <widget class="QCheckBox" name="checkBox_Morph">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
                  <property name="text">
                   <string>Morphological Features</string>
                  </property>
@@ -221,6 +227,9 @@
                </item>
                <item>
                 <widget class="QCheckBox" name="checkBox_GLCM">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
                  <property name="text">
                   <string>GLCM</string>
                  </property>

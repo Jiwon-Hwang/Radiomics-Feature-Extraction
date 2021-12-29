@@ -5,7 +5,6 @@ using namespace std;
 using namespace cv;
 
 int FILTER_MODE; 
-vector<string> featureFamilyName_list = {"Histogram", "Local Intensity", "Morphology", "GLCM"};
 
 CPlatform::CPlatform(QWidget *parent)
 	: QMainWindow(parent)
@@ -208,15 +207,18 @@ void CPlatform::setSignalSlot()
 	connect(ui.pushButton_run, SIGNAL(clicked()), this, SLOT(run()));
 	connect(ui.horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(scrollChangeImage(int)));
 	
-	//
+	// filter
 	connect(ui.radioButton_None, SIGNAL(clicked()), this, SLOT(setFilterMode()));
 	connect(ui.radioButton_Gaussian, SIGNAL(clicked()), this, SLOT(setFilterMode()));
 	connect(ui.radioButton_Laplacian, SIGNAL(clicked()), this, SLOT(setFilterMode()));
 
-	// 
+	// radiomics feature family
+	connect(ui.checkBox_Histogram, SIGNAL(clicked()), this, SLOT(setCheckedState()));
+	connect(ui.checkBox_Intensity, SIGNAL(clicked()), this, SLOT(setCheckedState()));
+	connect(ui.checkBox_Morph, SIGNAL(clicked()), this, SLOT(setCheckedState()));
+	connect(ui.checkBox_GLCM, SIGNAL(clicked()), this, SLOT(setCheckedState()));
 
-
-	//
+	// feature (pop-up)
 
 }
 void CPlatform::setProgressBarValue(int nCurrentIdx, int nMaximumIdx)
@@ -465,7 +467,7 @@ void CPlatform::scrollChangeImage(int nValue)
 // Algorithms ------------------------------------------------------------------------------------------------------------------------------
 
 // Filter //
-void CPlatform::setFilterMode() { // radio btn 체크될 때마다(시그널) 호출되는 슬롯 함수
+void CPlatform::setFilterMode() { // radio btn 체크될 때마다(시그널) 호출되는 SLOT 함수
 	
 	if (ui.radioButton_None->isChecked())
 		FILTER_MODE = FILTER_NONE;
@@ -504,7 +506,57 @@ void filtering(short* psImage, Mat &img_filtered, int nWidth, int nHeight, int F
 
 
 // Feature Extraction //
-// [ 3.2 Loacl Intensity Features ] // 
+void CPlatform::setCheckedState() { // check box 클릭될 때마다(시그널) 호출되는 SLOT 함수
+	
+	QObject* obj = sender();
+
+	if (obj == ui.checkBox_Histogram) {
+		intenseHisto.isActivatedFamily = !intenseHisto.isActivatedFamily;
+		if (intenseHisto.isActivatedFamily == TRUE) {
+			// pop-up (set isCheckedFeature, nCheckedFeatures) => if문으로 체크 후 T/F push 하는걸로 수정
+			intenseHisto.isCheckedFeature.push_back(TRUE);
+			intenseHisto.isCheckedFeature.push_back(TRUE);
+			for (int i = 0; i < 21; i++) {
+				intenseHisto.isCheckedFeature.push_back(FALSE);
+			}
+
+			intenseHisto.nCheckedFeatures = 2;
+		}
+	}
+
+	if (obj == ui.checkBox_Intensity) {
+
+	}
+
+	if (obj == ui.checkBox_Morph) {
+
+	}
+
+	if (obj == ui.checkBox_GLCM) {
+
+	}
+}
+void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth) {
+	if (intenseHisto.isActivatedFamily) {
+		intenseHisto.featureExtraction(psImage, pucMask, nHeight, nWidth);
+	}
+
+	if (ui.checkBox_Intensity->isChecked()) {
+		//short localIntensityPeak = calcLocalIntensityPeak(psImage, pucMask, nHeight, nWidth);
+		//localIntense.push_back(localIntensityPeak);
+	}
+
+	if (ui.checkBox_Morph->isChecked()) {
+
+	}
+
+	if (ui.checkBox_GLCM->isChecked()) {
+
+	}
+
+}
+
+// [ 3.2 Loacl Intensity Features ]
 short CPlatform::calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth) {
 
 	// 1. get center pos of max (intensity peak in ROI)
@@ -608,22 +660,7 @@ short CPlatform::calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask,
 }
 
 
-
-
 // Save Result //
-// [ 3.2 Local Intensity Features ] // 
-void defineLocalIntenseFeatures(vector<string> &features)
-{
-
-}
-void extractLocalIntensityData(vector<float> &localIntensityData, vector<float> localIntensityFeatures)
-{
-
-}
-
-
-
-
 void writeCSVCheckedValue(vector<float> extractedValues, string csvName)
 {
 	ofstream resultCSV(csvName, std::ios_base::app);
@@ -650,10 +687,10 @@ void CPlatform::writeCSVCaseName(int seriesIdx, string csvName) {
 
 void CPlatform::writeCSVFeatureValue(string csvName) {
 
-	if (ui.checkBox_Histogram->isChecked()) {
-		//vector<float> hitogramValue; // 추출값들 push 받아올 벡터
-		//intenseHisto.extractData(hitogramValue); // ***extractData : 각 클래스별 멤버함수. 각 family class의 멤버변수들에 접근해서 vector에 push해오기(NAN 포함)***
-		//writeCSVCheckedValue(hitogramValue, csvName);
+	if (intenseHisto.isActivatedFamily) {
+		vector<float> hitogramValue; // 추출값들 push 받아올 벡터
+		intenseHisto.extractFeatureValues(hitogramValue); // ***extractData : 모든 멤버변수 값들 vector에 push해오기(NAN 포함)***
+		writeCSVCheckedValue(hitogramValue, csvName);
 	}
 
 	if (ui.checkBox_Intensity->isChecked()) {
@@ -677,41 +714,52 @@ void CPlatform::writeCSVFile(int seriesIdx, string csvName) {
 }
 
 
-// Preset CSV File - write checked feature family name and feature name // 
+// Preset CSV File // 
 void CPlatform::presetCSVFile(string csvName) {
 
 	ofstream resultCSV(csvName); // 파일이 없으면 새로 생성, 있으면 기존 내용 지우고 새로 작성 (remove 포함)
 
-	// write feature family name 
+
+	// write family name 
 	resultCSV << " " << "," << " " << ","; 
 
-	QList<QCheckBox *> checkbox_list = ui.groupBox_families->findChildren<QCheckBox *>(); // checkBoxes should be in groupBox
-
-	int nFeatures = 2; // 추후 True로 체크된 특징 개수 parameter input => ***각 family마다 다른 개수 가져오기!! (ex. int family.nCheckedFeatures)***
-	for (int i = 0; i < checkbox_list.size(); i++) {
-		if (checkbox_list.at(i)->isChecked()) {
-			for (int j = 0; j < nFeatures; j++) {
-				resultCSV << featureFamilyName_list[i] << ",";
-			}
+	if (intenseHisto.isActivatedFamily) {
+		for (int i = 0; i < intenseHisto.nCheckedFeatures; i++) {
+			resultCSV << "Histogram" << ",";
 		}
 	}
+	/*
+	if (localIntense.isActivatedFamily) {
+		for (int i = 0; i < localIntense.nCheckedFeatures; i++) {
+			resultCSV << "Local Intensity" << ",";
+		}
+	}
+	if (morphology.isActivatedFamily) {
+		for (int i = 0; i < morphology.nCheckedFeatures; i++) {
+			resultCSV << "Morphology" << ",";
+		}
+	}
+	if (glcm.isActivatedFamily) {
+		for (int i = 0; i < glcm.nCheckedFeatures; i++) {
+			resultCSV << "GLCM" << ",";
+		}
+	}
+	*/
+
 	resultCSV << "\n";
+
 
 	// write feature name 
 	resultCSV << " " << "," << " " << ","; 
 
-	// == if(intenseHisto.isActivated~)
-	if (ui.checkBox_Histogram->isChecked()) {
-		vector<string> features;
-		IntensityHistogram intenseHisto;
-		intenseHisto.defineFeatures(features); // 일단 전체 feature name들 get
-		//for (int i = 0; i < features.size(); i++) {
-		// ***여기서 해당 family에서 체크된 feature들 bool 배열 체크해서 if문 통과시키기 (true값 수정)***
-		//if (true) { 
-		for (int j = 0; j< nFeatures; j++) {
-			resultCSV << features[j] << ",";
+	if (intenseHisto.isActivatedFamily) {
+		vector<string> featureNames;
+		intenseHisto.defineFeatureNames(featureNames); // 일단 전체 feature name들 get
+		for (int i = 0; i < featureNames.size(); i++) {
+			if (intenseHisto.isCheckedFeature[i]) {
+				resultCSV << featureNames[i] << ",";
+			}
 		}
-	//}
 	}
 
 	if (ui.checkBox_Intensity->isChecked()) {
@@ -857,59 +905,21 @@ void CPlatform::run()
 	*/
 	Mat img_filtered;
 	filtering(psImage, img_filtered, nWidth, nHeight, FILTER_MODE); // 0, 1, 2 : radio btn
+	
 	SAFE_DELETE_ARRAY(psImage); // psImage 포인터가 가리키고 있던 메모리 데이터들 해제 => 이후엔 Mat 데이터를 가리키므로, 또 해제해주지 않아야 함!
 	psImage = (short*)img_filtered.data; // 주소 변경
 	
 
-
-	// feature extraction // => ***추후 featureExtraction() 통합함수로 빼기***
-	vector<short> localIntense;
-	vector<float> morphology;
-	vector<float> glcm;
-
-
-	if (ui.checkBox_Histogram->isChecked()) {
-		// 3.4.0 Ready for Feature Extraction
-		int nBins = 32; // user input parameter
-		vector<short> vectorOfOriPixels = intenseHisto.getVectorOfPixelsInROI(psImage, pucMask, nHeight, nWidth);
-		intenseHisto.vectorOfDiscretizedPixels = intenseHisto.getVectorOfDiscretizedPixels_nBins(vectorOfOriPixels, nBins);
-		intenseHisto.hist = intenseHisto.getHistogram(intenseHisto.vectorOfDiscretizedPixels);
-
-		// 3.4.1 Mean discretised intensity
-		float meanValue = intenseHisto.calcMean(intenseHisto.vectorOfDiscretizedPixels); // 15.5894
-		intenseHisto.push_back(meanValue);
-
-		// 3.4.2 Discretised intensity variance
-		float varValue = intenseHisto.calcVariance(intenseHisto.vectorOfDiscretizedPixels); // 29.5587
-		intenseHisto.push_back(varValue);
-
-		// 3.3.3 Discretised intensity skewness
-
-
-	}
-
-
-	if (ui.checkBox_Intensity->isChecked()) {
-		short localIntensityPeak = calcLocalIntensityPeak(psImage, pucMask, nHeight, nWidth);
-		localIntense.push_back(localIntensityPeak);
-			
-	}
-
-	if (ui.checkBox_Morph->isChecked()) {
-
-	}
-
-	if (ui.checkBox_GLCM->isChecked()) {
-
-	}
-
+	// feature extraction // 
+	featureExtraction(psImage, pucMask, nHeight, nWidth);
 
 
 	// write csv file 
 	int seriesIdx = 0; // for loop idx
 	writeCSVFile(seriesIdx, csvName);
 	
-	
+	// 모든 객체들 clear //
+	//clearAllObj();
 
 	// 메모리 소멸 //
 	SAFE_DELETE_ARRAY(pucMask);

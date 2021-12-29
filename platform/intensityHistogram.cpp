@@ -5,13 +5,15 @@ using namespace std;
 IntensityHistogram::IntensityHistogram() {
 
 }
-
 IntensityHistogram::~IntensityHistogram() {
 
 }
 
+void IntensityHistogram::clear(void){
 
-vector<short> getVectorOfPixelsInROI(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth) {
+}
+
+vector<short> IntensityHistogram::getVectorOfPixelsInROI(short* psImage, unsigned char* pucMask, int nHeight, int nWidth) {
 
 	vector<short> vectorOfOriPixels; // size : 3032
 	for (int row = 0; row < nHeight; row++) {
@@ -31,7 +33,7 @@ vector<short> getVectorOfPixelsInROI(short* pusImage, unsigned char* pucMask, in
 
 	return vectorOfOriPixels;
 }
-vector<unsigned short> getVectorOfDiscretizedPixels_nBins(vector<short> vectorOfOriPixels, int nBins = 32) {
+vector<unsigned short> IntensityHistogram::getVectorOfDiscretizedPixels_nBins(vector<short> vectorOfOriPixels, int nBins = 32) {
 
 	float minimumValue = (float)*min_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end()); // min_element() : pointer return
 	float maximumValue = (float)*max_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end());
@@ -68,14 +70,14 @@ vector<unsigned short> getVectorOfDiscretizedPixels_nBins(vector<short> vectorOf
 
 	return vectorOfDiscretizedPixels;
 }
-vector<unsigned short> getVectorOfDiffGreyLevels(vector<unsigned short> vectorOfDiscretizedPixels) {
+vector<unsigned short> IntensityHistogram::getVectorOfDiffGreyLevels(vector<unsigned short> vectorOfDiscretizedPixels) {
 
 	vector<unsigned short> diffGreyLevels(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end()); // 1~nbins 사이 값으로 양자화된 픽셀값들
 	diffGreyLevels.erase(unique(diffGreyLevels.begin(), diffGreyLevels.end()), diffGreyLevels.end()); // size : 168 => 32 bins로 나누면 한 구간 당 약 5개의 픽셀값들의 빈도수들 누적
 
 	return diffGreyLevels;
 }
-vector<unsigned int> getHistogram(vector<unsigned short> vectorOfDiscretizedPixels) {
+vector<unsigned int> IntensityHistogram::getHistogram(vector<unsigned short> vectorOfDiscretizedPixels) {
 
 	vector<unsigned short> diffGreyLevels = getVectorOfDiffGreyLevels(vectorOfDiscretizedPixels);
 
@@ -96,12 +98,12 @@ vector<unsigned int> getHistogram(vector<unsigned short> vectorOfDiscretizedPixe
 	return hist;
 }
 
-float calcMean(vector<unsigned short> vectorOfDiscretizedPixels) {
+float IntensityHistogram::calcMean(vector<unsigned short> vectorOfDiscretizedPixels) {
 	float mean = accumulate(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), 0.0) / vectorOfDiscretizedPixels.size(); // 0.0 : initial value of the sum
 
 	return mean;
 }
-float calcVariance(vector<unsigned short> vectorOfDiscretizedPixels) {
+float IntensityHistogram::calcVariance(vector<unsigned short> vectorOfDiscretizedPixels) {
 	unsigned int size = vectorOfDiscretizedPixels.size(); // size_t : unsigned int
 	float mean = accumulate(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), 0.0) / size;
 	vector<float> diff(size);
@@ -129,8 +131,38 @@ float calcVariance(vector<unsigned short> vectorOfDiscretizedPixels) {
 	return variance;
 }
 
+void IntensityHistogram::calcFeature(int FEATURE_IDX) {
+	
+	switch (FEATURE_IDX)
+	{
+		case MEAN:
+			meanValue = calcMean(vectorOfDiscretizedPixels);
+			break;
 
-void defineFeatures(vector<string> &features) {
+		case VARIANCE:
+			varianceValue = calcVariance(vectorOfDiscretizedPixels);
+			break;
+
+		default:
+			//cout << "error : Unknown Intensity Histogram Feature!" << endl;
+			break;
+	}
+}
+void IntensityHistogram::featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth) {
+
+	// get histogram
+	vectorOfOriPixels = getVectorOfPixelsInROI(psImage, pucMask, nHeight, nWidth);
+	vectorOfDiscretizedPixels = getVectorOfDiscretizedPixels_nBins(vectorOfOriPixels,nBins);
+	hist = getHistogram(vectorOfDiscretizedPixels);
+
+	// calculate checked feature
+	for (int i = 0; i < isCheckedFeature.size(); i++) {
+		if (isCheckedFeature[i]) calcFeature(i);
+	}
+}
+
+void IntensityHistogram::defineFeatureNames(vector<string> &features) {
+	// 총 23가지
 	features.push_back("mean");
 	features.push_back("variance");
 	features.push_back("skewness");
@@ -155,32 +187,33 @@ void defineFeatures(vector<string> &features) {
 	features.push_back("Minimum histogram gradient");
 	features.push_back("Minimum histogram gradient grey level");
 }
-void extractData(IntensityHistogram intenseHisto, vector<float> &intensityHistogramValues) {
+void IntensityHistogram::extractFeatureValues(vector<float> &intensityHistogramValues) {
 	// 일단 여기서 intensityHistogramFeatures라는 객체의 멤버변수 값들(NAN을 포함한 특징값들) 모두 한 벡터(intensityHistogramValues)에 push 
 	// 추후 밖에서 이 벡터를 세부 특징들 체크 T/F 여부 담는 bool 배열 반복문으로 체크하면서 True에 해당하는 idx의 특징값들만 뽑아서 writeCSV
 
-	intensityHistogramValues.push_back(intenseHisto.meanValue);
-	intensityHistogramValues.push_back(intenseHisto.varianceValue);
-	intensityHistogramValues.push_back(intenseHisto.skewnessValue);
-	intensityHistogramValues.push_back(intenseHisto.kurtosisValue);
-	intensityHistogramValues.push_back(intenseHisto.medianValue);
-	intensityHistogramValues.push_back(intenseHisto.minimumValue);
-	intensityHistogramValues.push_back(intenseHisto.percentile10);
-	intensityHistogramValues.push_back(intenseHisto.percentile90);
-	intensityHistogramValues.push_back(intenseHisto.maximumValue);
-	intensityHistogramValues.push_back(intenseHisto.interquartileRange);
-	intensityHistogramValues.push_back(intenseHisto.mode);
-	intensityHistogramValues.push_back(intenseHisto.rangeValue);
-	intensityHistogramValues.push_back(intenseHisto.meanAbsDev);
-	intensityHistogramValues.push_back(intenseHisto.robustMeanAbsDev);
-	intensityHistogramValues.push_back(intenseHisto.medianAbsDev);
-	intensityHistogramValues.push_back(intenseHisto.coeffOfVar);
-	intensityHistogramValues.push_back(intenseHisto.quartileCoeff);
-	intensityHistogramValues.push_back(intenseHisto.entropy);
-	intensityHistogramValues.push_back(intenseHisto.histUniformity);
-	intensityHistogramValues.push_back(intenseHisto.maxHistGradient);
-	intensityHistogramValues.push_back(intenseHisto.maxHistGradGreyValue);
-	intensityHistogramValues.push_back(intenseHisto.minHistGradient);
-	intensityHistogramValues.push_back(intenseHisto.minHistGradGreyValue);
+	intensityHistogramValues.push_back(meanValue);
+	intensityHistogramValues.push_back(varianceValue);
+	intensityHistogramValues.push_back(skewnessValue);
+	intensityHistogramValues.push_back(kurtosisValue);
+	intensityHistogramValues.push_back(medianValue);
+	intensityHistogramValues.push_back(minimumValue);
+	intensityHistogramValues.push_back(percentile10);
+	intensityHistogramValues.push_back(percentile90);
+	intensityHistogramValues.push_back(maximumValue);
+	intensityHistogramValues.push_back(interquartileRange);
+	intensityHistogramValues.push_back(mode);
+	intensityHistogramValues.push_back(rangeValue);
+	intensityHistogramValues.push_back(meanAbsDev);
+	intensityHistogramValues.push_back(robustMeanAbsDev);
+	intensityHistogramValues.push_back(medianAbsDev);
+	intensityHistogramValues.push_back(coeffOfVar);
+	intensityHistogramValues.push_back(quartileCoeff);
+	intensityHistogramValues.push_back(entropy);
+	intensityHistogramValues.push_back(histUniformity);
+	intensityHistogramValues.push_back(maxHistGradient);
+	intensityHistogramValues.push_back(maxHistGradGreyValue);
+	intensityHistogramValues.push_back(minHistGradient);
+	intensityHistogramValues.push_back(minHistGradGreyValue);
 
 }
+

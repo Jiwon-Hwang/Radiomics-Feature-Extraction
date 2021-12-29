@@ -70,7 +70,13 @@ public:
 	CData m_ciData;						// data
 	int m_nActivatedFrameIdx;			// 현재 화면에 가시화된 Frame 번호
 	
-	IntensityHistogram intenseHisto; // Q. 이게 언제 소멸..? for문 마다? (여기다 선언해야 platform.cpp의 CPlatform:: 어느곳에서나 intensity 객체, 함수들 사용 가능)
+	IntensityHistogram intenseHisto; 
+	/*
+	LocalIntensity localIntense;
+	Morphological morphology;
+	GLCM glcm;
+	*/
+	
 
 // QT layout, action 변수
 public:
@@ -86,24 +92,35 @@ public:
 	void setProgressBarValue(int nCurrentIdx, int nMaximumIdx);
 
 protected:
+	void resizeEvent(QResizeEvent* event);
+	void dragEnterEvent(QDragEnterEvent* event);
+	void dropEvent(QDropEvent * event);
 	void keyPressEvent(QKeyEvent* event);
 	void keyReleaseEvent(QKeyEvent* event);
-	void dragEnterEvent(QDragEnterEvent* event);
-	void dropEvent(QDropEvent* event);
-	void resizeEvent(QResizeEvent* event);
 
 public slots:
-	// load + fileDirectory
+	// load + fileDirectory //
 	void showImage(int nFrameIdx);
 	void showImage(QTreeWidgetItem* item, int column);
 
+	// scroll //
 	void scrollChangeImage(int nValue);
+
+	// Filter //
 	void setFilterMode();
+
+	// Feature Extraction //
+	void setCheckedState();
+	void featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
+	
 	short calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth); // m_ciData.getPixelSpacing() call
+	
+	// write CSV //
 	void presetCSVFile(string csvName);
 	void writeCSVFile(int seriesIdx, string csvName);
 	void writeCSVFeatureValue(string csvName);
 	void writeCSVCaseName(int seriesIdx, string csvName);
+
 	void run();
 };
 

@@ -223,6 +223,7 @@ public:
 
         checkBox_Intensity = new QCheckBox(layoutWidget1);
         checkBox_Intensity->setObjectName(QStringLiteral("checkBox_Intensity"));
+        checkBox_Intensity->setEnabled(false);
         checkBox_Intensity->setCheckable(true);
         checkBox_Intensity->setChecked(false);
         checkBox_Intensity->setTristate(false);
@@ -231,11 +232,13 @@ public:
 
         checkBox_Morph = new QCheckBox(layoutWidget1);
         checkBox_Morph->setObjectName(QStringLiteral("checkBox_Morph"));
+        checkBox_Morph->setEnabled(false);
 
         verticalLayout_7->addWidget(checkBox_Morph);
 
         checkBox_GLCM = new QCheckBox(layoutWidget1);
         checkBox_GLCM->setObjectName(QStringLiteral("checkBox_GLCM"));
+        checkBox_GLCM->setEnabled(false);
         checkBox_GLCM->setChecked(false);
 
         verticalLayout_7->addWidget(checkBox_GLCM);
