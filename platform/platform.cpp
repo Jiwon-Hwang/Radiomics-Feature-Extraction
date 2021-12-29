@@ -1,5 +1,4 @@
 #include "platform.h"
-#include "IntensityHistogram.h"
 
 using namespace std;
 using namespace cv;
@@ -512,12 +511,12 @@ void CPlatform::setCheckedState() { // check box 클릭될 때마다(시그널) 호출되는 
 
 	if (obj == ui.checkBox_Histogram) {
 		intenseHisto.isActivatedFamily = !intenseHisto.isActivatedFamily;
-		if (intenseHisto.isActivatedFamily == TRUE) {
+		if (intenseHisto.isActivatedFamily == true) {
 			// pop-up (set isCheckedFeature, nCheckedFeatures) => if문으로 체크 후 T/F push 하는걸로 수정
-			intenseHisto.isCheckedFeature.push_back(TRUE);
-			intenseHisto.isCheckedFeature.push_back(TRUE);
+			intenseHisto.isCheckedFeature.push_back(true);
+			intenseHisto.isCheckedFeature.push_back(true);
 			for (int i = 0; i < 21; i++) {
-				intenseHisto.isCheckedFeature.push_back(FALSE);
+				intenseHisto.isCheckedFeature.push_back(false);
 			}
 
 			intenseHisto.nCheckedFeatures = 2;
@@ -661,12 +660,13 @@ short CPlatform::calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask,
 
 
 // Save Result //
-void writeCSVCheckedValue(vector<float> extractedValues, string csvName)
+void writeCSVCheckedValue(vector<float> extractedValues, string csvName) // 모든 class 공통
 {
 	ofstream resultCSV(csvName, std::ios_base::app);
 
 	for (int i = 0; i< extractedValues.size(); i++) {
-		if (extractedValues[i] != NAN) { // false(not checked)면 멤버변수의 초기값 NAN
+		// if(extractedValues[i] != NAN) => error! (-nan(ind) !- NAN)
+		if (!isnan(extractedValues[i])) { 
 			resultCSV << extractedValues[i] << ",";
 		}
 	}

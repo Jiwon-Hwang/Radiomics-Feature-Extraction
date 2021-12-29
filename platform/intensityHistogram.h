@@ -6,6 +6,7 @@
 #include <functional>
 #include <numeric>
 
+using namespace std; // Q. 여기다 선언하니까 왜 에러들 싹 없어짐?
 
 // enum, struct, map으로 수정! => #define은 헤더파일 범위 상관없이 전역에서 적용!
 // 변수명 & 함수명 맵핑시키기 (for. platform.cpp의 feature extraction 시 for loop에서 index로 한번에 접근 가능하도록!)
@@ -42,10 +43,9 @@ class IntensityHistogram
 	public:	
 		IntensityHistogram();
 		~IntensityHistogram();
-		void clear(void);
 
 		// set state //
-		bool isActivatedFamily = FALSE;		// by. platform main
+		bool isActivatedFamily = false;		// by. platform main
 		vector<bool> isCheckedFeature;		// by. platform pop-up
 		int nCheckedFeatures;				// **추후 위의 isCheckedFeature 벡터로부터 TRUE 개수 구하기**
 
@@ -56,9 +56,9 @@ class IntensityHistogram
 		vector<unsigned int> hist;
 
 		vector<short> getVectorOfPixelsInROI(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
-		vector<unsigned short> getVectorOfDiscretizedPixels_nBins(vector<short> vectorOfOriPixels, int nBins = 32);
-		vector<unsigned short> getVectorOfDiffGreyLevels(vector<unsigned short> vectorOfDiscretizedPixels);
-		vector<unsigned int> getHistogram(vector<unsigned short> vectorOfDiscretizedPixels);
+		vector<unsigned short> getVectorOfDiscretizedPixels_nBins();
+		vector<unsigned short> getVectorOfDiffGreyLevels();
+		vector<unsigned int> getHistogram();
 
 		// calculate feature //
 		float meanValue = NAN;

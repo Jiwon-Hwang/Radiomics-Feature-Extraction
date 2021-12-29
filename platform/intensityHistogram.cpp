@@ -9,10 +9,6 @@ IntensityHistogram::~IntensityHistogram() {
 
 }
 
-void IntensityHistogram::clear(void){
-
-}
-
 vector<short> IntensityHistogram::getVectorOfPixelsInROI(short* psImage, unsigned char* pucMask, int nHeight, int nWidth) {
 
 	vector<short> vectorOfOriPixels; // size : 3032
@@ -20,7 +16,7 @@ vector<short> IntensityHistogram::getVectorOfPixelsInROI(short* psImage, unsigne
 		for (int col = 0; col < nWidth; col++) {
 			int index = row * nWidth + col;
 			unsigned char maskValue = pucMask[index];
-			short imageValue = pusImage[index];
+			short imageValue = psImage[index];
 
 			// ROI 내부값 push (ROI가 없으면 계속 pass)
 			if (maskValue >(unsigned char)0) {
@@ -33,7 +29,7 @@ vector<short> IntensityHistogram::getVectorOfPixelsInROI(short* psImage, unsigne
 
 	return vectorOfOriPixels;
 }
-vector<unsigned short> IntensityHistogram::getVectorOfDiscretizedPixels_nBins(vector<short> vectorOfOriPixels, int nBins = 32) {
+vector<unsigned short> IntensityHistogram::getVectorOfDiscretizedPixels_nBins() {
 
 	float minimumValue = (float)*min_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end()); // min_element() : pointer return
 	float maximumValue = (float)*max_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end());
@@ -70,16 +66,16 @@ vector<unsigned short> IntensityHistogram::getVectorOfDiscretizedPixels_nBins(ve
 
 	return vectorOfDiscretizedPixels;
 }
-vector<unsigned short> IntensityHistogram::getVectorOfDiffGreyLevels(vector<unsigned short> vectorOfDiscretizedPixels) {
+vector<unsigned short> IntensityHistogram::getVectorOfDiffGreyLevels() {
 
 	vector<unsigned short> diffGreyLevels(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end()); // 1~nbins 사이 값으로 양자화된 픽셀값들
 	diffGreyLevels.erase(unique(diffGreyLevels.begin(), diffGreyLevels.end()), diffGreyLevels.end()); // size : 168 => 32 bins로 나누면 한 구간 당 약 5개의 픽셀값들의 빈도수들 누적
 
 	return diffGreyLevels;
 }
-vector<unsigned int> IntensityHistogram::getHistogram(vector<unsigned short> vectorOfDiscretizedPixels) {
+vector<unsigned int> IntensityHistogram::getHistogram() {
 
-	vector<unsigned short> diffGreyLevels = getVectorOfDiffGreyLevels(vectorOfDiscretizedPixels);
+	vector<unsigned short> diffGreyLevels = getVectorOfDiffGreyLevels();
 
 	vector<unsigned int> hist;
 	unsigned int nCnt;
@@ -152,8 +148,8 @@ void IntensityHistogram::featureExtraction(short* psImage, unsigned char* pucMas
 
 	// get histogram
 	vectorOfOriPixels = getVectorOfPixelsInROI(psImage, pucMask, nHeight, nWidth);
-	vectorOfDiscretizedPixels = getVectorOfDiscretizedPixels_nBins(vectorOfOriPixels,nBins);
-	hist = getHistogram(vectorOfDiscretizedPixels);
+	vectorOfDiscretizedPixels = getVectorOfDiscretizedPixels_nBins();
+	hist = getHistogram();
 
 	// calculate checked feature
 	for (int i = 0; i < isCheckedFeature.size(); i++) {

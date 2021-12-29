@@ -1,3 +1,4 @@
+#pragma once
 #ifndef platform_H
 #define platform_H
 
@@ -19,7 +20,7 @@
 #include <algorithm>
 #include <numeric>
 
-// for M_PI
+// for M_PI, isnan()
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -42,6 +43,7 @@
 
 #include "imageView.h"
 #include "data.h"
+#include "IntensityHistogram.h"
 
 
 #define MAX_FILE_LENGTH 64
