@@ -184,9 +184,7 @@ void IntensityHistogram::defineFeatureNames(vector<string> &features) {
 	features.push_back("Minimum histogram gradient grey level");
 }
 void IntensityHistogram::extractFeatureValues(vector<float> &intensityHistogramValues) {
-	// 일단 여기서 intensityHistogramFeatures라는 객체의 멤버변수 값들(NAN을 포함한 특징값들) 모두 한 벡터(intensityHistogramValues)에 push 
-	// 추후 밖에서 이 벡터를 세부 특징들 체크 T/F 여부 담는 bool 배열 반복문으로 체크하면서 True에 해당하는 idx의 특징값들만 뽑아서 writeCSV
-
+	
 	intensityHistogramValues.push_back(meanValue);
 	intensityHistogramValues.push_back(varianceValue);
 	intensityHistogramValues.push_back(skewnessValue);

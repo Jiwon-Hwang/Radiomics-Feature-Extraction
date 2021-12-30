@@ -6,8 +6,6 @@
 #include <functional>
 #include <numeric>
 
-using namespace std; // Q. 여기다 선언하니까 왜 에러들 싹 없어짐?
-
 // enum, struct, map으로 수정! => #define은 헤더파일 범위 상관없이 전역에서 적용!
 // 변수명 & 함수명 맵핑시키기 (for. platform.cpp의 feature extraction 시 for loop에서 index로 한번에 접근 가능하도록!)
 #define MEAN 0
@@ -46,19 +44,19 @@ class IntensityHistogram
 
 		// set state //
 		bool isActivatedFamily = false;		// by. platform main
-		vector<bool> isCheckedFeature;		// by. platform pop-up
+		std::vector<bool> isCheckedFeature;		// by. platform pop-up
 		int nCheckedFeatures;				// **추후 위의 isCheckedFeature 벡터로부터 TRUE 개수 구하기**
 
 		// get histogram //
 		int nBins = 32;
-		vector<short> vectorOfOriPixels;
-		vector<unsigned short> vectorOfDiscretizedPixels;
-		vector<unsigned int> hist;
+		std::vector<short> vectorOfOriPixels;
+		std::vector<unsigned short> vectorOfDiscretizedPixels;
+		std::vector<unsigned int> hist;
 
-		vector<short> getVectorOfPixelsInROI(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
-		vector<unsigned short> getVectorOfDiscretizedPixels_nBins();
-		vector<unsigned short> getVectorOfDiffGreyLevels();
-		vector<unsigned int> getHistogram();
+		std::vector<short> getVectorOfPixelsInROI(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
+		std::vector<unsigned short> getVectorOfDiscretizedPixels_nBins();
+		std::vector<unsigned short> getVectorOfDiffGreyLevels();
+		std::vector<unsigned int> getHistogram();
 
 		// calculate feature //
 		float meanValue = NAN;
@@ -89,22 +87,22 @@ class IntensityHistogram
 		//vector<float> maxHistVecGradient;
 		//vector<float> minHistVecGradient;
 
-		float calcMean(vector<unsigned short> vectorOfDiscretizedPixels);
-		float calcVariance(vector<unsigned short> vectorOfDiscretizedPixels);
+		float calcMean(std::vector<unsigned short> vectorOfDiscretizedPixels);
+		float calcVariance(std::vector<unsigned short> vectorOfDiscretizedPixels);
 		void calcSkewness();
 		void calcKurtosis();
 		void getMedian(std::vector<float> vectorMatrElement);
-		void getMinimum(vector<float> matrixVector);
-		double getPercentile(vector<float> matrixVector, float probability);
-		void get10percentile(vector<float> matrixVector);
-		void get90percentile(vector<float> matrixVector);
-		void getMaximum(vector<float> matrixVector);
-		void getInterquartileRange(vector<float> matrixVector);
+		void getMinimum(std::vector<float> matrixVector);
+		double getPercentile(std::vector<float> matrixVector, float probability);
+		void get10percentile(std::vector<float> matrixVector);
+		void get90percentile(std::vector<float> matrixVector);
+		void getMaximum(std::vector<float> matrixVector);
+		void getInterquartileRange(std::vector<float> matrixVector);
 		void getMode();
 		void getRange();
-		void meanAbsoluteDev(vector<float> vectorMatrElem);
-		void getRobustMeanAbsDev(vector<float> vectorMatrElem);
-		void medianAbsoluteDev(vector<float> vectorMatrElem);
+		void meanAbsoluteDev(std::vector<float> vectorMatrElem);
+		void getRobustMeanAbsDev(std::vector<float> vectorMatrElem);
+		void medianAbsoluteDev(std::vector<float> vectorMatrElem);
 		void getCoeffOfVar();
 		void getQuartileCoeff();
 		void getEntropy();
@@ -117,7 +115,7 @@ class IntensityHistogram
 		void featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
 
 		// define and extract calculated values //
-		void defineFeatureNames(vector<string> &features);
-		void extractFeatureValues(vector<float> &intensityHistogramValues);
+		void defineFeatureNames(std::vector<std::string> &features);
+		void extractFeatureValues(std::vector<float> &intensityHistogramValues);
 
 };
