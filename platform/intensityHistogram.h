@@ -42,10 +42,12 @@ class IntensityHistogram
 		IntensityHistogram();
 		~IntensityHistogram();
 
+		void clear();
+
 		// set state //
-		bool isActivatedFamily = false;		// by. platform main
+		bool isActivatedFamily = false;			// by. platform main
 		std::vector<bool> isCheckedFeature;		// by. platform pop-up
-		int nCheckedFeatures;				// **추후 위의 isCheckedFeature 벡터로부터 TRUE 개수 구하기**
+		int nCheckedFeatures;					// **추후 위의 isCheckedFeature 벡터로부터 TRUE 개수 구하기**
 
 		// get histogram //
 		int nBins = 32;
@@ -58,7 +60,11 @@ class IntensityHistogram
 		std::vector<unsigned short> getVectorOfDiffGreyLevels();
 		std::vector<unsigned int> getHistogram();
 
-		// calculate feature //
+		// put temp values in 2d vector //
+		std::vector<std::vector<float>> tempValues2DVec;
+		std::vector<float> final1DVec;
+
+		// final feature value //
 		float meanValue = NAN;
 		float varianceValue = NAN;
 		float skewnessValue = NAN;
@@ -87,6 +93,7 @@ class IntensityHistogram
 		//vector<float> maxHistVecGradient;
 		//vector<float> minHistVecGradient;
 
+		// calculate feature value //
 		float calcMean(std::vector<unsigned short> vectorOfDiscretizedPixels);
 		float calcVariance(std::vector<unsigned short> vectorOfDiscretizedPixels);
 		void calcSkewness();
@@ -110,9 +117,12 @@ class IntensityHistogram
 		void getMaxHistGradient();
 		void getMinHistGradient();
 
-		// feature extraction - only checked feature //
-		void calcFeature(int FEATURE_IDX);
+		// feature extraction - slice by slice //
+		void calcFeature(int FEATURE_IDX, std::vector<float> &tempValues1DVec);
 		void featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
+
+		// mean all slices - get final feature value //
+		void averageAllValues();
 
 		// define and extract calculated values //
 		void defineFeatureNames(std::vector<std::string> &features);

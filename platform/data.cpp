@@ -338,11 +338,11 @@ bool CData::copyImages(int nSeriesIdx, short** &ppsImages, int &nImageCnt, int &
 	CSeries* pTargetSeries = getSeries(nSeriesIdx);
 
 	if(ppsImages == NULL && pTargetSeries) {
-		int nSeriesImageCnt = pTargetSeries->getImageCount();
-		ppsImages = new short* [nSeriesImageCnt];
-		memset(ppsImages, 0, sizeof(short*)*nSeriesImageCnt);
+		nImageCnt = pTargetSeries->getImageCount();
+		ppsImages = new short* [nImageCnt];
+		memset(ppsImages, 0, sizeof(short*)*nImageCnt);
 
-		for(int i=0; i< nSeriesImageCnt; i++) {
+		for(int i=0; i< nImageCnt; i++) {
 			CImage<short>* pTargetImage = pTargetSeries->getImage(i);
 			pTargetImage->copyImage(ppsImages[i], nWidth, nHeight);
 		}
@@ -543,11 +543,11 @@ bool CData::copyMasks(int nSeriesIdx, unsigned char** &ppucMasks, int &nMaskCnt,
 	CSeries* pTargetSeries = getSeries(nSeriesIdx);
 
 	if(ppucMasks == NULL && pTargetSeries) {
-		int nSeriesImageCnt = pTargetSeries->getImageCount();
-		ppucMasks = new unsigned char* [nSeriesImageCnt];
-		memset(ppucMasks, 0, sizeof(unsigned char*)*nSeriesImageCnt);
+		nMaskCnt = pTargetSeries->getImageCount();
+		ppucMasks = new unsigned char* [nMaskCnt];
+		memset(ppucMasks, 0, sizeof(unsigned char*)*nMaskCnt);
 
-		for(int i=0; i< nSeriesImageCnt; i++) {
+		for(int i=0; i< nMaskCnt; i++) {
 			CImage<unsigned char>* pTargetMask = pTargetSeries->getMask(i);
 			isCopy = pTargetMask->copyImage(ppucMasks[i], nWidth, nHeight);
 			if(!isCopy) {

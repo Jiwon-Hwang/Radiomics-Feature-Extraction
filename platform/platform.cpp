@@ -380,6 +380,8 @@ void CPlatform::readImage(QStringList list) {
 		} while (it.hasNext());
 	}
 
+	sort(fileList.begin(), fileList.end(), compareNames); // series 폴더명 정렬
+
 	for(int i=0, ni=fileList.size(); i<ni; i++) {
 		char cInputPath[1024] = {0};
 		QString path = fileList.at(i).toUtf8().constData();
@@ -464,6 +466,15 @@ void CPlatform::scrollChangeImage(int nValue)
 
 
 // Algorithms ------------------------------------------------------------------------------------------------------------------------------
+
+// ROI slice check //
+bool isEmptyMask(unsigned char* pucMask, int nWidth, int nHeight) {
+
+	Mat mask(nWidth, nHeight, CV_8UC1, pucMask);
+
+	return countNonZero(mask) < 1 ? true : false;
+}
+
 
 // Filter //
 void CPlatform::setFilterMode() { // radio btn 체크될 때마다(시그널) 호출되는 SLOT 함수
@@ -555,7 +566,26 @@ void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, int nH
 
 }
 
-// [ 3.2 Loacl Intensity Features ]
+void CPlatform::meanAllSlices() {
+	if (intenseHisto.isActivatedFamily) {
+		intenseHisto.averageAllValues();
+	}
+
+	if (ui.checkBox_Intensity->isChecked()) {
+		
+	}
+
+	if (ui.checkBox_Morph->isChecked()) {
+
+	}
+
+	if (ui.checkBox_GLCM->isChecked()) {
+
+	}
+
+}
+
+// [ 3.2 Loacal Intensity Features ]
 short CPlatform::calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth) {
 
 	// 1. get center pos of max (intensity peak in ROI)
@@ -666,9 +696,12 @@ void writeCSVCheckedValue(vector<float> extractedValues, string csvName) // 모든
 
 	for (int i = 0; i< extractedValues.size(); i++) {
 		// if(extractedValues[i] != NAN) => error! (-nan(ind) !- NAN)
+		/*
 		if (!isnan(extractedValues[i])) { 
 			resultCSV << extractedValues[i] << ",";
 		}
+		*/
+		resultCSV << extractedValues[i] << ",";
 	}
 	resultCSV.close();
 }
@@ -676,8 +709,10 @@ void writeCSVCheckedValue(vector<float> extractedValues, string csvName) // 모든
 void CPlatform::writeCSVCaseName(int seriesIdx, string csvName) {
 	ofstream resultCSV(csvName, std::ios_base::app); // std::ios_base::app => 이어쓰기 모드로 열기(open)
 
+	resultCSV << "\n";
+
 	// ***추후 series.h에서 멤버변수로 폴더명 접근 가능. series idx로 접근***
-	string imagePath = m_ciData.getImagePath(seriesIdx, 9); // (nSeriesIdx, nImageIdx)
+	string imagePath = m_ciData.getImagePath(seriesIdx, 0); // (nSeriesIdx, nImageIdx)
 	vector<string> paths = m_ciData.splitPath(imagePath);
 
 	resultCSV << paths[paths.size() - 4] << "," << paths[paths.size() - 3] << ",";
@@ -688,9 +723,11 @@ void CPlatform::writeCSVCaseName(int seriesIdx, string csvName) {
 void CPlatform::writeCSVFeatureValue(string csvName) {
 
 	if (intenseHisto.isActivatedFamily) {
+		/*
 		vector<float> hitogramValue; // 추출값들 push 받아올 벡터
 		intenseHisto.extractFeatureValues(hitogramValue); // ***extractData : 모든 멤버변수 값들 vector에 push해오기(NAN 포함)***
-		writeCSVCheckedValue(hitogramValue, csvName);
+		*/
+		writeCSVCheckedValue(intenseHisto.final1DVec, csvName);
 	}
 
 	if (ui.checkBox_Intensity->isChecked()) {
@@ -774,12 +811,20 @@ void CPlatform::presetCSVFile(string csvName) {
 
 	}
 
-	resultCSV << "\n";
-
 	resultCSV.close();
 
 }
 
+
+// Clear All Vector //
+void CPlatform::clearAll() {
+	intenseHisto.clear();
+	/*
+	localIntense.clear();
+	morphology.clear();
+	glcm.clear();
+	*/
+}
 
 // Normalize and 16 bit Image Show //
 void RescaleIntensityFilter(short* sIN_OUT_img, int nWidth, int nHeight, int nSetMax, int nSetMin)
@@ -869,62 +914,52 @@ void CPlatform::run()
 
 	presetCSVFile(csvName);
 	
-
-	// case별 바깥 for loop 시작 (ex. ICC_01_001 - ICC_01_001_CT) //
-
-	// 배열 복사 //
-	int nWidth = 0; // 512
-	int nHeight = 0; // 512
-	short* psImage = NULL;
-	unsigned char* pucMask = NULL;
 	
-	m_ciData.copyImage(9, psImage, nWidth, nHeight); // DCM
-	m_ciData.copyMask(9, pucMask, nWidth, nHeight); // label image
+	// filtering and feature extraction by series //
+	int nSeriesCnt = m_ciData.getSeriesCount();
 
-	/*
-	// ***여러 file들 copy***
-	int nWidth2 = 0;
-	int nHeight2 = 0;
-	int nImageCnt = 0; // copyImages()에서 nImageCnt 계산 후 반환
-	short** ppsImages = NULL;
-	m_ciData.copyImages(0, ppsImages, nImageCnt, nWidth2, nHeight2); // 한 그룹의 여러 dcm들 깊은 복사 => copyImage 호출
+	for (int i = 0; i < nSeriesCnt; i++) {
 
-	cout << "nWidth2 : " << nWidth2 << endl;
-	cout << "nHeight2 : " << nHeight2 << endl;
-	cout << "nImageCnt : " << nImageCnt << endl;
-	*/
+		int nWidth = 0;		
+		int nHeight = 0;	
+		int nImageCnt = 0;	
+		int nMaskCnt = 0;	
+		short** ppsImages = NULL;
+		unsigned char** ppucMasks = NULL;
 
-	
-	// filtering //
-	/*
-	for (int i = 0; i < 3; i++) {
-	if (ui.radioButton_Gaussian->isChecked()) {
-	int FILTER_MODE = FILTER_GAUSSIAN;
+		// copy series //
+		m_ciData.copyImages(i, ppsImages, nImageCnt, nWidth, nHeight);
+		m_ciData.copyMasks(i, ppucMasks, nMaskCnt, nWidth, nHeight);
+
+		// slice by slice //
+		for (int j = 0; j < nImageCnt; j++) {
+			// ROI slice check //
+			if (!isEmptyMask(ppucMasks[j], nWidth, nHeight)) {
+				
+				// filtering //
+				Mat img_filtered;
+				filtering(ppsImages[j], img_filtered, nWidth, nHeight, FILTER_MODE); 
+				SAFE_DELETE_ARRAY(ppsImages[j]); // psImage 포인터가 가리키고 있던 메모리 데이터들 해제 => 이후엔 Mat 데이터를 가리키므로, 또 해제해주지 않아야 함!
+				ppsImages[j] = (short*)img_filtered.data; // 주소 변경
+
+				// feature extraction //
+				featureExtraction(ppsImages[j], ppucMasks[j], nHeight, nWidth);
+			}
+		}
+
+		// mean all ROI slices //
+		meanAllSlices();
+
+		// write csv file //
+		writeCSVFile(i, csvName);
+		
+		// clear all vector //
+		clearAll();
+
+		// 메모리 소멸 //
+		SAFE_DELETE_VOLUME(ppucMasks, nMaskCnt);
+
 	}
-	}
-	*/
-	Mat img_filtered;
-	filtering(psImage, img_filtered, nWidth, nHeight, FILTER_MODE); // 0, 1, 2 : radio btn
-	
-	SAFE_DELETE_ARRAY(psImage); // psImage 포인터가 가리키고 있던 메모리 데이터들 해제 => 이후엔 Mat 데이터를 가리키므로, 또 해제해주지 않아야 함!
-	psImage = (short*)img_filtered.data; // 주소 변경
-	
-
-	// feature extraction // 
-	featureExtraction(psImage, pucMask, nHeight, nWidth);
-
-
-	// write csv file 
-	int seriesIdx = 0; // for loop idx
-	writeCSVFile(seriesIdx, csvName);
-	
-	// 모든 객체들 clear //
-	//clearAllObj();
-
-	// 메모리 소멸 //
-	SAFE_DELETE_ARRAY(pucMask);
-	// 2차원 배열 일 땐, SAFE_DELETE_VOLUME(배열명, 1차원 배열 수)
-	//SAFE_DELETE_VOLUME(ppsImages, nImageCnt);
 	
 }
 

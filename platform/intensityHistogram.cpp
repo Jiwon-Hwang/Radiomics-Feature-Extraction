@@ -8,6 +8,18 @@ IntensityHistogram::IntensityHistogram() {
 IntensityHistogram::~IntensityHistogram() {
 
 }
+void IntensityHistogram::clear() {
+
+	if (!tempValues2DVec.empty()) {
+		tempValues2DVec.clear();
+	}
+
+	if (!final1DVec.empty()) {
+		final1DVec.clear();
+	}
+
+	cout << "clear intenseHisto's all vectors of this series!" << endl;
+}
 
 vector<short> IntensityHistogram::getVectorOfPixelsInROI(short* psImage, unsigned char* pucMask, int nHeight, int nWidth) {
 
@@ -127,16 +139,16 @@ float IntensityHistogram::calcVariance(vector<unsigned short> vectorOfDiscretize
 	return variance;
 }
 
-void IntensityHistogram::calcFeature(int FEATURE_IDX) {
+void IntensityHistogram::calcFeature(int FEATURE_IDX, vector<float> &tempValues1DVec) {
 	
 	switch (FEATURE_IDX)
 	{
 		case MEAN:
-			meanValue = calcMean(vectorOfDiscretizedPixels);
+			tempValues1DVec.push_back(calcMean(vectorOfDiscretizedPixels));
 			break;
 
 		case VARIANCE:
-			varianceValue = calcVariance(vectorOfDiscretizedPixels);
+			tempValues1DVec.push_back(calcVariance(vectorOfDiscretizedPixels));
 			break;
 
 		default:
@@ -145,16 +157,46 @@ void IntensityHistogram::calcFeature(int FEATURE_IDX) {
 	}
 }
 void IntensityHistogram::featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth) {
-
+	
 	// get histogram
 	vectorOfOriPixels = getVectorOfPixelsInROI(psImage, pucMask, nHeight, nWidth);
 	vectorOfDiscretizedPixels = getVectorOfDiscretizedPixels_nBins();
 	hist = getHistogram();
 
+	vector<float> tempValues1DVec;
+
 	// calculate checked feature
 	for (int i = 0; i < isCheckedFeature.size(); i++) {
-		if (isCheckedFeature[i]) calcFeature(i);
+		if (isCheckedFeature[i]) calcFeature(i, tempValues1DVec);
 	}
+
+	tempValues2DVec.push_back(tempValues1DVec);
+
+}
+
+void IntensityHistogram::averageAllValues() {
+	
+	// get final mean vector
+	for (int col = 0; col < tempValues2DVec[0].size(); col++) {
+		float colSum = 0;
+		float colMean;
+
+		for (int row = 0; row < tempValues2DVec.size(); row++) {
+			colSum += tempValues2DVec[row][col];
+		}
+		colMean = colSum / tempValues2DVec.size();
+		final1DVec.push_back(colMean);
+	}
+
+	// set final feature value => Q. 꼭 멤버변수에 넣어줘야 하나..? final1DVec이면 되는데..
+	/*
+	for (int i = 0; i < isCheckedFeature.size(); i++) {
+		if (isCheckedFeature[i]) {
+			
+		}
+	}
+	*/
+
 }
 
 void IntensityHistogram::defineFeatureNames(vector<string> &features) {
