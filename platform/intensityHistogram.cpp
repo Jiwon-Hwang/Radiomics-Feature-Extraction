@@ -138,6 +138,19 @@ float IntensityHistogram::calcVariance(vector<unsigned short> vectorOfDiscretize
 
 	return variance;
 }
+float IntensityHistogram::calcSkewness(vector<unsigned short> vectorOfDiscretizedPixels) {
+	float skew = 0;
+	float mean = calcSkewness(vectorOfDiscretizedPixels);
+	float var = calcVariance(vectorOfDiscretizedPixels);
+	int count = vectorOfDiscretizedPixels.size();
+
+	for (int i = 0; i<count; ++i) {
+		skew += (vectorOfDiscretizedPixels[i] - mean)*(vectorOfDiscretizedPixels[i] - mean)*(vectorOfDiscretizedPixels[i] - mean);
+	}
+	skew *= sqrt(float(count)) / pow(var*float(count), 1.5);
+
+	return skew;
+}
 
 void IntensityHistogram::calcFeature(int FEATURE_IDX, vector<float> &tempValues1DVec) {
 	
@@ -149,6 +162,10 @@ void IntensityHistogram::calcFeature(int FEATURE_IDX, vector<float> &tempValues1
 
 		case VARIANCE:
 			tempValues1DVec.push_back(calcVariance(vectorOfDiscretizedPixels));
+			break;
+
+		case SKEWNESS:
+			tempValues1DVec.push_back(calcSkewness(vectorOfDiscretizedPixels));
 			break;
 
 		default:

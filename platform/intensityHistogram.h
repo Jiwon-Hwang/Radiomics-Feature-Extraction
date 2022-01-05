@@ -96,10 +96,10 @@ class IntensityHistogram
 		// calculate feature value //
 		float calcMean(std::vector<unsigned short> vectorOfDiscretizedPixels);
 		float calcVariance(std::vector<unsigned short> vectorOfDiscretizedPixels);
-		void calcSkewness();
-		void calcKurtosis();
-		void getMedian(std::vector<float> vectorMatrElement);
-		void getMinimum(std::vector<float> matrixVector);
+		float calcSkewness(std::vector<unsigned short> vectorOfDiscretizedPixels);
+		float calcKurtosis();
+		float getMedian(std::vector<float> vectorMatrElement);
+		float getMinimum(std::vector<float> matrixVector);
 		double getPercentile(std::vector<float> matrixVector, float probability);
 		void get10percentile(std::vector<float> matrixVector);
 		void get90percentile(std::vector<float> matrixVector);

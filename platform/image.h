@@ -9,11 +9,8 @@
 class CSeries;
 template <typename T>
 class CImage {
-// version 1.1
 // variable
 public:
-	CSeries* m_series;				// series
-
 	std::string m_sImagePath;		// image file path
 	std::string m_sImageName;		// image file name
 	std::string m_sImageExtension;	// image file extension
@@ -42,6 +39,8 @@ public:
 	int m_nWW;						// window width
 	int m_nInstanceNumber;			// instance number
 
+	CSeries* m_series;				// series
+
 // function
 public:
 	CImage();
@@ -50,10 +49,7 @@ public:
 	void clear();
 	CImage<T>* copy();
 	template <typename T2>
-	void copyOtherType(CImage<T2>* &pCiOtherTypeImage);
-
-	CSeries* getSeries();
-	void setSeries(CSeries* pCiSeries);
+	void convertTo(CImage<T2>* &pCiOtherTypeImage);
 
 	// image path, name, extension
 	std::string getImagePath();
@@ -65,6 +61,7 @@ public:
 
 	// image, width, height, channel, size
 	T* getImage();
+	void clearImage();
 	bool setImage(CImage<T>* pCiImage);
 	bool setImage(T* pImage, int nWidth, int nHeight, int nChannel=1);
 	bool copyImage(T* &pImage, int& nWidth, int& nHeight);
@@ -98,10 +95,14 @@ public:
 	// instance number
 	int getInstanceNumber();
 	void setInstanceNumber(int nInstanceNumber);
+
+	// series Á¤º¸
+	CSeries* getSeries();
+	void setSeries(CSeries* pCiSeries);
 };
 
 
-// image.cpp (templateï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½Ö¾î¼­ Ã³ï¿½ï¿½ï¿½Ø¾ï¿½ ï¿½Ñ´Ù°ï¿½ ï¿½ï¿½)
+// image.cpp
 template <typename T>
 CImage<T>::CImage() {
 	init();
@@ -113,10 +114,11 @@ CImage<T>::~CImage() {
 
 template <typename T>
 void CImage<T>::init() {
-	m_series = NULL;
-
 	m_sImagePath = "";
 	m_sImageName = "";
+	m_sImageExtension = "";
+	m_series = NULL;
+
 	m_image = NULL;
 	m_nWidth = 0;
 	m_nHeight = 0;
@@ -143,7 +145,7 @@ void CImage<T>::init() {
 }
 template <typename T>
 void CImage<T>::clear() {
-	SAFE_DELETE_ARRAY(m_image);
+	clearImage();
 }
 template <typename T>
 CImage<T>* CImage<T>::copy() {
@@ -152,6 +154,7 @@ CImage<T>* CImage<T>::copy() {
 	pCiImage->m_series = m_series;
 	pCiImage->m_sImagePath = m_sImagePath;
 	pCiImage->m_sImageName = m_sImageName;
+	pCiImage->m_sImageExtension = m_sImageExtension;
 	copyImage(pCiImage->m_image, pCiImage->m_nWidth, pCiImage->m_nHeight, pCiImage->m_nChannel);
 
 	pCiImage->m_fImagePositionX = m_fImagePositionX;
@@ -176,7 +179,7 @@ CImage<T>* CImage<T>::copy() {
 	return pCiImage;
 }
 template <typename T> template <typename T2>
-void CImage<T>::copyOtherType(CImage<T2>* &pCiOtherTypeImage) {
+void CImage<T>::convertTo(CImage<T2>* &pCiOtherTypeImage) {
 	if(pCiOtherTypeImage != NULL) {
 		return;
 	}
@@ -185,6 +188,7 @@ void CImage<T>::copyOtherType(CImage<T2>* &pCiOtherTypeImage) {
 	pCiOtherTypeImage->m_series = m_series;
 	pCiOtherTypeImage->m_sImagePath = m_sImagePath;
 	pCiOtherTypeImage->m_sImageName = m_sImageName;
+	pCiOtherTypeImage->m_sImageExtension = m_sImageExtension;
 	
 	int nSize = m_nWidth * m_nHeight * m_nChannel;
 	T2* image = new T2[nSize];
@@ -215,15 +219,6 @@ void CImage<T>::copyOtherType(CImage<T2>* &pCiOtherTypeImage) {
 }
 
 template <typename T>
-CSeries* getSeries() {
-	return m_series;
-}
-template<typename T>
-void CImage<T>::setSeries(CSeries* pCiSeries) {
-	m_series = pCiSeries;
-}
-
-template <typename T>
 std::string CImage<T>::getImagePath() {
 	return m_sImagePath;
 }
@@ -249,6 +244,13 @@ void CImage<T>::setImageExtension(std::string sImageExtension) {
 	m_sImageExtension = sImageExtension;
 }
 
+template<typename T>
+void CImage<T>::clearImage() {
+	m_nWidth = 0;
+	m_nHeight = 0;
+	m_nChannel = 0;
+	SAFE_DELETE(m_image);
+}
 template<typename T>
 bool CImage<T>::setImage(CImage<T>* pCiImage) {
 	// exception
@@ -305,25 +307,9 @@ T* CImage<T>::getImage() {
 }
 template <typename T>
 bool CImage<T>::copyImage(T* &pImage, int& nWidth, int& nHeight) {
-	//
-	if(pImage != NULL) {
-		return false;
-	}
+	int nChannel = 1;
 
-	// 
-	int nSize = m_nWidth * m_nHeight* m_nChannel;
-
-	pImage = new T[nSize];
-	memcpy_s(pImage, sizeof(T)*nSize, m_image, sizeof(T)*nSize);
-	/*
-	for(int i=0; i< nSize; i++) {
-		pImage[i] = (T)m_image[i];
-	}
-	*/
-	nWidth = m_nWidth;
-	nHeight = m_nHeight;
-
-	return true;
+	return copyImage(pImage, nWidth, nHeight, nChannel);
 }
 template <typename T>
 bool CImage<T>::copyImage(T* &pImage, int& nWidth, int& nHeight, int& nChannel) {
@@ -332,15 +318,22 @@ bool CImage<T>::copyImage(T* &pImage, int& nWidth, int& nHeight, int& nChannel) 
 		return false;
 	}
 
-	// 
-	int nSize = m_nWidth * m_nHeight* m_nChannel;
+	if(m_image == NULL) {
+		pImage = NULL;
+		nWidth = 0;
+		nHeight = 0;
+		nChannel = 0;
+	}
+	else {
+		int nSize = m_nWidth * m_nHeight* m_nChannel;
 
-	pImage = new T[nSize];
-	memcpy_s(pImage, sizeof(T)*nSize, m_image, sizeof(T)*nSize);
+		pImage = new T[nSize];
+		memcpy_s(pImage, sizeof(T)*nSize, m_image, sizeof(T)*nSize);
 
-	nWidth = m_nWidth;
-	nHeight = m_nHeight;
-	nChannel = m_nChannel;
+		nWidth = m_nWidth;
+		nHeight = m_nHeight;
+		nChannel = m_nChannel;
+	}
 
 	return true;
 }
@@ -431,4 +424,13 @@ int CImage<T>::getInstanceNumber() {
 template <typename T>
 void CImage<T>::setInstanceNumber(int nInstanceNumber) {
 	m_nInstanceNumber = nInstanceNumber;
+}
+
+template <typename T>
+CSeries* CImage<T>::getSeries() {
+	return m_series;
+}
+template<typename T>
+void CImage<T>::setSeries(CSeries* pCiSeries) {
+	m_series = pCiSeries;
 }

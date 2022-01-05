@@ -369,21 +369,28 @@ void CPlatform::keyReleaseEvent(QKeyEvent* event)
 void CPlatform::readImage(QStringList list) {
 
 	QStringList fileList;
-	for(int i=0, ni=list.size(); i<ni; i++) {
-		QDirIterator it(list[i], QDir::Dirs|QDir::Files, QDirIterator::Subdirectories);
+	for (int i = 0, ni = list.size(); i<ni; i++) {
+		QFileInfo f(list[i]);
 
-		do {
-			it.next();
-			if(it.fileInfo().isDir() == false) {
-				fileList.push_back(it.filePath());
-			}
-		} while (it.hasNext());
+		if (f.isDir()) {
+			QDirIterator it(list[i], QDir::Dirs | QDir::Files, QDirIterator::Subdirectories);
+
+			do {
+				it.next();
+				if (it.fileInfo().isDir() == false) {
+					fileList.push_back(it.filePath());
+				}
+			} while (it.hasNext());
+		}
+		else {
+			fileList.push_back(list[i]);
+		}
 	}
 
-	sort(fileList.begin(), fileList.end(), compareNames); // series 폴더명 정렬
+	sort(fileList.begin(), fileList.end(), compareNames);
 
-	for(int i=0, ni=fileList.size(); i<ni; i++) {
-		char cInputPath[1024] = {0};
+	for (int i = 0, ni = fileList.size(); i<ni; i++) {
+		char cInputPath[1024] = { 0 };
 		QString path = fileList.at(i).toUtf8().constData();
 		QTextCodec* c = QTextCodec::codecForLocale();
 		QByteArray b = c->fromUnicode(path);
@@ -400,7 +407,7 @@ void CPlatform::readImage(QStringList list) {
 	showImage(0);
 
 	int nStartFrameIdx = 0;
-	int nEndFrameIdx = m_ciData.getSeries(0)->getImageCount()-1; // 0번째 시리즈만 보여줌
+	int nEndFrameIdx = m_ciData.getSeries(0)->getImageCount() - 1;
 	ui.horizontalScrollBar->setMaximum(nEndFrameIdx - nStartFrameIdx);
 	ui.horizontalScrollBar->setMinimum(0);
 }
@@ -711,11 +718,10 @@ void CPlatform::writeCSVCaseName(int seriesIdx, string csvName) {
 
 	resultCSV << "\n";
 
-	// ***추후 series.h에서 멤버변수로 폴더명 접근 가능. series idx로 접근***
-	string imagePath = m_ciData.getImagePath(seriesIdx, 0); // (nSeriesIdx, nImageIdx)
-	vector<string> paths = m_ciData.splitPath(imagePath);
+	string patientName = m_ciData.getSeries(seriesIdx)->m_sPatientName;
+	string studyDescription = m_ciData.getSeries(seriesIdx)->m_sStudyDescription;
 
-	resultCSV << paths[paths.size() - 4] << "," << paths[paths.size() - 3] << ",";
+	resultCSV << patientName << "," << studyDescription << ",";
 
 	resultCSV.close();
 }

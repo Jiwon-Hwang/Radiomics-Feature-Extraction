@@ -4,15 +4,21 @@
 #include "image.h"
 
 class CSeries {
-// version 1.1
 // variable
 public:
-	std::string m_sSeriesInstanceUID;
-	std::string m_sFrameOfReferenceUID;
 	std::string m_sPatientID;
 	std::string m_sPatientName;
+
+	std::string m_sStudyInstanceUID;
+	std::string m_sStudyDescription;
+	std::string m_sStudyDate;
+	std::string m_sStudyName;
+
+	std::string m_sSeriesInstanceUID;
+	std::string m_sFrameOfReferenceUID;
 	std::string m_sSeriesDate;
-	std::string m_sDescription;
+	std::string m_sSeriesDescription;
+	std::string m_sSeriesName;
 	std::string m_sModality;
 
 	std::vector<CImage<short>*> m_images;				// image

@@ -57,8 +57,14 @@ void CImageView::init(CPlatform* parent)
 	m_pucWLWWImage = new unsigned char[m_nImageWidth * m_nImageHeight];
 	memset(m_pucWLWWImage, 0, sizeof(unsigned char)*m_nImageWidth * m_nImageHeight);
 
-	//adjustIntensityHistogram(-160, 240); // (window min, window max)
-	adjustIntensityHistogram(psImage, m_nImageWidth, m_nImageHeight);
+	int nWL, nWW;
+	m_parent->m_ciData.getCImage(m_nActivatedFrameIdx)->getWLWW(nWL, nWW);
+
+	int nMin = nWL - nWW;
+	int nMax = nWL + nWW;
+
+	adjustIntensityHistogram(nMin, nMax); // (window min, window max)
+	//adjustIntensityHistogram(psImage, m_nImageWidth, m_nImageHeight);
 
 	// mouse
 	m_bLMouseDown = false;
@@ -251,27 +257,28 @@ void CImageView::redraw(bool isMouseMove)
 
 		// ¸¶½ºÅ© overlay
 		unsigned char* pucMask = m_parent->m_ciData.getMask(m_nActivatedFrameIdx);
-		for (int row = 0; row< m_nImageHeight; row++) {
-			for (int col = 0; col<m_nImageWidth; col++) {
-				int index = row*m_nImageWidth + col;
+		if(pucMask) {
+			for(int row = 0; row< m_nImageHeight; row++) {
+				for(int col = 0; col<m_nImageWidth; col++) {
+					int index = row*m_nImageWidth + col;
 
-				unsigned char value = (unsigned char)m_pucWLWWImage[index];
-				unsigned char maskValue = (unsigned char)pucMask[index];
+					unsigned char value = (unsigned char)m_pucWLWWImage[index];
+					unsigned char maskValue = (unsigned char)pucMask[index];
 
-				if (maskValue > (unsigned char)0) {
-					int r = 255, g = 0, b = 0;
-					float fOpacity = 0.5;
+					if (maskValue > (unsigned char)0) {
+						int r = 255, g = 0, b = 0;
+						float fOpacity = 0.7;
 
-					float fValueR = value * fOpacity + r*(1 - fOpacity);
-					float fValueG = value * fOpacity + g*(1 - fOpacity);
-					float fValueB = value * fOpacity + b*(1 - fOpacity);
+						float fValueR = value * fOpacity + r*(1 - fOpacity);
+						float fValueG = value * fOpacity + g*(1 - fOpacity);
+						float fValueB = value * fOpacity + b*(1 - fOpacity);
 
-					m_qImage.setPixel(col, row, qRgb(fValueR, fValueG, fValueB));
+						m_qImage.setPixel(col, row, qRgb(fValueR, fValueG, fValueB));
+					}
 				}
 			}
 		}
 		
-
 		// scaling
 		m_qImageScreen = m_qImage.scaled(QSize(m_nImageScreenWidth, m_nImageScreenHeight), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 	}

@@ -7,13 +7,23 @@ CSeries::~CSeries() {
 	clear();
 }
 void CSeries::init() {
-	m_sSeriesInstanceUID = "";
-	m_sFrameOfReferenceUID = "";
 	m_sPatientID = "";
 	m_sPatientName = "";
+
+	m_sStudyInstanceUID = "";
+	m_sStudyDescription = "";
+	m_sStudyDate = "";
+	m_sStudyName = "";
+
+	m_sSeriesInstanceUID = "";
+	m_sFrameOfReferenceUID = "";
 	m_sSeriesDate = "";
-	m_sDescription = "";
+	m_sSeriesDescription = "";
+	m_sSeriesName = "";
 	m_sModality = "";
+
+	m_images.clear();
+	m_masks.clear();
 }
 void CSeries::clear() {
 	for(int i=0, ni=m_images.size(); i<ni; i++) {
@@ -31,8 +41,18 @@ CSeries* CSeries::copy() {
 
 	pSeries->m_sPatientID = m_sPatientID;
 	pSeries->m_sPatientName = m_sPatientName;
+
+	pSeries->m_sStudyInstanceUID = m_sStudyInstanceUID;
+	pSeries->m_sStudyDescription = m_sStudyDescription;
+	pSeries->m_sStudyDate = m_sStudyDate;
+	pSeries->m_sStudyName = m_sStudyName;
+
+	pSeries->m_sSeriesInstanceUID = m_sSeriesInstanceUID;
+	pSeries->m_sFrameOfReferenceUID = m_sFrameOfReferenceUID;
 	pSeries->m_sSeriesDate = m_sSeriesDate;
-	pSeries->m_sDescription = m_sDescription;
+	pSeries->m_sSeriesDescription = m_sSeriesDescription;
+	pSeries->m_sSeriesName = m_sSeriesName;
+	pSeries->m_sModality = m_sModality;
 
 	int nImageCount = m_images.size();
 	pSeries->m_images.reserve(nImageCount);
