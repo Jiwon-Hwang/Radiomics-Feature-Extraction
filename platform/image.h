@@ -249,7 +249,7 @@ void CImage<T>::clearImage() {
 	m_nWidth = 0;
 	m_nHeight = 0;
 	m_nChannel = 0;
-	SAFE_DELETE(m_image);
+	SAFE_DELETE_ARRAY(m_image);
 }
 template<typename T>
 bool CImage<T>::setImage(CImage<T>* pCiImage) {
@@ -323,6 +323,8 @@ bool CImage<T>::copyImage(T* &pImage, int& nWidth, int& nHeight, int& nChannel) 
 		nWidth = 0;
 		nHeight = 0;
 		nChannel = 0;
+
+		return false;
 	}
 	else {
 		int nSize = m_nWidth * m_nHeight* m_nChannel;
@@ -333,9 +335,9 @@ bool CImage<T>::copyImage(T* &pImage, int& nWidth, int& nHeight, int& nChannel) 
 		nWidth = m_nWidth;
 		nHeight = m_nHeight;
 		nChannel = m_nChannel;
-	}
 
-	return true;
+		return true;
+	}
 }
 template <typename T>
 int CImage<T>::getWidth() {

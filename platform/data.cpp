@@ -959,6 +959,7 @@ bool CData::isMask_namingRule(std::string sPath) {
 }
 template<typename T>
 bool CData::isMask_imageRule(CImage<T>* pCiImage) {
+	
 	// 1. pixel 값이 binary mask거나, 1~10까지의 label을 갖는 이미지 (0~10, 255)
 	if(pCiImage->m_nChannel == 1) {
 		for(int r=0; r< pCiImage->m_nHeight; r++) {
@@ -972,7 +973,7 @@ bool CData::isMask_imageRule(CImage<T>* pCiImage) {
 			}
 		}
 	}
-
+	
 	return false;
 }
 

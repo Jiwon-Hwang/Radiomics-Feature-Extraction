@@ -696,75 +696,14 @@ short CPlatform::calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask,
 }
 
 
-// Save Result //
-void writeCSVCheckedValue(vector<float> extractedValues, string csvName) // 모든 class 공통
-{
-	ofstream resultCSV(csvName, std::ios_base::app);
-
-	for (int i = 0; i< extractedValues.size(); i++) {
-		// if(extractedValues[i] != NAN) => error! (-nan(ind) !- NAN)
-		/*
-		if (!isnan(extractedValues[i])) { 
-			resultCSV << extractedValues[i] << ",";
-		}
-		*/
-		resultCSV << extractedValues[i] << ",";
-	}
-	resultCSV.close();
-}
-
-void CPlatform::writeCSVCaseName(int seriesIdx, string csvName) {
-	ofstream resultCSV(csvName, std::ios_base::app); // std::ios_base::app => 이어쓰기 모드로 열기(open)
-
-	resultCSV << "\n";
-
-	string patientName = m_ciData.getSeries(seriesIdx)->m_sPatientName;
-	string studyDescription = m_ciData.getSeries(seriesIdx)->m_sStudyDescription;
-
-	resultCSV << patientName << "," << studyDescription << ",";
-
-	resultCSV.close();
-}
-
-void CPlatform::writeCSVFeatureValue(string csvName) {
-
-	if (intenseHisto.isActivatedFamily) {
-		/*
-		vector<float> hitogramValue; // 추출값들 push 받아올 벡터
-		intenseHisto.extractFeatureValues(hitogramValue); // ***extractData : 모든 멤버변수 값들 vector에 push해오기(NAN 포함)***
-		*/
-		writeCSVCheckedValue(intenseHisto.final1DVec, csvName);
-	}
-
-	if (ui.checkBox_Intensity->isChecked()) {
-		
-	}
-
-	if (ui.checkBox_Morph->isChecked()) {
-
-	}
-
-	if (ui.checkBox_GLCM->isChecked()) {
-
-	}
-}
-
-void CPlatform::writeCSVFile(int seriesIdx, string csvName) {
-
-	writeCSVCaseName(seriesIdx, csvName); // case명 & case명_modality 저장
-	writeCSVFeatureValue(csvName); // feature values 저장 (각 family별로 호출)
-
-}
-
-
 // Preset CSV File // 
 void CPlatform::presetCSVFile(string csvName) {
 
 	ofstream resultCSV(csvName); // 파일이 없으면 새로 생성, 있으면 기존 내용 지우고 새로 작성 (remove 포함)
 
 
-	// write family name 
-	resultCSV << " " << "," << " " << ","; 
+								 // write family name 
+	resultCSV << " " << "," << " " << ",";
 
 	if (intenseHisto.isActivatedFamily) {
 		for (int i = 0; i < intenseHisto.nCheckedFeatures; i++) {
@@ -773,19 +712,19 @@ void CPlatform::presetCSVFile(string csvName) {
 	}
 	/*
 	if (localIntense.isActivatedFamily) {
-		for (int i = 0; i < localIntense.nCheckedFeatures; i++) {
-			resultCSV << "Local Intensity" << ",";
-		}
+	for (int i = 0; i < localIntense.nCheckedFeatures; i++) {
+	resultCSV << "Local Intensity" << ",";
+	}
 	}
 	if (morphology.isActivatedFamily) {
-		for (int i = 0; i < morphology.nCheckedFeatures; i++) {
-			resultCSV << "Morphology" << ",";
-		}
+	for (int i = 0; i < morphology.nCheckedFeatures; i++) {
+	resultCSV << "Morphology" << ",";
+	}
 	}
 	if (glcm.isActivatedFamily) {
-		for (int i = 0; i < glcm.nCheckedFeatures; i++) {
-			resultCSV << "GLCM" << ",";
-		}
+	for (int i = 0; i < glcm.nCheckedFeatures; i++) {
+	resultCSV << "GLCM" << ",";
+	}
 	}
 	*/
 
@@ -793,7 +732,7 @@ void CPlatform::presetCSVFile(string csvName) {
 
 
 	// write feature name 
-	resultCSV << " " << "," << " " << ","; 
+	resultCSV << " " << "," << " " << ",";
 
 	if (intenseHisto.isActivatedFamily) {
 		vector<string> featureNames;
@@ -818,6 +757,65 @@ void CPlatform::presetCSVFile(string csvName) {
 	}
 
 	resultCSV.close();
+
+}
+
+
+// Save Result //
+void writeCSVCheckedValue(vector<float> extractedValues, string csvName) // 모든 class 공통
+{
+	ofstream resultCSV(csvName, std::ios_base::app);
+
+	for (int i = 0; i< extractedValues.size(); i++) {
+		// if(extractedValues[i] != NAN) => error! (-nan(ind) !- NAN)
+		/*
+		if (!isnan(extractedValues[i])) { 
+			resultCSV << extractedValues[i] << ",";
+		}
+		*/
+		resultCSV << extractedValues[i] << ",";
+	}
+	resultCSV.close();
+}
+void CPlatform::writeCSVCaseName(int seriesIdx, string csvName) {
+	ofstream resultCSV(csvName, std::ios_base::app); // std::ios_base::app => 이어쓰기 모드로 열기(open)
+
+	resultCSV << "\n";
+
+	string patientName = m_ciData.getSeries(seriesIdx)->m_sPatientName;
+	string studyName = m_ciData.getSeries(seriesIdx)->m_sStudyName;
+	string seriesName = m_ciData.getSeries(seriesIdx)->m_sSeriesName;
+
+	resultCSV << patientName << "," << studyName + '_' + seriesName << ",";
+
+	resultCSV.close();
+}
+void CPlatform::writeCSVFeatureValue(string csvName) {
+
+	if (intenseHisto.isActivatedFamily) {
+		/*
+		vector<float> hitogramValue; // 추출값들 push 받아올 벡터
+		intenseHisto.extractFeatureValues(hitogramValue); // ***extractData : 모든 멤버변수 값들 vector에 push해오기(NAN 포함)***
+		*/
+		writeCSVCheckedValue(intenseHisto.final1DVec, csvName);
+	}
+
+	if (ui.checkBox_Intensity->isChecked()) {
+		
+	}
+
+	if (ui.checkBox_Morph->isChecked()) {
+
+	}
+
+	if (ui.checkBox_GLCM->isChecked()) {
+
+	}
+}
+void CPlatform::writeCSVFile(int seriesIdx, string csvName) {
+
+	writeCSVCaseName(seriesIdx, csvName); // case명 & case명_modality 저장
+	writeCSVFeatureValue(csvName); // feature values 저장 (각 family별로 호출)
 
 }
 
