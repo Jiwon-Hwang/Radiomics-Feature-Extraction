@@ -203,9 +203,16 @@ void CPlatform::createProgressBar()
 }
 void CPlatform::setSignalSlot()
 {
+	// platform
 	connect(ui.pushButton_run, SIGNAL(clicked()), this, SLOT(run()));
 	connect(ui.horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(scrollChangeImage(int)));
-	
+	//connect(mCloseButton, SIGNAL(clicked()), this, SLOT(slot_closed()));
+	/*
+	mCloseButton = new QPushButton(mTitlebarWidget);
+	mCloseButton->setObjectName("closeButton");
+	connect(mCloseButton, SIGNAL(clicked()), this, SLOT(slot_closed()));
+	*/
+
 	// filter
 	connect(ui.radioButton_None, SIGNAL(clicked()), this, SLOT(setFilterMode()));
 	connect(ui.radioButton_Gaussian, SIGNAL(clicked()), this, SLOT(setFilterMode()));
@@ -533,11 +540,12 @@ void CPlatform::setCheckedState() { // check box 클릭될 때마다(시그널) 호출되는 
 			// pop-up (set isCheckedFeature, nCheckedFeatures) => if문으로 체크 후 T/F push 하는걸로 수정
 			intenseHisto.isCheckedFeature.push_back(true);
 			intenseHisto.isCheckedFeature.push_back(true);
-			for (int i = 0; i < 21; i++) {
+			intenseHisto.isCheckedFeature.push_back(true);
+			for (int i = 0; i < 20; i++) {
 				intenseHisto.isCheckedFeature.push_back(false);
 			}
 
-			intenseHisto.nCheckedFeatures = 2;
+			intenseHisto.nCheckedFeatures = 3;
 		}
 	}
 
@@ -964,6 +972,27 @@ void CPlatform::run()
 		SAFE_DELETE_VOLUME(ppucMasks, nMaskCnt);
 
 	}
+
+	// finish pop-up and exit		
+	if (QMessageBox(QMessageBox::Information, " ", "extraction finished!", QMessageBox::Close).exec() == QMessageBox::Close) {
+		QApplication::quit();
+	}
+
+	/*
+	QMessageBox msgBox;
+	msgBox.setWindowTitle("Radiomics Feature Extraction");
+	//msgBox.setText("<p align='center'>finish!&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>");
+	msgBox.setText("<br><br>extraction finished!");
+	msgBox.setStandardButtons(QMessageBox::Close);
+
+	QGridLayout* layout = (QGridLayout*)msgBox.layout();
+	layout->setColumnMinimumWidth(1, 190);
+	layout->setRowMinimumHeight(1, 45);
+
+	if (msgBox.exec() == QMessageBox::Close) {
+	QApplication::quit();
+	}
+	*/
 	
 }
 

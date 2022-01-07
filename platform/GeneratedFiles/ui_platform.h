@@ -223,7 +223,7 @@ public:
 
         checkBox_Intensity = new QCheckBox(layoutWidget1);
         checkBox_Intensity->setObjectName(QStringLiteral("checkBox_Intensity"));
-        checkBox_Intensity->setEnabled(false);
+        checkBox_Intensity->setEnabled(true);
         checkBox_Intensity->setCheckable(true);
         checkBox_Intensity->setChecked(false);
         checkBox_Intensity->setTristate(false);
