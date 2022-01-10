@@ -10,15 +10,15 @@ IntensityHistogram::~IntensityHistogram() {
 }
 void IntensityHistogram::clear() {
 
-	if (!tempValues2DVec.empty()) {
-		tempValues2DVec.clear();
+	if (!final2DVec.empty()) {
+		final2DVec.clear();
 	}
 
 	if (!final1DVec.empty()) {
 		final1DVec.clear();
 	}
 
-	cout << "clear intenseHisto's all vectors of this series!" << endl;
+	cout << "clear intenseHisto..." << endl;
 }
 
 vector<short> IntensityHistogram::getVectorOfPixelsInROI(short* psImage, unsigned char* pucMask, int nHeight, int nWidth) {
@@ -106,12 +106,12 @@ vector<unsigned int> IntensityHistogram::getHistogram() {
 	return hist;
 }
 
-float IntensityHistogram::calcMean(vector<unsigned short> vectorOfDiscretizedPixels) {
+float IntensityHistogram::calcMean() {
 	float mean = accumulate(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), 0.0) / vectorOfDiscretizedPixels.size(); // 0.0 : initial value of the sum
 
 	return mean;
 }
-float IntensityHistogram::calcVariance(vector<unsigned short> vectorOfDiscretizedPixels) {
+float IntensityHistogram::calcVariance() {
 	unsigned int size = vectorOfDiscretizedPixels.size(); // size_t : unsigned int
 	float mean = accumulate(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), 0.0) / size;
 	vector<float> diff(size);
@@ -138,18 +138,40 @@ float IntensityHistogram::calcVariance(vector<unsigned short> vectorOfDiscretize
 
 	return variance;
 }
-float IntensityHistogram::calcSkewness(vector<unsigned short> vectorOfDiscretizedPixels) {
+float IntensityHistogram::calcSkewness() {
 	float skew = 0;
-	float mean = calcMean(vectorOfDiscretizedPixels);
-	float var = calcVariance(vectorOfDiscretizedPixels);
+	float mean = calcMean();
+	float var = calcVariance();
 	int count = vectorOfDiscretizedPixels.size();
 
-	for (int i = 0; i<count; ++i) {
+	for (int i = 0; i < count; ++i) {
 		skew += pow(vectorOfDiscretizedPixels[i] - mean, 3);
 	}
 	skew *= sqrt(float(count)) / pow(var*float(count), 1.5);
 
 	return skew;
+}
+float IntensityHistogram::calcKurtosis() {
+	float kurto = 0;
+	float mean = calcMean();
+	float var = calcVariance();
+	int count = vectorOfDiscretizedPixels.size();
+
+	for (int i = 0; i < count; ++i) {
+		kurto += pow(vectorOfDiscretizedPixels[i] - mean, 4);
+	}
+	kurto /= float(count) * pow(var, 2);
+	kurto -= 3;
+
+	return kurto;
+}
+float IntensityHistogram::calcMedian() {
+	float median = 0;
+	float mean = calcMean();
+	float var = calcVariance();
+	int count = vectorOfDiscretizedPixels.size();
+
+	return median;
 }
 
 void IntensityHistogram::calcFeature(int FEATURE_IDX, vector<float> &tempValues1DVec) {
@@ -157,15 +179,19 @@ void IntensityHistogram::calcFeature(int FEATURE_IDX, vector<float> &tempValues1
 	switch (FEATURE_IDX)
 	{
 		case MEAN:
-			tempValues1DVec.push_back(calcMean(vectorOfDiscretizedPixels));
+			tempValues1DVec.push_back(calcMean());
 			break;
 
 		case VARIANCE:
-			tempValues1DVec.push_back(calcVariance(vectorOfDiscretizedPixels));
+			tempValues1DVec.push_back(calcVariance());
 			break;
 
 		case SKEWNESS:
-			tempValues1DVec.push_back(calcSkewness(vectorOfDiscretizedPixels));
+			tempValues1DVec.push_back(calcSkewness());
+			break;
+
+		case KURTOSIS:
+			tempValues1DVec.push_back(calcKurtosis());
 			break;
 
 		default:
@@ -177,31 +203,31 @@ void IntensityHistogram::featureExtraction(short* psImage, unsigned char* pucMas
 	
 	// get histogram
 	vectorOfOriPixels = getVectorOfPixelsInROI(psImage, pucMask, nHeight, nWidth);
-	vectorOfDiscretizedPixels = getVectorOfDiscretizedPixels_nBins();
+	vectorOfDiscretizedPixels = getVectorOfDiscretizedPixels_nBins(); // 슬라이스마다 초기화
 	hist = getHistogram();
 
-	vector<float> tempValues1DVec;
+	vector<float> tempValues1DVec; // 슬라이스마다 초기화
 
 	// calculate checked feature
 	for (int i = 0; i < isCheckedFeature.size(); i++) {
 		if (isCheckedFeature[i]) calcFeature(i, tempValues1DVec);
 	}
 
-	tempValues2DVec.push_back(tempValues1DVec);
+	final2DVec.push_back(tempValues1DVec); // 모든 ROI 슬라이스 들어올 때까지 누적 (시리즈마다 초기화)
 
 }
 
 void IntensityHistogram::averageAllValues() {
 	
 	// get final mean vector
-	for (int col = 0; col < tempValues2DVec[0].size(); col++) {
+	for (int col = 0; col < final2DVec[0].size(); col++) {
 		float colSum = 0;
 		float colMean;
 
-		for (int row = 0; row < tempValues2DVec.size(); row++) {
-			colSum += tempValues2DVec[row][col];
+		for (int row = 0; row < final2DVec.size(); row++) {
+			colSum += final2DVec[row][col];
 		}
-		colMean = colSum / tempValues2DVec.size();
+		colMean = colSum / final2DVec.size();
 		final1DVec.push_back(colMean);
 	}
 

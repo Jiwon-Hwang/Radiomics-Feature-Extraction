@@ -60,9 +60,9 @@ class IntensityHistogram
 		std::vector<unsigned short> getVectorOfDiffGreyLevels();
 		std::vector<unsigned int> getHistogram();
 
-		// put temp values in 2d vector //
-		std::vector<std::vector<float>> tempValues2DVec;
-		std::vector<float> final1DVec;
+		// put extracted values in 2d vector //
+		std::vector<std::vector<float>> final2DVec;		// slice by slice
+		std::vector<float> final1DVec;					// series by series (average)
 
 		// final feature value //
 		float meanValue = NAN;
@@ -94,11 +94,11 @@ class IntensityHistogram
 		//vector<float> minHistVecGradient;
 
 		// calculate feature value //
-		float calcMean(std::vector<unsigned short> vectorOfDiscretizedPixels);
-		float calcVariance(std::vector<unsigned short> vectorOfDiscretizedPixels);
-		float calcSkewness(std::vector<unsigned short> vectorOfDiscretizedPixels);
+		float calcMean();
+		float calcVariance();
+		float calcSkewness();
 		float calcKurtosis();
-		float getMedian(std::vector<float> vectorMatrElement);
+		float calcMedian();
 		float getMinimum(std::vector<float> matrixVector);
 		double getPercentile(std::vector<float> matrixVector, float probability);
 		void get10percentile(std::vector<float> matrixVector);

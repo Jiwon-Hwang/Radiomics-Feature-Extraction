@@ -22,7 +22,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_CPlatform_t {
     QByteArrayData data[30];
-    char stringdata0[335];
+    char stringdata0[338];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -49,18 +49,18 @@ QT_MOC_LITERAL(14, 148, 14), // "unsigned char*"
 QT_MOC_LITERAL(15, 163, 7), // "pucMask"
 QT_MOC_LITERAL(16, 171, 7), // "nHeight"
 QT_MOC_LITERAL(17, 179, 6), // "nWidth"
-QT_MOC_LITERAL(18, 186, 13), // "meanAllSlices"
-QT_MOC_LITERAL(19, 200, 22), // "calcLocalIntensityPeak"
-QT_MOC_LITERAL(20, 223, 8), // "pusImage"
-QT_MOC_LITERAL(21, 232, 13), // "presetCSVFile"
-QT_MOC_LITERAL(22, 246, 6), // "string"
-QT_MOC_LITERAL(23, 253, 7), // "csvName"
-QT_MOC_LITERAL(24, 261, 12), // "writeCSVFile"
-QT_MOC_LITERAL(25, 274, 9), // "seriesIdx"
-QT_MOC_LITERAL(26, 284, 20), // "writeCSVFeatureValue"
-QT_MOC_LITERAL(27, 305, 16), // "writeCSVCaseName"
-QT_MOC_LITERAL(28, 322, 8), // "clearAll"
-QT_MOC_LITERAL(29, 331, 3) // "run"
+QT_MOC_LITERAL(18, 186, 16), // "averageAllSlices"
+QT_MOC_LITERAL(19, 203, 22), // "calcLocalIntensityPeak"
+QT_MOC_LITERAL(20, 226, 8), // "pusImage"
+QT_MOC_LITERAL(21, 235, 13), // "presetCSVFile"
+QT_MOC_LITERAL(22, 249, 6), // "string"
+QT_MOC_LITERAL(23, 256, 7), // "csvName"
+QT_MOC_LITERAL(24, 264, 12), // "writeCSVFile"
+QT_MOC_LITERAL(25, 277, 9), // "seriesIdx"
+QT_MOC_LITERAL(26, 287, 20), // "writeCSVFeatureValue"
+QT_MOC_LITERAL(27, 308, 16), // "writeCSVCaseName"
+QT_MOC_LITERAL(28, 325, 8), // "clearAll"
+QT_MOC_LITERAL(29, 334, 3) // "run"
 
     },
     "CPlatform\0showImage\0\0nFrameIdx\0"
@@ -68,7 +68,7 @@ QT_MOC_LITERAL(29, 331, 3) // "run"
     "scrollChangeImage\0nValue\0setFilterMode\0"
     "setCheckedState\0featureExtraction\0"
     "short*\0psImage\0unsigned char*\0pucMask\0"
-    "nHeight\0nWidth\0meanAllSlices\0"
+    "nHeight\0nWidth\0averageAllSlices\0"
     "calcLocalIntensityPeak\0pusImage\0"
     "presetCSVFile\0string\0csvName\0writeCSVFile\0"
     "seriesIdx\0writeCSVFeatureValue\0"
@@ -102,8 +102,8 @@ static const uint qt_meta_data_CPlatform[] = {
       24,    2,  119,    2, 0x0a /* Public */,
       26,    1,  124,    2, 0x0a /* Public */,
       27,    2,  127,    2, 0x0a /* Public */,
-      28,    0,  132,    2, 0x0a /* Public */,
-      29,    0,  133,    2, 0x0a /* Public */,
+      28,    1,  132,    2, 0x0a /* Public */,
+      29,    0,  135,    2, 0x0a /* Public */,
 
  // slots: parameters
     QMetaType::Void, QMetaType::Int,    3,
@@ -118,7 +118,7 @@ static const uint qt_meta_data_CPlatform[] = {
     QMetaType::Void, QMetaType::Int, 0x80000000 | 22,   25,   23,
     QMetaType::Void, 0x80000000 | 22,   23,
     QMetaType::Void, QMetaType::Int, 0x80000000 | 22,   25,   23,
-    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,   25,
     QMetaType::Void,
 
        0        // eod
@@ -136,14 +136,14 @@ void CPlatform::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 3: _t->setFilterMode(); break;
         case 4: _t->setCheckedState(); break;
         case 5: _t->featureExtraction((*reinterpret_cast< short*(*)>(_a[1])),(*reinterpret_cast< unsigned char*(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3])),(*reinterpret_cast< int(*)>(_a[4]))); break;
-        case 6: _t->meanAllSlices(); break;
+        case 6: _t->averageAllSlices(); break;
         case 7: { short _r = _t->calcLocalIntensityPeak((*reinterpret_cast< short*(*)>(_a[1])),(*reinterpret_cast< unsigned char*(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3])),(*reinterpret_cast< int(*)>(_a[4])));
             if (_a[0]) *reinterpret_cast< short*>(_a[0]) = std::move(_r); }  break;
         case 8: _t->presetCSVFile((*reinterpret_cast< string(*)>(_a[1]))); break;
         case 9: _t->writeCSVFile((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< string(*)>(_a[2]))); break;
         case 10: _t->writeCSVFeatureValue((*reinterpret_cast< string(*)>(_a[1]))); break;
         case 11: _t->writeCSVCaseName((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< string(*)>(_a[2]))); break;
-        case 12: _t->clearAll(); break;
+        case 12: _t->clearAll((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 13: _t->run(); break;
         default: ;
         }

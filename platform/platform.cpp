@@ -541,11 +541,12 @@ void CPlatform::setCheckedState() { // check box 클릭될 때마다(시그널) 호출되는 
 			intenseHisto.isCheckedFeature.push_back(true);
 			intenseHisto.isCheckedFeature.push_back(true);
 			intenseHisto.isCheckedFeature.push_back(true);
-			for (int i = 0; i < 20; i++) {
+			intenseHisto.isCheckedFeature.push_back(true);
+			for (int i = 0; i < 19; i++) {
 				intenseHisto.isCheckedFeature.push_back(false);
 			}
 
-			intenseHisto.nCheckedFeatures = 3;
+			intenseHisto.nCheckedFeatures = 4;
 		}
 	}
 
@@ -581,7 +582,7 @@ void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, int nH
 
 }
 
-void CPlatform::meanAllSlices() {
+void CPlatform::averageAllSlices() {
 	if (intenseHisto.isActivatedFamily) {
 		intenseHisto.averageAllValues();
 	}
@@ -829,13 +830,14 @@ void CPlatform::writeCSVFile(int seriesIdx, string csvName) {
 
 
 // Clear All Vector //
-void CPlatform::clearAll() {
+void CPlatform::clearAll(int seriesIdx) {
 	intenseHisto.clear();
 	/*
 	localIntense.clear();
 	morphology.clear();
 	glcm.clear();
 	*/
+	cout << "clear series[" << seriesIdx << "]'s all vectors!" << endl;
 }
 
 // Normalize and 16 bit Image Show //
@@ -930,6 +932,8 @@ void CPlatform::run()
 	// filtering and feature extraction by series //
 	int nSeriesCnt = m_ciData.getSeriesCount();
 
+	cout << "*** nSeriesCnt : " << nSeriesCnt << " ***" << endl;
+
 	for (int i = 0; i < nSeriesCnt; i++) {
 
 		int nWidth = 0;		
@@ -960,13 +964,13 @@ void CPlatform::run()
 		}
 
 		// mean all ROI slices //
-		meanAllSlices();
+		averageAllSlices();
 
 		// write csv file //
 		writeCSVFile(i, csvName);
 		
 		// clear all vector //
-		clearAll();
+		clearAll(i);
 
 		// 메모리 소멸 //
 		SAFE_DELETE_VOLUME(ppucMasks, nMaskCnt);

@@ -115,8 +115,8 @@ public slots:
 	void setCheckedState();
 	void featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
 	
-	// mean all ROI slices //
-	void meanAllSlices();
+	// average all ROI slices //
+	void averageAllSlices();
 
 	short calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth); // class 함수로 넣기, m_ciData.getPixelSpacing() call
 	
@@ -127,7 +127,7 @@ public slots:
 	void writeCSVCaseName(int seriesIdx, string csvName);
 
 	// clear all vector //
-	void clearAll();
+	void clearAll(int seriesIdx);
 
 	void run();
 };
