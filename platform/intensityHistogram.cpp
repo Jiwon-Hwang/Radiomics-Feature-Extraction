@@ -8,7 +8,38 @@ IntensityHistogram::IntensityHistogram() {
 IntensityHistogram::~IntensityHistogram() {
 
 }
-void IntensityHistogram::clear() {
+void IntensityHistogram::clearVariable() {
+
+	meanValue = NAN;
+	varianceValue = NAN;
+	skewnessValue = NAN;
+	kurtosisValue = NAN;
+	medianValue = NAN;
+	minimumValue = NAN;
+	percentile10 = NAN;
+	percentile90 = NAN;
+	maximumValue = NAN;
+	interquartileRange = NAN;
+	mode = NAN;
+	rangeValue = NAN;
+	meanAbsDev = NAN;
+	robustMeanAbsDev = NAN;
+	medianAbsDev = NAN;
+	coeffOfVar = NAN;
+	quartileCoeff = NAN;
+	entropy = NAN;
+	histUniformity = NAN;
+	maxHistGradient = NAN;
+	maxHistGradGreyValue = NAN;
+	minHistGradient = NAN;
+	minHistGradGreyValue = NAN;
+	//percentile25 = NAN;
+	//percentile75 = NAN;
+	//vector<float> maxHistVecGradient;
+	//vector<float> minHistVecGradient;
+
+}
+void IntensityHistogram::clearVector() {
 
 	if (!final2DVec.empty()) {
 		final2DVec.clear();
@@ -18,7 +49,6 @@ void IntensityHistogram::clear() {
 		final1DVec.clear();
 	}
 
-	cout << "clear intenseHisto..." << endl;
 }
 
 vector<short> IntensityHistogram::getVectorOfPixelsInROI(short* psImage, unsigned char* pucMask, int nHeight, int nWidth) {
@@ -106,22 +136,27 @@ vector<unsigned int> IntensityHistogram::getHistogram() {
 	return hist;
 }
 
-float IntensityHistogram::calcMean() {
-	float mean = accumulate(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), 0.0) / vectorOfDiscretizedPixels.size(); // 0.0 : initial value of the sum
+void IntensityHistogram::calcMean() {
 
-	return mean;
+	meanValue = accumulate(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), 0.0) / nPixels; // 0.0 : initial value of the sum
+
 }
-float IntensityHistogram::calcVariance() {
-	unsigned int size = vectorOfDiscretizedPixels.size(); // size_t : unsigned int
-	float mean = accumulate(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), 0.0) / size;
+void IntensityHistogram::calcVariance() {
+
+	unsigned int size = nPixels; // size_t : unsigned int
+
+	if (isnan(meanValue)) {
+		calcMean();
+	}
+		
 	vector<float> diff(size);
-	transform(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), diff.begin(), bind2nd(minus<float>(), mean));
-	float variance = inner_product(diff.begin(), diff.end(), diff.begin(), 0.0) / size;
+	transform(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), diff.begin(), bind2nd(minus<float>(), meanValue));
+	varianceValue = inner_product(diff.begin(), diff.end(), diff.begin(), 0.0) / size;
 
 	/*
 	// with anonymous function : func = [capture](parameters){body}
 	auto variance_func = [&mean, &size](float accumulator, const float& val) {
-	return accumulator + ((val - mean) * (val - mean) / size);
+	return accumulator + ((val - meanValue) * (val - meanValue) / size);
 	};
 	variance = accumulate(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), 0.0, variance_func);
 	*/
@@ -129,49 +164,52 @@ float IntensityHistogram::calcVariance() {
 	/*
 	// with for loop
 	float variance = 0;
-	for (int n = 0; n < vectorOfDiscretizedPixels.size(); n++)
+	for (int n = 0; n < nPixels; n++)
 	{
 	variance += (vectorOfDiscretizedPixels[n] - meanValue) * (vectorOfDiscretizedPixels[n] - meanValue);
 	}
-	variance /= vectorOfDiscretizedPixels.size();
+	variance /= nPixels;
 	*/
-
-	return variance;
 }
-float IntensityHistogram::calcSkewness() {
-	float skew = 0;
-	float mean = calcMean();
-	float var = calcVariance();
-	int count = vectorOfDiscretizedPixels.size();
+void IntensityHistogram::calcSkewness() {
 
-	for (int i = 0; i < count; ++i) {
-		skew += pow(vectorOfDiscretizedPixels[i] - mean, 3);
+	skewnessValue = 0;
+
+	if (isnan(meanValue)) {
+		calcMean();
 	}
-	skew *= sqrt(float(count)) / pow(var*float(count), 1.5);
 
-	return skew;
-}
-float IntensityHistogram::calcKurtosis() {
-	float kurto = 0;
-	float mean = calcMean();
-	float var = calcVariance();
-	int count = vectorOfDiscretizedPixels.size();
-
-	for (int i = 0; i < count; ++i) {
-		kurto += pow(vectorOfDiscretizedPixels[i] - mean, 4);
+	if (isnan(varianceValue)) {
+		calcVariance();
 	}
-	kurto /= float(count) * pow(var, 2);
-	kurto -= 3;
 
-	return kurto;
+	for (int i = 0; i < nPixels; ++i) {
+		skewnessValue += pow(vectorOfDiscretizedPixels[i] - meanValue, 3);
+	}
+	skewnessValue *= sqrt(float(nPixels)) / pow(varianceValue*float(nPixels), 1.5);
+
 }
-float IntensityHistogram::calcMedian() {
-	float median = 0;
-	float mean = calcMean();
-	float var = calcVariance();
-	int count = vectorOfDiscretizedPixels.size();
+void IntensityHistogram::calcKurtosis() {
+	
+	kurtosisValue = 0;
 
-	return median;
+	if (isnan(meanValue)) {
+		calcMean();
+	}
+
+	if (isnan(varianceValue)) {
+		calcVariance();
+	}
+
+	for (int i = 0; i < nPixels; ++i) {
+		kurtosisValue += pow(vectorOfDiscretizedPixels[i] - meanValue, 4);
+	}
+	kurtosisValue /= float(nPixels) * pow(varianceValue, 2);
+	kurtosisValue -= 3;
+
+}
+void IntensityHistogram::calcMedian() {
+
 }
 
 void IntensityHistogram::calcFeature(int FEATURE_IDX, vector<float> &tempValues1DVec) {
@@ -179,19 +217,23 @@ void IntensityHistogram::calcFeature(int FEATURE_IDX, vector<float> &tempValues1
 	switch (FEATURE_IDX)
 	{
 		case MEAN:
-			tempValues1DVec.push_back(calcMean());
+			calcMean();
+			tempValues1DVec.push_back(meanValue);
 			break;
 
 		case VARIANCE:
-			tempValues1DVec.push_back(calcVariance());
+			calcVariance();
+			tempValues1DVec.push_back(varianceValue);
 			break;
 
 		case SKEWNESS:
-			tempValues1DVec.push_back(calcSkewness());
+			calcSkewness();
+			tempValues1DVec.push_back(skewnessValue);
 			break;
 
 		case KURTOSIS:
-			tempValues1DVec.push_back(calcKurtosis());
+			calcKurtosis();
+			tempValues1DVec.push_back(kurtosisValue);
 			break;
 
 		default:
@@ -201,15 +243,19 @@ void IntensityHistogram::calcFeature(int FEATURE_IDX, vector<float> &tempValues1
 }
 void IntensityHistogram::featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth) {
 	
+	// claer all values
+	clearVariable(); // 슬라이스마다 초기화
+
 	// get histogram
 	vectorOfOriPixels = getVectorOfPixelsInROI(psImage, pucMask, nHeight, nWidth);
 	vectorOfDiscretizedPixels = getVectorOfDiscretizedPixels_nBins(); // 슬라이스마다 초기화
+	nPixels = vectorOfDiscretizedPixels.size();
 	hist = getHistogram();
 
 	vector<float> tempValues1DVec; // 슬라이스마다 초기화
 
 	// calculate checked feature
-	for (int i = 0; i < isCheckedFeature.size(); i++) {
+	for (int i = 0; i < FEATURE_COUNT; i++) {
 		if (isCheckedFeature[i]) calcFeature(i, tempValues1DVec);
 	}
 
@@ -231,68 +277,60 @@ void IntensityHistogram::averageAllValues() {
 		final1DVec.push_back(colMean);
 	}
 
-	// set final feature value => Q. 꼭 멤버변수에 넣어줘야 하나..? final1DVec이면 되는데..
-	/*
-	for (int i = 0; i < isCheckedFeature.size(); i++) {
-		if (isCheckedFeature[i]) {
-			
-		}
-	}
-	*/
-
 }
 
 void IntensityHistogram::defineFeatureNames(vector<string> &features) {
 	// 총 23가지
-	features.push_back("mean");
-	features.push_back("variance");
-	features.push_back("skewness");
-	features.push_back("kurtosis");
-	features.push_back("median");
-	features.push_back("minimum");
-	features.push_back("10th percentile");
-	features.push_back("90th percentile");
-	features.push_back("maximum");
-	features.push_back("Interquartile range");
-	features.push_back("mode");
-	features.push_back("range");
-	features.push_back("Mean absolut deviation");
-	features.push_back("Robust mean absolute deviation");
-	features.push_back("Median absolut deviation");
-	features.push_back("Coefficient of variation");
-	features.push_back("Quartile coefficient");
-	features.push_back("Entropy");
-	features.push_back("Uniformity");
-	features.push_back("Maximum histogram gradient");
-	features.push_back("Maximum histogram gradient grey level");
-	features.push_back("Minimum histogram gradient");
-	features.push_back("Minimum histogram gradient grey level");
+	features[MEAN] = "mean";
+	features[VARIANCE] = "variance";
+	features[SKEWNESS] = "skewness";
+	features[KURTOSIS] = "kurtosis";
+	features[MEDIAN] = "median";
+	features[MINIMUM] = "minimum";
+	features[PERCENTILE10] = "10th percentile";
+	features[PERCENTILE90] = "90th percentile";
+	features[MAXIMUM] = "maximum";
+	features[INTERQUARTILERANGE] = "Interquartile range";
+	features[MODE] = "mode";
+	features[RANGE] = "range";
+	features[MEANABSDEV] = "Mean absolut deviation";
+	features[ROBUSTMEANABSDEV] = "Robust mean absolute deviation";
+	features[MEDIANABSDEV] = "Median absolut deviation";
+	features[COEFFOFVAR] = "Coefficient of variation";
+	features[QUARTILECOEFF] = "Quartile coefficient";
+	features[ENTROPY] = "Entropy";
+	features[UNIFORMITY] = "Uniformity";
+	features[MAXHISTGRADIENT] = "Maximum histogram gradient";
+	features[MAXHISTGRADGREY] = "Maximum histogram gradient grey level";
+	features[MINHISTGRADIENT] = "Minimum histogram gradient";
+	features[MINHISTGRADGREY] = "Minimum histogram gradient grey level";
+
 }
 void IntensityHistogram::extractFeatureValues(vector<float> &intensityHistogramValues) {
-	
-	intensityHistogramValues.push_back(meanValue);
-	intensityHistogramValues.push_back(varianceValue);
-	intensityHistogramValues.push_back(skewnessValue);
-	intensityHistogramValues.push_back(kurtosisValue);
-	intensityHistogramValues.push_back(medianValue);
-	intensityHistogramValues.push_back(minimumValue);
-	intensityHistogramValues.push_back(percentile10);
-	intensityHistogramValues.push_back(percentile90);
-	intensityHistogramValues.push_back(maximumValue);
-	intensityHistogramValues.push_back(interquartileRange);
-	intensityHistogramValues.push_back(mode);
-	intensityHistogramValues.push_back(rangeValue);
-	intensityHistogramValues.push_back(meanAbsDev);
-	intensityHistogramValues.push_back(robustMeanAbsDev);
-	intensityHistogramValues.push_back(medianAbsDev);
-	intensityHistogramValues.push_back(coeffOfVar);
-	intensityHistogramValues.push_back(quartileCoeff);
-	intensityHistogramValues.push_back(entropy);
-	intensityHistogramValues.push_back(histUniformity);
-	intensityHistogramValues.push_back(maxHistGradient);
-	intensityHistogramValues.push_back(maxHistGradGreyValue);
-	intensityHistogramValues.push_back(minHistGradient);
-	intensityHistogramValues.push_back(minHistGradGreyValue);
+	// platform.cpp의 writeCSVCheckedValue()에서 참조 가능. But, 속도 문제로 사용 x 
+	intensityHistogramValues[MEAN] = meanValue;
+	intensityHistogramValues[VARIANCE] = varianceValue;
+	intensityHistogramValues[SKEWNESS] = skewnessValue;
+	intensityHistogramValues[KURTOSIS] = kurtosisValue;
+	intensityHistogramValues[MEDIAN] = medianValue;
+	intensityHistogramValues[MINIMUM] = minimumValue;
+	intensityHistogramValues[PERCENTILE10] = percentile10;
+	intensityHistogramValues[PERCENTILE90] = percentile90;
+	intensityHistogramValues[MAXIMUM] = maximumValue;
+	intensityHistogramValues[INTERQUARTILERANGE] = interquartileRange;
+	intensityHistogramValues[MODE] = mode;
+	intensityHistogramValues[RANGE] = rangeValue;
+	intensityHistogramValues[MEANABSDEV] = meanAbsDev;
+	intensityHistogramValues[ROBUSTMEANABSDEV] = robustMeanAbsDev;
+	intensityHistogramValues[MEDIANABSDEV] = medianAbsDev;
+	intensityHistogramValues[COEFFOFVAR] = coeffOfVar;
+	intensityHistogramValues[QUARTILECOEFF] = quartileCoeff;
+	intensityHistogramValues[ENTROPY] = entropy;
+	intensityHistogramValues[UNIFORMITY] = histUniformity;
+	intensityHistogramValues[MAXHISTGRADIENT] = maxHistGradient;
+	intensityHistogramValues[MAXHISTGRADGREY] = maxHistGradGreyValue;
+	intensityHistogramValues[MINHISTGRADIENT] = minHistGradient;
+	intensityHistogramValues[MINHISTGRADGREY] = minHistGradGreyValue;
 
 }
 

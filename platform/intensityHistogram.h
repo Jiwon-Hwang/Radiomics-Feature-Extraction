@@ -6,43 +6,48 @@
 #include <functional>
 #include <numeric>
 
-// enum, struct, map으로 수정! => #define은 헤더파일 범위 상관없이 전역에서 적용!
-// 변수명 & 함수명 맵핑시키기 (for. platform.cpp의 feature extraction 시 for loop에서 index로 한번에 접근 가능하도록!)
-#define MEAN 0
-#define VARIANCE 1
-#define SKEWNESS 2
-#define KURTOSIS 3 
-#define MEDIAN 4
-#define MINIMUM 5
-#define PERCENTILE10 6 
-#define PERCENTILE90 7 
-#define MAXIMUM 8
-#define INTERQUARTILERANGE 9
-#define MODE 10
-#define RANGE 11
-#define MEANABSDEV 12
-#define ROBUSTMEANABSDEV 13
-#define MEDIANABSDEV 14
-#define COEFFOFVAR 15
-#define QUARTILECOEFF 16
-#define ENTROPY 17
-#define UNIFORMITY 18
-#define MAXHISTGRADIENT 19
-#define MAXHISTGRADGREY 20
-#define MINHISTGRADIENT 21
-#define MINHISTGRADGREY 22
+
 
 
 class IntensityHistogram 
 {
-	private:
+	public:
+	enum FEATURE
+	{
+		MEAN,
+		VARIANCE,
+		SKEWNESS,
+		KURTOSIS,
+		MEDIAN,
+		MINIMUM,
+		PERCENTILE10,
+		PERCENTILE90,
+		MAXIMUM,
+		INTERQUARTILERANGE,
+		MODE,
+		RANGE,
+		MEANABSDEV,
+		ROBUSTMEANABSDEV,
+		MEDIANABSDEV,
+		COEFFOFVAR,
+		QUARTILECOEFF,
+		ENTROPY,
+		UNIFORMITY,
+		MAXHISTGRADIENT,
+		MAXHISTGRADGREY,
+		MINHISTGRADIENT,
+		MINHISTGRADGREY,
 
+		FEATURE_COUNT
+
+	};
 
 	public:	
 		IntensityHistogram();
 		~IntensityHistogram();
 
-		void clear();
+		void clearVariable();
+		void clearVector();
 
 		// set state //
 		bool isActivatedFamily = false;			// by. platform main
@@ -51,6 +56,7 @@ class IntensityHistogram
 
 		// get histogram //
 		int nBins = 32;
+		int nPixels;
 		std::vector<short> vectorOfOriPixels;
 		std::vector<unsigned short> vectorOfDiscretizedPixels;
 		std::vector<unsigned int> hist;
@@ -94,12 +100,12 @@ class IntensityHistogram
 		//vector<float> minHistVecGradient;
 
 		// calculate feature value //
-		float calcMean();
-		float calcVariance();
-		float calcSkewness();
-		float calcKurtosis();
-		float calcMedian();
-		float getMinimum(std::vector<float> matrixVector);
+		void calcMean();
+		void calcVariance();
+		void calcSkewness();
+		void calcKurtosis();
+		void calcMedian();
+		void getMinimum(std::vector<float> matrixVector);
 		double getPercentile(std::vector<float> matrixVector, float probability);
 		void get10percentile(std::vector<float> matrixVector);
 		void get90percentile(std::vector<float> matrixVector);

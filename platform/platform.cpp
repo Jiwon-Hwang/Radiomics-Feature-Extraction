@@ -374,7 +374,7 @@ void CPlatform::keyReleaseEvent(QKeyEvent* event)
 
 // open, load, Image //
 void CPlatform::readImage(QStringList list) {
-
+	// ***QThread로 병렬 처리하기!(2가지 thread로)*** //
 	QStringList fileList;
 	for (int i = 0, ni = list.size(); i<ni; i++) {
 		QFileInfo f(list[i]);
@@ -536,15 +536,15 @@ void CPlatform::setCheckedState() { // check box 클릭될 때마다(시그널) 호출되는 
 
 	if (obj == ui.checkBox_Histogram) {
 		intenseHisto.isActivatedFamily = !intenseHisto.isActivatedFamily;
+
 		if (intenseHisto.isActivatedFamily == true) {
+			intenseHisto.isCheckedFeature.assign(IntensityHistogram::FEATURE_COUNT, false);
+
 			// pop-up (set isCheckedFeature, nCheckedFeatures) => if문으로 체크 후 T/F push 하는걸로 수정
-			intenseHisto.isCheckedFeature.push_back(true);
-			intenseHisto.isCheckedFeature.push_back(true);
-			intenseHisto.isCheckedFeature.push_back(true);
-			intenseHisto.isCheckedFeature.push_back(true);
-			for (int i = 0; i < 19; i++) {
-				intenseHisto.isCheckedFeature.push_back(false);
-			}
+			intenseHisto.isCheckedFeature[IntensityHistogram::MEAN] = true;
+			intenseHisto.isCheckedFeature[IntensityHistogram::VARIANCE] = true;
+			intenseHisto.isCheckedFeature[IntensityHistogram::SKEWNESS] = true;
+			intenseHisto.isCheckedFeature[IntensityHistogram::KURTOSIS] = true;
 
 			intenseHisto.nCheckedFeatures = 4;
 		}
@@ -711,7 +711,7 @@ void CPlatform::presetCSVFile(string csvName) {
 	ofstream resultCSV(csvName); // 파일이 없으면 새로 생성, 있으면 기존 내용 지우고 새로 작성 (remove 포함)
 
 
-								 // write family name 
+	// write family name 
 	resultCSV << " " << "," << " " << ",";
 
 	if (intenseHisto.isActivatedFamily) {
@@ -744,7 +744,7 @@ void CPlatform::presetCSVFile(string csvName) {
 	resultCSV << " " << "," << " " << ",";
 
 	if (intenseHisto.isActivatedFamily) {
-		vector<string> featureNames;
+		vector<string> featureNames(IntensityHistogram::FEATURE_COUNT, "");
 		intenseHisto.defineFeatureNames(featureNames); // 일단 전체 feature name들 get
 		for (int i = 0; i < featureNames.size(); i++) {
 			if (intenseHisto.isCheckedFeature[i]) {
@@ -776,14 +776,15 @@ void writeCSVCheckedValue(vector<float> extractedValues, string csvName) // 모든
 	ofstream resultCSV(csvName, std::ios_base::app);
 
 	for (int i = 0; i< extractedValues.size(); i++) {
-		// if(extractedValues[i] != NAN) => error! (-nan(ind) !- NAN)
 		/*
-		if (!isnan(extractedValues[i])) { 
-			resultCSV << extractedValues[i] << ",";
+		// 속도 문제로 사용 x
+		if (!isnan(extractedValues[i])) {
+		resultCSV << extractedValues[i] << ",";
 		}
 		*/
 		resultCSV << extractedValues[i] << ",";
 	}
+
 	resultCSV.close();
 }
 void CPlatform::writeCSVCaseName(int seriesIdx, string csvName) {
@@ -802,10 +803,6 @@ void CPlatform::writeCSVCaseName(int seriesIdx, string csvName) {
 void CPlatform::writeCSVFeatureValue(string csvName) {
 
 	if (intenseHisto.isActivatedFamily) {
-		/*
-		vector<float> hitogramValue; // 추출값들 push 받아올 벡터
-		intenseHisto.extractFeatureValues(hitogramValue); // ***extractData : 모든 멤버변수 값들 vector에 push해오기(NAN 포함)***
-		*/
 		writeCSVCheckedValue(intenseHisto.final1DVec, csvName);
 	}
 
@@ -820,6 +817,7 @@ void CPlatform::writeCSVFeatureValue(string csvName) {
 	if (ui.checkBox_GLCM->isChecked()) {
 
 	}
+
 }
 void CPlatform::writeCSVFile(int seriesIdx, string csvName) {
 
@@ -831,13 +829,16 @@ void CPlatform::writeCSVFile(int seriesIdx, string csvName) {
 
 // Clear All Vector //
 void CPlatform::clearAll(int seriesIdx) {
-	intenseHisto.clear();
+
+	intenseHisto.clearVector();
 	/*
 	localIntense.clear();
 	morphology.clear();
 	glcm.clear();
 	*/
-	cout << "clear series[" << seriesIdx << "]'s all vectors!" << endl;
+
+	cout << "clear series[" << seriesIdx << "]'s all values!" << endl;
+
 }
 
 // Normalize and 16 bit Image Show //
@@ -932,7 +933,7 @@ void CPlatform::run()
 	// filtering and feature extraction by series //
 	int nSeriesCnt = m_ciData.getSeriesCount();
 
-	cout << "*** nSeriesCnt : " << nSeriesCnt << " ***" << endl;
+	cout << "*** total number of Series : " << nSeriesCnt << " ***" << endl;
 
 	for (int i = 0; i < nSeriesCnt; i++) {
 
