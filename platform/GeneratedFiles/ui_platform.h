@@ -65,6 +65,7 @@ public:
     QCheckBox *checkBox_Intensity;
     QCheckBox *checkBox_Morph;
     QCheckBox *checkBox_GLCM;
+    QCheckBox *checkBox_GLRLM;
     QPushButton *pushButton_run;
     QMenuBar *menuBar;
     QStatusBar *statusBar;
@@ -176,7 +177,7 @@ public:
         groupBox_filters->setObjectName(QStringLiteral("groupBox_filters"));
         layoutWidget = new QWidget(groupBox_filters);
         layoutWidget->setObjectName(QStringLiteral("layoutWidget"));
-        layoutWidget->setGeometry(QRect(20, 90, 193, 141));
+        layoutWidget->setGeometry(QRect(30, 90, 193, 141));
         verticalLayout_6 = new QVBoxLayout(layoutWidget);
         verticalLayout_6->setSpacing(6);
         verticalLayout_6->setContentsMargins(11, 11, 11, 11);
@@ -207,7 +208,7 @@ public:
         groupBox_families->setObjectName(QStringLiteral("groupBox_families"));
         layoutWidget1 = new QWidget(groupBox_families);
         layoutWidget1->setObjectName(QStringLiteral("layoutWidget1"));
-        layoutWidget1->setGeometry(QRect(30, 70, 186, 171));
+        layoutWidget1->setGeometry(QRect(30, 70, 186, 201));
         verticalLayout_7 = new QVBoxLayout(layoutWidget1);
         verticalLayout_7->setSpacing(6);
         verticalLayout_7->setContentsMargins(11, 11, 11, 11);
@@ -242,6 +243,13 @@ public:
         checkBox_GLCM->setChecked(false);
 
         verticalLayout_7->addWidget(checkBox_GLCM);
+
+        checkBox_GLRLM = new QCheckBox(layoutWidget1);
+        checkBox_GLRLM->setObjectName(QStringLiteral("checkBox_GLRLM"));
+        checkBox_GLRLM->setEnabled(false);
+        checkBox_GLRLM->setChecked(false);
+
+        verticalLayout_7->addWidget(checkBox_GLRLM);
 
 
         verticalLayout_4->addWidget(groupBox_families);
@@ -287,10 +295,11 @@ public:
         radioButton_Gaussian->setText(QApplication::translate("platformClass", "Gaussian", Q_NULLPTR));
         radioButton_Laplacian->setText(QApplication::translate("platformClass", "Laplacian", Q_NULLPTR));
         groupBox_families->setTitle(QApplication::translate("platformClass", "Radiomics Features", Q_NULLPTR));
-        checkBox_Histogram->setText(QApplication::translate("platformClass", "Intensity Histogram Features", Q_NULLPTR));
-        checkBox_Intensity->setText(QApplication::translate("platformClass", "Local Intensity Features", Q_NULLPTR));
-        checkBox_Morph->setText(QApplication::translate("platformClass", "Morphological Features", Q_NULLPTR));
-        checkBox_GLCM->setText(QApplication::translate("platformClass", "GLCM", Q_NULLPTR));
+        checkBox_Histogram->setText(QApplication::translate("platformClass", "Intensity Histogram", Q_NULLPTR));
+        checkBox_Intensity->setText(QApplication::translate("platformClass", "Local Intensity ", Q_NULLPTR));
+        checkBox_Morph->setText(QApplication::translate("platformClass", "Morphological ", Q_NULLPTR));
+        checkBox_GLCM->setText(QApplication::translate("platformClass", "GLCM ", Q_NULLPTR));
+        checkBox_GLRLM->setText(QApplication::translate("platformClass", "GLRLM ", Q_NULLPTR));
         pushButton_run->setText(QApplication::translate("platformClass", "Run", Q_NULLPTR));
     } // retranslateUi
 

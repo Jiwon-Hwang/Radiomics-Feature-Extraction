@@ -712,7 +712,7 @@ void CPlatform::presetCSVFile(string csvName) {
 
 
 	// write family name 
-	resultCSV << " " << "," << " " << ",";
+	resultCSV << " " << "," << " " << "," << " " << ",";
 
 	if (intenseHisto.isActivatedFamily) {
 		for (int i = 0; i < intenseHisto.nCheckedFeatures; i++) {
@@ -741,7 +741,7 @@ void CPlatform::presetCSVFile(string csvName) {
 
 
 	// write feature name 
-	resultCSV << " " << "," << " " << ",";
+	resultCSV << " " << "," << " " << "," << " " << ",";
 
 	if (intenseHisto.isActivatedFamily) {
 		vector<string> featureNames(IntensityHistogram::FEATURE_COUNT, "");
@@ -796,7 +796,7 @@ void CPlatform::writeCSVCaseName(int seriesIdx, string csvName) {
 	string studyName = m_ciData.getSeries(seriesIdx)->m_sStudyName;
 	string seriesName = m_ciData.getSeries(seriesIdx)->m_sSeriesName;
 
-	resultCSV << patientName << "," << studyName + '_' + seriesName << ",";
+	resultCSV << patientName << "," << studyName << "," << seriesName << ",";
 
 	resultCSV.close();
 }

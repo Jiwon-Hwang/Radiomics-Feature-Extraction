@@ -130,7 +130,7 @@
              <widget class="QWidget" name="layoutWidget">
               <property name="geometry">
                <rect>
-                <x>20</x>
+                <x>30</x>
                 <y>90</y>
                 <width>193</width>
                 <height>141</height>
@@ -176,7 +176,7 @@
                 <x>30</x>
                 <y>70</y>
                 <width>186</width>
-                <height>171</height>
+                <height>201</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -186,7 +186,7 @@
                   <bool>false</bool>
                  </property>
                  <property name="text">
-                  <string>Intensity Histogram Features</string>
+                  <string>Intensity Histogram</string>
                  </property>
                  <property name="checked">
                   <bool>false</bool>
@@ -202,7 +202,7 @@
                   <bool>true</bool>
                  </property>
                  <property name="text">
-                  <string>Local Intensity Features</string>
+                  <string>Local Intensity </string>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
@@ -221,7 +221,7 @@
                   <bool>false</bool>
                  </property>
                  <property name="text">
-                  <string>Morphological Features</string>
+                  <string>Morphological </string>
                  </property>
                 </widget>
                </item>
@@ -231,7 +231,20 @@
                   <bool>false</bool>
                  </property>
                  <property name="text">
-                  <string>GLCM</string>
+                  <string>GLCM </string>
+                 </property>
+                 <property name="checked">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="checkBox_GLRLM">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="text">
+                  <string>GLRLM </string>
                  </property>
                  <property name="checked">
                   <bool>false</bool>
