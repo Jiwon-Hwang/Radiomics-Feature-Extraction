@@ -57,8 +57,8 @@ class IntensityHistogram
 		// get histogram //
 		int nBins = 32;
 		int nPixels;
-		std::vector<short> vectorOfOriPixels;
-		std::vector<unsigned short> vectorOfDiscretizedPixels;
+		std::vector<short> vectorOfOriPixels;					// sorted
+		std::vector<unsigned short> vectorOfDiscretizedPixels;	// sorted
 		std::vector<unsigned int> hist;
 
 		std::vector<short> getVectorOfPixelsInROI(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
@@ -75,11 +75,11 @@ class IntensityHistogram
 		float varianceValue = NAN;
 		float skewnessValue = NAN;
 		float kurtosisValue = NAN;
-		float medianValue = NAN;
-		float minimumValue = NAN;
-		float percentile10 = NAN;
-		float percentile90 = NAN;
-		float maximumValue = NAN;
+		unsigned short medianValue = NAN;
+		unsigned short minimumValue = NAN;
+		unsigned short percentile10 = NAN;
+		unsigned short percentile90 = NAN;
+		unsigned short maximumValue = NAN;
 		float interquartileRange = NAN;
 		float mode = NAN;
 		float rangeValue = NAN;
@@ -105,11 +105,11 @@ class IntensityHistogram
 		void calcSkewness();
 		void calcKurtosis();
 		void calcMedian();
-		void getMinimum(std::vector<float> matrixVector);
-		double getPercentile(std::vector<float> matrixVector, float probability);
-		void get10percentile(std::vector<float> matrixVector);
-		void get90percentile(std::vector<float> matrixVector);
-		void getMaximum(std::vector<float> matrixVector);
+		void calcMinimum();
+		unsigned short getPercentile(float probability);
+		void calc10percentile();
+		void calc90percentile();
+		void calcMaximum();
 		void getInterquartileRange(std::vector<float> matrixVector);
 		void getMode();
 		void getRange();

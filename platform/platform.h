@@ -20,6 +20,9 @@
 #include <algorithm>
 #include <numeric>
 
+#define _CRT_SECURE_NO_WARNINGS
+#include <ctime>
+
 // for M_PI, isnan()
 #define _USE_MATH_DEFINES
 #include <math.h>

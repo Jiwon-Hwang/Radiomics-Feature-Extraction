@@ -106,6 +106,8 @@ vector<unsigned short> IntensityHistogram::getVectorOfDiscretizedPixels_nBins() 
 	//type casting
 	vector<unsigned short> vectorOfDiscretizedPixels(tempFloatVec.begin(), tempFloatVec.end()); // 양자화한 최종 결과 픽셀값들 담을 벡터
 
+	sort(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end());
+
 	return vectorOfDiscretizedPixels;
 }
 vector<unsigned short> IntensityHistogram::getVectorOfDiffGreyLevels() {
@@ -210,6 +212,35 @@ void IntensityHistogram::calcKurtosis() {
 }
 void IntensityHistogram::calcMedian() {
 
+	int medianIdx = nPixels / 2; // 몫
+	medianValue = vectorOfDiscretizedPixels[medianIdx];
+
+}
+void IntensityHistogram::calcMinimum() {
+
+	minimumValue = vectorOfDiscretizedPixels.front();
+
+}
+unsigned short IntensityHistogram::getPercentile(float probability){
+
+	int percentileIdx = int(probability * nPixels);
+
+	return vectorOfDiscretizedPixels[percentileIdx];
+}
+void IntensityHistogram::calc10percentile() {
+
+	percentile10 = getPercentile(0.1);
+
+}
+void IntensityHistogram::calc90percentile() {
+
+	percentile90 = getPercentile(0.9);
+
+}
+void IntensityHistogram::calcMaximum() {
+
+	maximumValue = vectorOfDiscretizedPixels.back();
+
 }
 
 void IntensityHistogram::calcFeature(int FEATURE_IDX, vector<float> &tempValues1DVec) {
@@ -234,6 +265,31 @@ void IntensityHistogram::calcFeature(int FEATURE_IDX, vector<float> &tempValues1
 		case KURTOSIS:
 			calcKurtosis();
 			tempValues1DVec.push_back(kurtosisValue);
+			break;
+
+		case MEDIAN:
+			calcMedian();
+			tempValues1DVec.push_back(medianValue);
+			break;
+		
+		case MINIMUM:
+			calcMinimum();
+			tempValues1DVec.push_back(minimumValue);
+			break;
+
+		case PERCENTILE10:
+			calc10percentile();
+			tempValues1DVec.push_back(percentile10);
+			break;
+
+		case PERCENTILE90:
+			calc90percentile();
+			tempValues1DVec.push_back(percentile90);
+			break;
+
+		case MAXIMUM:
+			calcMaximum();
+			tempValues1DVec.push_back(maximumValue);
 			break;
 
 		default:

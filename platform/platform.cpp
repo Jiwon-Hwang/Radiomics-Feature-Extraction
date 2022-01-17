@@ -545,8 +545,13 @@ void CPlatform::setCheckedState() { // check box 클릭될 때마다(시그널) 호출되는 
 			intenseHisto.isCheckedFeature[IntensityHistogram::VARIANCE] = true;
 			intenseHisto.isCheckedFeature[IntensityHistogram::SKEWNESS] = true;
 			intenseHisto.isCheckedFeature[IntensityHistogram::KURTOSIS] = true;
+			intenseHisto.isCheckedFeature[IntensityHistogram::MEDIAN] = true;
+			intenseHisto.isCheckedFeature[IntensityHistogram::MINIMUM] = true;
+			intenseHisto.isCheckedFeature[IntensityHistogram::PERCENTILE10] = true;
+			intenseHisto.isCheckedFeature[IntensityHistogram::PERCENTILE90] = true;
+			intenseHisto.isCheckedFeature[IntensityHistogram::MAXIMUM] = true;
 
-			intenseHisto.nCheckedFeatures = 4;
+			intenseHisto.nCheckedFeatures = 9;
 		}
 	}
 
@@ -709,7 +714,6 @@ short CPlatform::calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask,
 void CPlatform::presetCSVFile(string csvName) {
 
 	ofstream resultCSV(csvName); // 파일이 없으면 새로 생성, 있으면 기존 내용 지우고 새로 작성 (remove 포함)
-
 
 	// write family name 
 	resultCSV << " " << "," << " " << "," << " " << ",";
@@ -919,13 +923,25 @@ double getMaxOfMat(Mat m) {
 }
 
 
+string getCurrentTime()
+{
+	time_t timer = time(NULL);
+	struct tm* t = localtime(&timer);
+
+	ostringstream os;
+	os << put_time(t, "%Y-%m-%d %H;%M;%S");
+	
+	return os.str();
+}
+
 
 // Run //
 void CPlatform::run()
 {
 	// create and preset csv file //
 	const static string outputFolder = string("Result/");
-	string csvName = outputFolder + "result.csv";
+	string currentTime = getCurrentTime();
+	string csvName = outputFolder + currentTime + ".csv";
 
 	presetCSVFile(csvName);
 	
