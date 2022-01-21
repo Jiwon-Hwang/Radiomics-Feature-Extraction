@@ -5,6 +5,10 @@ using namespace cv;
 
 int FILTER_MODE; 
 
+const static QString configPath = QString("Config/config.ini");
+const static string outputFolder = string("Result/");
+
+
 CPlatform::CPlatform(QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -16,6 +20,8 @@ CPlatform::CPlatform(QWidget *parent)
 	createProgressBar();
 
 	setSignalSlot();
+
+	loadSettings();
 }
 CPlatform::~CPlatform()
 {
@@ -206,25 +212,23 @@ void CPlatform::setSignalSlot()
 	// platform
 	connect(ui.pushButton_run, SIGNAL(clicked()), this, SLOT(run()));
 	connect(ui.horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(scrollChangeImage(int)));
-	//connect(mCloseButton, SIGNAL(clicked()), this, SLOT(slot_closed()));
-	/*
-	mCloseButton = new QPushButton(mTitlebarWidget);
-	mCloseButton->setObjectName("closeButton");
-	connect(mCloseButton, SIGNAL(clicked()), this, SLOT(slot_closed()));
-	*/
 
-	// filter
-	connect(ui.radioButton_None, SIGNAL(clicked()), this, SLOT(setFilterMode()));
-	connect(ui.radioButton_Gaussian, SIGNAL(clicked()), this, SLOT(setFilterMode()));
-	connect(ui.radioButton_Laplacian, SIGNAL(clicked()), this, SLOT(setFilterMode()));
+	// filter - group box
+	QList<QRadioButton *> filterBox = ui.groupBox_Filters->findChildren<QRadioButton *>();
+	for (int i = 0; i < filterBox.size(); i++) {
+		connect(filterBox[i], SIGNAL(clicked()), this, SLOT(setFilterMode()));
+		connect(filterBox[i], SIGNAL(clicked()), this, SLOT(checkReadyToRun()));
+	}
 
-	// radiomics feature family
-	connect(ui.checkBox_Histogram, SIGNAL(clicked()), this, SLOT(setCheckedState()));
-	connect(ui.checkBox_Intensity, SIGNAL(clicked()), this, SLOT(setCheckedState()));
-	connect(ui.checkBox_Morph, SIGNAL(clicked()), this, SLOT(setCheckedState()));
-	connect(ui.checkBox_GLCM, SIGNAL(clicked()), this, SLOT(setCheckedState()));
+	// radiomics feature family - group box
+	QList<QCheckBox *> familyBox = ui.groupBox_Families->findChildren<QCheckBox *>();
+	for (int i = 0; i < familyBox.size(); i++) {
+		connect(familyBox[i], SIGNAL(clicked()), this, SLOT(setCheckedFamilyState()));
+		connect(familyBox[i], SIGNAL(clicked()), this, SLOT(checkReadyToRun()));
+	}
 
 	// feature (pop-up)
+
 
 }
 void CPlatform::setProgressBarValue(int nCurrentIdx, int nMaximumIdx)
@@ -241,6 +245,81 @@ void CPlatform::setProgressBarValue(int nCurrentIdx, int nMaximumIdx)
 		progressBar->setValue(0);
 		progressBar->setVisible(false);
 	}
+}
+
+// Load and Save GUI State //
+void CPlatform::loadSettings() {
+
+	if (QFile::exists(configPath)) {
+
+		QSettings settings(configPath, QSettings::IniFormat);
+
+		// filter
+		settings.beginGroup("filter");
+		QList<QRadioButton *> filterBox = ui.groupBox_Filters->findChildren<QRadioButton *>();
+		for (int i = 0; i < filterBox.size(); i++) {
+			filterBox[i]->setChecked(settings.value(filterBox[i]->objectName(), false /* default value */).toBool());
+		}
+		settings.endGroup();
+
+		// radiomics feature family
+		settings.beginGroup("feature_family");
+		QList<QCheckBox *> familyBox = ui.groupBox_Families->findChildren<QCheckBox *>();
+		for (int i = 0; i < familyBox.size(); i++) {
+			familyBox[i]->setChecked(settings.value(familyBox[i]->objectName(), false /* default value */).toBool());
+		}
+		settings.endGroup();
+
+		ui.pushButton_run->setEnabled(true); // enable run button
+
+	}
+	
+}
+void CPlatform::saveSettings() {
+
+	QSettings settings(configPath, QSettings::IniFormat);
+
+	// filter
+	settings.beginGroup("filter");
+	QList<QRadioButton *> filterBox = ui.groupBox_Filters->findChildren<QRadioButton *>();
+	for (int i = 0; i < filterBox.size(); i++) {
+		settings.setValue(filterBox[i]->objectName(), QVariant(filterBox[i]->isChecked()));
+	}
+	settings.endGroup();
+	
+	// radiomics feature family
+	settings.beginGroup("feature_family");
+	QList<QCheckBox *> familyBox = ui.groupBox_Families->findChildren<QCheckBox *>();
+	for (int i = 0; i < familyBox.size(); i++) {
+		settings.setValue(familyBox[i]->objectName(), QVariant(familyBox[i]->isChecked()));
+	}
+	settings.endGroup();
+
+}
+
+bool CPlatform::checkReadyToRun() {
+
+	QList<QRadioButton *> filterBox = ui.groupBox_Filters->findChildren<QRadioButton *>();
+	QList<QCheckBox *> familyBox = ui.groupBox_Families->findChildren<QCheckBox *>();
+
+	for (int i = 0; i < filterBox.size(); i++) 
+	{
+		if (filterBox[i]->isChecked()) 
+		{
+			for (int j = 0; j < familyBox.size(); j++) 
+			{
+				if (familyBox[j]->isChecked()) 
+				{
+					ui.pushButton_run->setEnabled(true); // enable run button
+					return true;
+				}
+			}
+			ui.pushButton_run->setEnabled(false); // disable run button
+			break;
+		}
+	}
+
+	return false;
 }
 
 // 화면 resize event //
@@ -373,7 +452,10 @@ void CPlatform::keyReleaseEvent(QKeyEvent* event)
 }
 
 // open, load, Image //
-void CPlatform::readImage(QStringList list) {
+void CPlatform::readImage(QStringList list) 
+{
+	m_ciData.clear();
+
 	// ***QThread로 병렬 처리하기!(2가지 thread로)*** //
 	QStringList fileList;
 	for (int i = 0, ni = list.size(); i<ni; i++) {
@@ -530,7 +612,7 @@ void filtering(short* psImage, Mat &img_filtered, int nWidth, int nHeight, int F
 
 
 // Feature Extraction //
-void CPlatform::setCheckedState() { // check box 클릭될 때마다(시그널) 호출되는 SLOT 함수
+void CPlatform::setCheckedFamilyState() { // check box 클릭될 때마다(시그널) 호출되는 SLOT 함수
 	
 	QObject* obj = sender();
 
@@ -566,6 +648,11 @@ void CPlatform::setCheckedState() { // check box 클릭될 때마다(시그널) 호출되는 
 	if (obj == ui.checkBox_GLCM) {
 
 	}
+
+	if (obj == ui.checkBox_GLRLM) {
+
+	}
+
 }
 void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth) {
 	if (intenseHisto.isActivatedFamily) {
@@ -711,6 +798,16 @@ short CPlatform::calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask,
 
 
 // Preset CSV File // 
+string getCurrentTime()
+{
+	time_t timer = time(NULL);
+	struct tm* t = localtime(&timer);
+
+	ostringstream os;
+	os << put_time(t, "%Y-%m-%d %H.%M.%S");
+
+	return os.str();
+}
 void CPlatform::presetCSVFile(string csvName) {
 
 	ofstream resultCSV(csvName); // 파일이 없으면 새로 생성, 있으면 기존 내용 지우고 새로 작성 (remove 포함)
@@ -845,6 +942,7 @@ void CPlatform::clearAll(int seriesIdx) {
 
 }
 
+
 // Normalize and 16 bit Image Show //
 void RescaleIntensityFilter(short* sIN_OUT_img, int nWidth, int nHeight, int nSetMax, int nSetMin)
 {
@@ -923,23 +1021,16 @@ double getMaxOfMat(Mat m) {
 }
 
 
-string getCurrentTime()
-{
-	time_t timer = time(NULL);
-	struct tm* t = localtime(&timer);
-
-	ostringstream os;
-	os << put_time(t, "%Y-%m-%d %H;%M;%S");
-	
-	return os.str();
-}
-
 
 // Run //
 void CPlatform::run()
 {
+
+	// save GUI settings //
+	saveSettings();
+
+
 	// create and preset csv file //
-	const static string outputFolder = string("Result/");
 	string currentTime = getCurrentTime();
 	string csvName = outputFolder + currentTime + ".csv";
 
@@ -998,22 +1089,6 @@ void CPlatform::run()
 	if (QMessageBox(QMessageBox::Information, " ", "extraction finished!", QMessageBox::Close).exec() == QMessageBox::Close) {
 		QApplication::quit();
 	}
-
-	/*
-	QMessageBox msgBox;
-	msgBox.setWindowTitle("Radiomics Feature Extraction");
-	//msgBox.setText("<p align='center'>finish!&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>");
-	msgBox.setText("<br><br>extraction finished!");
-	msgBox.setStandardButtons(QMessageBox::Close);
-
-	QGridLayout* layout = (QGridLayout*)msgBox.layout();
-	layout->setColumnMinimumWidth(1, 190);
-	layout->setRowMinimumHeight(1, 45);
-
-	if (msgBox.exec() == QMessageBox::Close) {
-	QApplication::quit();
-	}
-	*/
 	
 }
 

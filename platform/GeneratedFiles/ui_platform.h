@@ -52,15 +52,13 @@ public:
     QGroupBox *groupBox;
     QVBoxLayout *verticalLayout_5;
     QVBoxLayout *verticalLayout_4;
-    QGroupBox *groupBox_filters;
-    QWidget *layoutWidget;
-    QVBoxLayout *verticalLayout_6;
+    QGroupBox *groupBox_Filters;
+    QVBoxLayout *verticalLayout;
     QRadioButton *radioButton_None;
     QRadioButton *radioButton_Gaussian;
     QRadioButton *radioButton_Laplacian;
-    QGroupBox *groupBox_families;
-    QWidget *layoutWidget1;
-    QVBoxLayout *verticalLayout_7;
+    QGroupBox *groupBox_Families;
+    QVBoxLayout *verticalLayout_6;
     QCheckBox *checkBox_Histogram;
     QCheckBox *checkBox_Intensity;
     QCheckBox *checkBox_Morph;
@@ -173,92 +171,85 @@ public:
         verticalLayout_4 = new QVBoxLayout();
         verticalLayout_4->setSpacing(6);
         verticalLayout_4->setObjectName(QStringLiteral("verticalLayout_4"));
-        groupBox_filters = new QGroupBox(groupBox);
-        groupBox_filters->setObjectName(QStringLiteral("groupBox_filters"));
-        layoutWidget = new QWidget(groupBox_filters);
-        layoutWidget->setObjectName(QStringLiteral("layoutWidget"));
-        layoutWidget->setGeometry(QRect(30, 90, 193, 141));
-        verticalLayout_6 = new QVBoxLayout(layoutWidget);
+        groupBox_Filters = new QGroupBox(groupBox);
+        groupBox_Filters->setObjectName(QStringLiteral("groupBox_Filters"));
+        groupBox_Filters->setFlat(false);
+        verticalLayout = new QVBoxLayout(groupBox_Filters);
+        verticalLayout->setSpacing(6);
+        verticalLayout->setContentsMargins(11, 11, 11, 11);
+        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+        verticalLayout->setContentsMargins(30, 40, 30, 40);
+        radioButton_None = new QRadioButton(groupBox_Filters);
+        radioButton_None->setObjectName(QStringLiteral("radioButton_None"));
+
+        verticalLayout->addWidget(radioButton_None);
+
+        radioButton_Gaussian = new QRadioButton(groupBox_Filters);
+        radioButton_Gaussian->setObjectName(QStringLiteral("radioButton_Gaussian"));
+
+        verticalLayout->addWidget(radioButton_Gaussian);
+
+        radioButton_Laplacian = new QRadioButton(groupBox_Filters);
+        radioButton_Laplacian->setObjectName(QStringLiteral("radioButton_Laplacian"));
+
+        verticalLayout->addWidget(radioButton_Laplacian);
+
+
+        verticalLayout_4->addWidget(groupBox_Filters);
+
+        groupBox_Families = new QGroupBox(groupBox);
+        groupBox_Families->setObjectName(QStringLiteral("groupBox_Families"));
+        verticalLayout_6 = new QVBoxLayout(groupBox_Families);
         verticalLayout_6->setSpacing(6);
         verticalLayout_6->setContentsMargins(11, 11, 11, 11);
         verticalLayout_6->setObjectName(QStringLiteral("verticalLayout_6"));
-        verticalLayout_6->setContentsMargins(0, 0, 0, 0);
-        radioButton_None = new QRadioButton(layoutWidget);
-        radioButton_None->setObjectName(QStringLiteral("radioButton_None"));
-
-        verticalLayout_6->addWidget(radioButton_None);
-
-        radioButton_Gaussian = new QRadioButton(layoutWidget);
-        radioButton_Gaussian->setObjectName(QStringLiteral("radioButton_Gaussian"));
-
-        verticalLayout_6->addWidget(radioButton_Gaussian);
-
-        radioButton_Laplacian = new QRadioButton(layoutWidget);
-        radioButton_Laplacian->setObjectName(QStringLiteral("radioButton_Laplacian"));
-
-        verticalLayout_6->addWidget(radioButton_Laplacian);
-
-        radioButton_Gaussian->raise();
-        radioButton_Laplacian->raise();
-        radioButton_None->raise();
-
-        verticalLayout_4->addWidget(groupBox_filters);
-
-        groupBox_families = new QGroupBox(groupBox);
-        groupBox_families->setObjectName(QStringLiteral("groupBox_families"));
-        layoutWidget1 = new QWidget(groupBox_families);
-        layoutWidget1->setObjectName(QStringLiteral("layoutWidget1"));
-        layoutWidget1->setGeometry(QRect(30, 70, 186, 201));
-        verticalLayout_7 = new QVBoxLayout(layoutWidget1);
-        verticalLayout_7->setSpacing(6);
-        verticalLayout_7->setContentsMargins(11, 11, 11, 11);
-        verticalLayout_7->setObjectName(QStringLiteral("verticalLayout_7"));
-        verticalLayout_7->setContentsMargins(0, 0, 0, 0);
-        checkBox_Histogram = new QCheckBox(layoutWidget1);
+        verticalLayout_6->setContentsMargins(30, 40, 30, 20);
+        checkBox_Histogram = new QCheckBox(groupBox_Families);
         checkBox_Histogram->setObjectName(QStringLiteral("checkBox_Histogram"));
         checkBox_Histogram->setAutoFillBackground(false);
         checkBox_Histogram->setChecked(false);
         checkBox_Histogram->setTristate(false);
 
-        verticalLayout_7->addWidget(checkBox_Histogram);
+        verticalLayout_6->addWidget(checkBox_Histogram);
 
-        checkBox_Intensity = new QCheckBox(layoutWidget1);
+        checkBox_Intensity = new QCheckBox(groupBox_Families);
         checkBox_Intensity->setObjectName(QStringLiteral("checkBox_Intensity"));
         checkBox_Intensity->setEnabled(true);
         checkBox_Intensity->setCheckable(true);
         checkBox_Intensity->setChecked(false);
         checkBox_Intensity->setTristate(false);
 
-        verticalLayout_7->addWidget(checkBox_Intensity);
+        verticalLayout_6->addWidget(checkBox_Intensity);
 
-        checkBox_Morph = new QCheckBox(layoutWidget1);
+        checkBox_Morph = new QCheckBox(groupBox_Families);
         checkBox_Morph->setObjectName(QStringLiteral("checkBox_Morph"));
         checkBox_Morph->setEnabled(false);
 
-        verticalLayout_7->addWidget(checkBox_Morph);
+        verticalLayout_6->addWidget(checkBox_Morph);
 
-        checkBox_GLCM = new QCheckBox(layoutWidget1);
+        checkBox_GLCM = new QCheckBox(groupBox_Families);
         checkBox_GLCM->setObjectName(QStringLiteral("checkBox_GLCM"));
         checkBox_GLCM->setEnabled(false);
         checkBox_GLCM->setChecked(false);
 
-        verticalLayout_7->addWidget(checkBox_GLCM);
+        verticalLayout_6->addWidget(checkBox_GLCM);
 
-        checkBox_GLRLM = new QCheckBox(layoutWidget1);
+        checkBox_GLRLM = new QCheckBox(groupBox_Families);
         checkBox_GLRLM->setObjectName(QStringLiteral("checkBox_GLRLM"));
         checkBox_GLRLM->setEnabled(false);
         checkBox_GLRLM->setChecked(false);
 
-        verticalLayout_7->addWidget(checkBox_GLRLM);
+        verticalLayout_6->addWidget(checkBox_GLRLM);
 
 
-        verticalLayout_4->addWidget(groupBox_families);
+        verticalLayout_4->addWidget(groupBox_Families);
 
 
         verticalLayout_5->addLayout(verticalLayout_4);
 
         pushButton_run = new QPushButton(groupBox);
         pushButton_run->setObjectName(QStringLiteral("pushButton_run"));
+        pushButton_run->setEnabled(false);
 
         verticalLayout_5->addWidget(pushButton_run);
 
@@ -290,11 +281,11 @@ public:
         pushButton_1->setText(QApplication::translate("platformClass", "1 case", Q_NULLPTR));
         pushButton_2->setText(QApplication::translate("platformClass", "multiple cases", Q_NULLPTR));
         groupBox->setTitle(QString());
-        groupBox_filters->setTitle(QApplication::translate("platformClass", "Filters", Q_NULLPTR));
+        groupBox_Filters->setTitle(QApplication::translate("platformClass", "Filter", Q_NULLPTR));
         radioButton_None->setText(QApplication::translate("platformClass", "None", Q_NULLPTR));
         radioButton_Gaussian->setText(QApplication::translate("platformClass", "Gaussian", Q_NULLPTR));
         radioButton_Laplacian->setText(QApplication::translate("platformClass", "Laplacian", Q_NULLPTR));
-        groupBox_families->setTitle(QApplication::translate("platformClass", "Radiomics Features", Q_NULLPTR));
+        groupBox_Families->setTitle(QApplication::translate("platformClass", "Radiomics Feature Family", Q_NULLPTR));
         checkBox_Histogram->setText(QApplication::translate("platformClass", "Intensity Histogram", Q_NULLPTR));
         checkBox_Intensity->setText(QApplication::translate("platformClass", "Local Intensity ", Q_NULLPTR));
         checkBox_Morph->setText(QApplication::translate("platformClass", "Morphological ", Q_NULLPTR));

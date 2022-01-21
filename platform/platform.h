@@ -19,6 +19,8 @@
 #include <functional>
 #include <algorithm>
 #include <numeric>
+#include <QSettings>
+#include <QDebug>
 
 #define _CRT_SECURE_NO_WARNINGS
 #include <ctime>
@@ -31,7 +33,6 @@
 #include <opencv2\core\core.hpp>
 #include <opencv2\highgui\highgui.hpp>
 #include <iostream>
-#include <string>
 
 
 #include "ui_platform.h"
@@ -95,6 +96,8 @@ public:
 	void createProgressBar();
 	void setSignalSlot();
 	void setProgressBarValue(int nCurrentIdx, int nMaximumIdx);
+	void loadSettings();
+	void saveSettings();
 
 protected:
 	void resizeEvent(QResizeEvent* event);
@@ -115,9 +118,12 @@ public slots:
 	void setFilterMode();
 
 	// Feature Extraction //
-	void setCheckedState();
+	void setCheckedFamilyState();
 	void featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
 	
+	// check every btn click event //
+	bool checkReadyToRun();
+
 	// average all ROI slices //
 	void averageAllSlices();
 
