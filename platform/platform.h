@@ -96,8 +96,25 @@ public:
 	void createProgressBar();
 	void setSignalSlot();
 	void setProgressBarValue(int nCurrentIdx, int nMaximumIdx);
+	
+	// load and save GUI state //
 	void loadSettings();
 	void saveSettings();
+
+	// feature extraction //
+	void featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
+	void averageAllSlices();
+
+	short calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth); // class 함수로 넣기, m_ciData.getPixelSpacing() call
+					
+	// write CSV //
+	void presetCSVFile(string csvName);
+	void writeCSVFile(int seriesIdx, string csvName);
+	void writeCSVFeatureValue(string csvName);
+	void writeCSVCaseName(int seriesIdx, string csvName);
+
+	// clear all vector //
+	void clearAll(int seriesIdx);
 
 protected:
 	void resizeEvent(QResizeEvent* event);
@@ -114,29 +131,10 @@ public slots:
 	// scroll //
 	void scrollChangeImage(int nValue);
 
-	// Filter //
+	// check and set all btn's state //
 	void setFilterMode();
-
-	// Feature Extraction //
 	void setCheckedFamilyState();
-	void featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
-	
-	// check every btn click event //
 	bool checkReadyToRun();
-
-	// average all ROI slices //
-	void averageAllSlices();
-
-	short calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth); // class 함수로 넣기, m_ciData.getPixelSpacing() call
-	
-	// write CSV //
-	void presetCSVFile(string csvName);
-	void writeCSVFile(int seriesIdx, string csvName);
-	void writeCSVFeatureValue(string csvName);
-	void writeCSVCaseName(int seriesIdx, string csvName);
-
-	// clear all vector //
-	void clearAll(int seriesIdx);
 
 	void run();
 };

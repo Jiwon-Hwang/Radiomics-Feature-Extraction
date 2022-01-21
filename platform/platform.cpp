@@ -247,7 +247,7 @@ void CPlatform::setProgressBarValue(int nCurrentIdx, int nMaximumIdx)
 	}
 }
 
-// Load and Save GUI State //
+// load and save GUI state //
 void CPlatform::loadSettings() {
 
 	if (QFile::exists(configPath)) {
@@ -572,7 +572,7 @@ bool isEmptyMask(unsigned char* pucMask, int nWidth, int nHeight) {
 }
 
 
-// Filter //
+// filter //
 void CPlatform::setFilterMode() { // radio btn 체크될 때마다(시그널) 호출되는 SLOT 함수
 	
 	if (ui.radioButton_None->isChecked())
@@ -611,7 +611,7 @@ void filtering(short* psImage, Mat &img_filtered, int nWidth, int nHeight, int F
 }
 
 
-// Feature Extraction //
+// feature extraction //
 void CPlatform::setCheckedFamilyState() { // check box 클릭될 때마다(시그널) 호출되는 SLOT 함수
 	
 	QObject* obj = sender();
@@ -693,7 +693,7 @@ void CPlatform::averageAllSlices() {
 
 }
 
-// [ 3.2 Loacal Intensity Features ]
+// [ 3.2 Local Intensity Features ]
 short CPlatform::calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth) {
 
 	// 1. get center pos of max (intensity peak in ROI)
@@ -797,7 +797,7 @@ short CPlatform::calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask,
 }
 
 
-// Preset CSV File // 
+// preset csv file // 
 string getCurrentTime()
 {
 	time_t timer = time(NULL);
@@ -871,7 +871,7 @@ void CPlatform::presetCSVFile(string csvName) {
 }
 
 
-// Save Result //
+// save result //
 void writeCSVCheckedValue(vector<float> extractedValues, string csvName) // 모든 class 공통
 {
 	ofstream resultCSV(csvName, std::ios_base::app);
@@ -928,7 +928,7 @@ void CPlatform::writeCSVFile(int seriesIdx, string csvName) {
 }
 
 
-// Clear All Vector //
+// clear all vector //
 void CPlatform::clearAll(int seriesIdx) {
 
 	intenseHisto.clearVector();
@@ -943,7 +943,7 @@ void CPlatform::clearAll(int seriesIdx) {
 }
 
 
-// Normalize and 16 bit Image Show //
+// normalize and 16 bit image show //
 void RescaleIntensityFilter(short* sIN_OUT_img, int nWidth, int nHeight, int nSetMax, int nSetMin)
 {
 	int nMin = INT_MAX;
@@ -1000,7 +1000,7 @@ void ShowShortImage(short* sImg, int nWidth, int nHeight, char* cWindowName)
 }
 
 
-// Get min, max of Mat //
+// get min, max of Mat //
 double getMinOfMat(Mat m) {
 	double minVal;
 	double maxVal;
@@ -1025,7 +1025,6 @@ double getMaxOfMat(Mat m) {
 // Run //
 void CPlatform::run()
 {
-
 	// save GUI settings //
 	saveSettings();
 
@@ -1033,13 +1032,11 @@ void CPlatform::run()
 	// create and preset csv file //
 	string currentTime = getCurrentTime();
 	string csvName = outputFolder + currentTime + ".csv";
-
 	presetCSVFile(csvName);
 	
 	
 	// filtering and feature extraction by series //
 	int nSeriesCnt = m_ciData.getSeriesCount();
-
 	cout << "*** total number of Series : " << nSeriesCnt << " ***" << endl;
 
 	for (int i = 0; i < nSeriesCnt; i++) {
@@ -1084,6 +1081,7 @@ void CPlatform::run()
 		SAFE_DELETE_VOLUME(ppucMasks, nMaskCnt);
 
 	}
+
 
 	// finish pop-up and exit		
 	if (QMessageBox(QMessageBox::Information, " ", "extraction finished!", QMessageBox::Close).exec() == QMessageBox::Close) {
