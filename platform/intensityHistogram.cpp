@@ -28,7 +28,7 @@ void IntensityHistogram::clearVariable() {
 	coeffOfVar = NAN;
 	quartileCoeff = NAN;
 	entropy = NAN;
-	histUniformity = NAN;
+	uniformity = NAN;
 	maxHistGradient = NAN;
 	maxHistGradGreyValue = NAN;
 	minHistGradient = NAN;
@@ -73,24 +73,24 @@ vector<short> IntensityHistogram::getVectorOfPixelsInROI(short* psImage, unsigne
 }
 vector<unsigned short> IntensityHistogram::getVectorOfDiscretizedPixels_nBins() {
 
-	float minimumValue = (float)*min_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end()); // min_element() : pointer return
-	float maximumValue = (float)*max_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end());
+	float min = (float)*min_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end()); // min_element() : pointer return
+	float max = (float)*max_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end());
 	vector<float> tempFloatVec(vectorOfOriPixels.begin(), vectorOfOriPixels.end());
 
-	if (minimumValue == 0 && minimumValue == maximumValue) {
+	if (min == 0 && min == max) {
 		cout << "error in calculating discretization, VOI contains only 0" << endl;
 		exit(0);
 	}
-	else if (minimumValue > 0 && minimumValue == maximumValue) {
+	else if (min > 0 && min == max) {
 		cout << "error in calculating discretization, VOI contains only one intensity value, minimum value is set to 0" << endl;
-		minimumValue = 0;
+		min = 0;
 	}
 
 	//subtract minimum value from every matrix element
-	transform(tempFloatVec.begin(), tempFloatVec.end(), tempFloatVec.begin(), bind2nd(minus<float>(), minimumValue)); // minus<T> : 이항 연산 함수 객체 (-) / bind2nd : 2번째 인수를 고정해 함수 객체로 변환 / transform : 일괄 연산
+	transform(tempFloatVec.begin(), tempFloatVec.end(), tempFloatVec.begin(), bind2nd(minus<float>(), min)); // minus<T> : 이항 연산 함수 객체 (-) / bind2nd : 2번째 인수를 고정해 함수 객체로 변환 / transform : 일괄 연산
 
-																													  //get the range
-	float range = (maximumValue - minimumValue) / nBins; // range : 몫 (width of a bin) => ***float이 들어가면 / 는 몫이 아니라 진짜 "나누기" 연산!!!***
+	//get the range
+	float range = (max - min) / nBins; // range : 몫 (width of a bin) => ***float이 들어가면 / 는 몫이 아니라 진짜 "나누기" 연산!!!***
 
 	//divide every element of the matrix by the range
 	transform(tempFloatVec.begin(), tempFloatVec.end(), tempFloatVec.begin(), bind2nd(divides<float>(), range));
@@ -242,6 +242,29 @@ void IntensityHistogram::calcMaximum() {
 	maximumValue = vectorOfDiscretizedPixels.back();
 
 }
+void IntensityHistogram::calcInterquartileRange() {
+
+	interquartileRange = getPercentile(0.75) - getPercentile(0.25);
+
+}
+void IntensityHistogram::calcMode() {
+
+
+
+}
+void IntensityHistogram::calcRange() {
+
+	if (isnan(maximumValue)) {
+		calcMaximum();
+	}
+
+	if (isnan(minimumValue)) {
+		calcMinimum();
+	}
+
+	rangeValue = maximumValue - minimumValue;
+
+}
 
 void IntensityHistogram::calcFeature(int FEATURE_IDX, vector<float> &tempValues1DVec) {
 	
@@ -290,6 +313,21 @@ void IntensityHistogram::calcFeature(int FEATURE_IDX, vector<float> &tempValues1
 		case MAXIMUM:
 			calcMaximum();
 			tempValues1DVec.push_back(maximumValue);
+			break;
+
+		case INTERQUARTILERANGE:
+			calcInterquartileRange();
+			tempValues1DVec.push_back(interquartileRange);
+			break;
+
+		case MODE:
+			calcMode();
+			tempValues1DVec.push_back(mode);
+			break;
+
+		case RANGE:
+			calcRange();
+			tempValues1DVec.push_back(rangeValue);
 			break;
 
 		default:
@@ -349,7 +387,7 @@ void IntensityHistogram::defineFeatureNames(vector<string> &features) {
 	features[INTERQUARTILERANGE] = "Interquartile range";
 	features[MODE] = "mode";
 	features[RANGE] = "range";
-	features[MEANABSDEV] = "Mean absolut deviation";
+	features[MEANABSDEV] = "Mean absolute deviation";
 	features[ROBUSTMEANABSDEV] = "Robust mean absolute deviation";
 	features[MEDIANABSDEV] = "Median absolut deviation";
 	features[COEFFOFVAR] = "Coefficient of variation";
@@ -382,7 +420,7 @@ void IntensityHistogram::extractFeatureValues(vector<float> &intensityHistogramV
 	intensityHistogramValues[COEFFOFVAR] = coeffOfVar;
 	intensityHistogramValues[QUARTILECOEFF] = quartileCoeff;
 	intensityHistogramValues[ENTROPY] = entropy;
-	intensityHistogramValues[UNIFORMITY] = histUniformity;
+	intensityHistogramValues[UNIFORMITY] = uniformity;
 	intensityHistogramValues[MAXHISTGRADIENT] = maxHistGradient;
 	intensityHistogramValues[MAXHISTGRADGREY] = maxHistGradGreyValue;
 	intensityHistogramValues[MINHISTGRADIENT] = minHistGradient;

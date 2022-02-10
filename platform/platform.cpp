@@ -12,7 +12,8 @@ const static string outputFolder = string("Result/");
 CPlatform::CPlatform(QWidget *parent)
 	: QMainWindow(parent)
 {
-	ui.setupUi(this);			// ui setting 
+	ui.setupUi(this);	// ui setting 
+
 	setMouseTracking(true);
 	setAcceptDrops(true);
 
@@ -22,6 +23,8 @@ CPlatform::CPlatform(QWidget *parent)
 	setSignalSlot();
 
 	loadSettings();
+
+	//m_ciData.setLogPath(outputFolder + ~); // error log path
 }
 CPlatform::~CPlatform()
 {
@@ -187,6 +190,21 @@ void CPlatform::init()
 {
 	m_nActivatedFrameIdx = -1;
 	m_ciImage = NULL;
+
+	// create pop-up instance
+	ppopup_Histogram = new popup_Histogram; 
+	ppopup_Histogram->setModal(true);
+	/*
+	ppopup_Histogram = new popup_Histogram; 
+	ppopup_Histogram->setModal(true);
+	ppopup_Histogram = new popup_Histogram;
+	ppopup_Histogram->setModal(true);
+	ppopup_Histogram = new popup_Histogram;
+	ppopup_Histogram->setModal(true);
+	ppopup_Histogram = new popup_Histogram;
+	ppopup_Histogram->setModal(true);
+	*/
+	
 }
 void CPlatform::clear()
 {
@@ -195,6 +213,7 @@ void CPlatform::clear()
 		m_ciImage = NULL;
 	}
 }
+
 
 // Widget 생성 //
 void CPlatform::createProgressBar()
@@ -229,6 +248,28 @@ void CPlatform::setSignalSlot()
 
 	// feature (pop-up)
 
+}
+void CPlatform::showPopUp(QObject* sender) {
+	// for loop으로 대체 가능 (for auto, break)
+	if (sender == ui.checkBox_Histogram) {
+		ppopup_Histogram->show();
+	}
+
+	if (sender == ui.checkBox_Intensity) {
+		//ppopup_Histogram->show();
+	}
+
+	if (sender == ui.checkBox_Morph) {
+		//ppopup_Histogram->show();
+	}
+
+	if (sender == ui.checkBox_GLCM) {
+		//ppopup_Histogram->show();
+	}
+
+	if (sender == ui.checkBox_GLRLM) {
+		//ppopup_Histogram->show();
+	}
 
 }
 void CPlatform::setProgressBarValue(int nCurrentIdx, int nMaximumIdx)
@@ -254,21 +295,41 @@ void CPlatform::loadSettings() {
 
 		QSettings settings(configPath, QSettings::IniFormat);
 
-		// filter
+		// filter 
 		settings.beginGroup("filter");
+		
 		QList<QRadioButton *> filterBox = ui.groupBox_Filters->findChildren<QRadioButton *>();
 		for (int i = 0; i < filterBox.size(); i++) {
 			filterBox[i]->setChecked(settings.value(filterBox[i]->objectName(), false /* default value */).toBool());
 		}
+		
 		settings.endGroup();
 
-		// radiomics feature family
+		
+		// radiomics feature family 
 		settings.beginGroup("feature_family");
+		
 		QList<QCheckBox *> familyBox = ui.groupBox_Families->findChildren<QCheckBox *>();
 		for (int i = 0; i < familyBox.size(); i++) {
-			familyBox[i]->setChecked(settings.value(familyBox[i]->objectName(), false /* default value */).toBool());
+			familyBox[i]->setChecked(settings.value(familyBox[i]->objectName(), false).toBool());
+			initIsActivatedFamily(i); //get<i>(featureFamily).isActivatedFamily = true;
 		}
+				
 		settings.endGroup();
+
+		
+		// Intensity Histogram (popup) 
+		settings.beginGroup("popup_Histogram");
+
+		int nfeatures_Histogram = ppopup_Histogram->ui->groupBox_Features->findChildren<QCheckBox *>().size();
+		for (int i = 0; i < nfeatures_Histogram; i++) {
+			ppopup_Histogram->filterGroup->button(i)->setChecked(settings.value(ppopup_Histogram->filterGroup->button(i)->objectName(), false).toBool());
+		}
+		
+		ppopup_Histogram->ui->comboBox_nBins->setCurrentText(settings.value(ppopup_Histogram->ui->comboBox_nBins->objectName(), "32").toString());
+
+		settings.endGroup();
+
 
 		ui.pushButton_run->setEnabled(true); // enable run button
 
@@ -279,24 +340,104 @@ void CPlatform::saveSettings() {
 
 	QSettings settings(configPath, QSettings::IniFormat);
 
-	// filter
+	// filter 
 	settings.beginGroup("filter");
+
 	QList<QRadioButton *> filterBox = ui.groupBox_Filters->findChildren<QRadioButton *>();
 	for (int i = 0; i < filterBox.size(); i++) {
 		settings.setValue(filterBox[i]->objectName(), QVariant(filterBox[i]->isChecked()));
 	}
+
 	settings.endGroup();
 	
-	// radiomics feature family
+
+	// radiomics feature family 
 	settings.beginGroup("feature_family");
+
 	QList<QCheckBox *> familyBox = ui.groupBox_Families->findChildren<QCheckBox *>();
 	for (int i = 0; i < familyBox.size(); i++) {
 		settings.setValue(familyBox[i]->objectName(), QVariant(familyBox[i]->isChecked()));
 	}
+
+	settings.endGroup();
+
+
+	// popup - save settings to config and to object's member variable
+
+	// Intensity Histogram (popup)
+	settings.beginGroup("popup_Histogram");
+
+	intenseHisto.isCheckedFeature.assign(IntensityHistogram::FEATURE_COUNT, false);
+	intenseHisto.nCheckedFeatures = 0;
+
+	int nfeatures_Histogram = ppopup_Histogram->ui->groupBox_Features->findChildren<QCheckBox *>().size();
+	for (int i = 0; i < nfeatures_Histogram; i++) {
+		settings.setValue(ppopup_Histogram->filterGroup->button(i)->objectName(), QVariant(ppopup_Histogram->filterGroup->button(i)->isChecked()));
+		intenseHisto.isCheckedFeature[i] = ppopup_Histogram->filterGroup->button(i)->isChecked();
+		if (intenseHisto.isCheckedFeature[i] == true) intenseHisto.nCheckedFeatures++;
+	}
+
+	settings.setValue(ppopup_Histogram->ui->comboBox_nBins->objectName(), ppopup_Histogram->ui->comboBox_nBins->currentText());
+	intenseHisto.nBins = ppopup_Histogram->ui->comboBox_nBins->currentText().toInt();
+
+	settings.endGroup();
+
+
+	// Local Intensity (popup)
+
+	// Morphological (popup)
+
+	// GLCM (popup)
+
+	// GLRLM (popup)
+
+
+
+}
+void CPlatform::initIsActivatedFamily(int FAMILY_IDX) {
+
+	QSettings settings(configPath, QSettings::IniFormat);
+	settings.beginGroup("feature_family"); // 꼭 써줘야 함!
+
+	switch (FAMILY_IDX) 
+	{
+		case INTENSEHISTO:
+			if (settings.value(ui.checkBox_Histogram->objectName()).toBool() == true) {
+				intenseHisto.isActivatedFamily = true;
+			}
+			break;
+
+		case LOCALINTENSE:
+			if (settings.value(ui.checkBox_Intensity->objectName()).toBool() == true) {
+				localIntense.isActivatedFamily = true;
+			}
+			break;
+
+		case MORPHOLOGY:
+			if (settings.value(ui.checkBox_Morph->objectName()).toBool() == true) {
+				morphology.isActivatedFamily = true;
+			}
+			break;
+
+		case GLCM:
+			if (settings.value(ui.checkBox_GLCM->objectName()).toBool() == true) {
+				glcm.isActivatedFamily = true;
+			}
+			break;
+
+		case GLRLM:
+			if (settings.value(ui.checkBox_GLRLM->objectName()).toBool() == true) {
+				glrlm.isActivatedFamily = true;
+			}
+			break;
+
+		default:
+			break;
+	}
+
 	settings.endGroup();
 
 }
-
 bool CPlatform::checkReadyToRun() {
 
 	QList<QRadioButton *> filterBox = ui.groupBox_Filters->findChildren<QRadioButton *>();
@@ -613,27 +754,14 @@ void filtering(short* psImage, Mat &img_filtered, int nWidth, int nHeight, int F
 
 // feature extraction //
 void CPlatform::setCheckedFamilyState() { // check box 클릭될 때마다(시그널) 호출되는 SLOT 함수
-	
+	// for loop으로 대체 가능 (for auto, break)
 	QObject* obj = sender();
 
 	if (obj == ui.checkBox_Histogram) {
 		intenseHisto.isActivatedFamily = !intenseHisto.isActivatedFamily;
 
 		if (intenseHisto.isActivatedFamily == true) {
-			intenseHisto.isCheckedFeature.assign(IntensityHistogram::FEATURE_COUNT, false);
-
-			// pop-up (set isCheckedFeature, nCheckedFeatures) => if문으로 체크 후 T/F push 하는걸로 수정
-			intenseHisto.isCheckedFeature[IntensityHistogram::MEAN] = true;
-			intenseHisto.isCheckedFeature[IntensityHistogram::VARIANCE] = true;
-			intenseHisto.isCheckedFeature[IntensityHistogram::SKEWNESS] = true;
-			intenseHisto.isCheckedFeature[IntensityHistogram::KURTOSIS] = true;
-			intenseHisto.isCheckedFeature[IntensityHistogram::MEDIAN] = true;
-			intenseHisto.isCheckedFeature[IntensityHistogram::MINIMUM] = true;
-			intenseHisto.isCheckedFeature[IntensityHistogram::PERCENTILE10] = true;
-			intenseHisto.isCheckedFeature[IntensityHistogram::PERCENTILE90] = true;
-			intenseHisto.isCheckedFeature[IntensityHistogram::MAXIMUM] = true;
-
-			intenseHisto.nCheckedFeatures = 9;
+			showPopUp(obj); // pop-up
 		}
 	}
 
@@ -655,6 +783,7 @@ void CPlatform::setCheckedFamilyState() { // check box 클릭될 때마다(시그널) 호�
 
 }
 void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth) {
+	// for loop으로 대체 가능 (for auto, break)
 	if (intenseHisto.isActivatedFamily) {
 		intenseHisto.featureExtraction(psImage, pucMask, nHeight, nWidth);
 	}
@@ -675,6 +804,7 @@ void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, int nH
 }
 
 void CPlatform::averageAllSlices() {
+	// for loop으로 대체 가능 (for auto, break)
 	if (intenseHisto.isActivatedFamily) {
 		intenseHisto.averageAllValues();
 	}
@@ -840,7 +970,6 @@ void CPlatform::presetCSVFile(string csvName) {
 
 	resultCSV << "\n";
 
-
 	// write feature name 
 	resultCSV << " " << "," << " " << "," << " " << ",";
 
@@ -930,7 +1059,7 @@ void CPlatform::writeCSVFile(int seriesIdx, string csvName) {
 
 // clear all vector //
 void CPlatform::clearAll(int seriesIdx) {
-
+	// for loop으로 대체 가능 (for auto, break)
 	intenseHisto.clearVector();
 	/*
 	localIntense.clear();
@@ -1025,7 +1154,7 @@ double getMaxOfMat(Mat m) {
 // Run //
 void CPlatform::run()
 {
-	// save GUI settings //
+	// save GUI settings - config, member //
 	saveSettings();
 
 

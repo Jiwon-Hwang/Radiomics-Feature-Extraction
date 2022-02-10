@@ -7,7 +7,9 @@
 #include <numeric>
 
 
+class test {
 
+};
 
 class IntensityHistogram 
 {
@@ -52,7 +54,7 @@ class IntensityHistogram
 		// set state //
 		bool isActivatedFamily = false;			// by. platform main
 		std::vector<bool> isCheckedFeature;		// by. platform pop-up
-		int nCheckedFeatures;					// **추후 위의 isCheckedFeature 벡터로부터 TRUE 개수 구하기**
+		int nCheckedFeatures;					
 
 		// get histogram //
 		int nBins = 32;
@@ -75,11 +77,11 @@ class IntensityHistogram
 		float varianceValue = NAN;
 		float skewnessValue = NAN;
 		float kurtosisValue = NAN;
-		unsigned short medianValue = NAN;
-		unsigned short minimumValue = NAN;
-		unsigned short percentile10 = NAN;
-		unsigned short percentile90 = NAN;
-		unsigned short maximumValue = NAN;
+		float medianValue = NAN;
+		float minimumValue = NAN;
+		float percentile10 = NAN;
+		float percentile90 = NAN;
+		float maximumValue = NAN;
 		float interquartileRange = NAN;
 		float mode = NAN;
 		float rangeValue = NAN;
@@ -89,7 +91,7 @@ class IntensityHistogram
 		float coeffOfVar = NAN;
 		float quartileCoeff = NAN;
 		float entropy = NAN;
-		float histUniformity = NAN;
+		float uniformity = NAN;
 		float maxHistGradient = NAN;
 		float maxHistGradGreyValue = NAN;
 		float minHistGradient = NAN;
@@ -110,9 +112,9 @@ class IntensityHistogram
 		void calc10percentile();
 		void calc90percentile();
 		void calcMaximum();
-		void getInterquartileRange(std::vector<float> matrixVector);
-		void getMode();
-		void getRange();
+		void calcInterquartileRange();
+		void calcMode();
+		void calcRange();
 		void meanAbsoluteDev(std::vector<float> vectorMatrElem);
 		void getRobustMeanAbsDev(std::vector<float> vectorMatrElem);
 		void medianAbsoluteDev(std::vector<float> vectorMatrElem);

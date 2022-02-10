@@ -21,6 +21,7 @@
 #include <numeric>
 #include <QSettings>
 #include <QDebug>
+#include <QDialog>
 
 #define _CRT_SECURE_NO_WARNINGS
 #include <ctime>
@@ -36,6 +37,19 @@
 
 
 #include "ui_platform.h"
+#include "ui_popup_Histogram.h"
+#include "popup_Histogram.h"
+/*
+#include "ui_popup_Intensity.h"
+#include "popup_Intensity.h"
+#include "ui_popup_Morph.h"
+#include "popup_Morph.h"
+#include "ui_popup_GLCM.h"
+#include "popup_GLCM.h"
+#include "ui_popup_GLRLM.h"
+#include "popup_GLRLM.h"
+*/
+
 #include "dcmtk/dcmimgle/dcmimage.h"
 #include "dcmtk/config/osconfig.h" 
 #include "dcmtk/dcmdata/dctk.h"
@@ -58,6 +72,7 @@
 #define FILTER_GAUSSIAN 1 
 #define FILTER_LAPLACIAN 2
 
+
 class CPlatform : public QMainWindow
 {
 	Q_OBJECT
@@ -76,13 +91,36 @@ public:
 	CData m_ciData;						// data
 	int m_nActivatedFrameIdx;			// 현재 화면에 가시화된 Frame 번호
 	
-	IntensityHistogram intenseHisto; 
+
+public:	
+	enum FAMILY { INTENSEHISTO, LOCALINTENSE, MORPHOLOGY, GLCM, GLRLM, FAMILY_COUNT };
+
+	// Feature Family objects
+	IntensityHistogram intenseHisto;
+	IntensityHistogram localIntense;
+	IntensityHistogram morphology;
+	IntensityHistogram glcm;
+	IntensityHistogram glrlm;
 	/*
 	LocalIntensity localIntense;
 	Morphological morphology;
 	GLCM glcm;
+	GLRLM glrlm;
 	*/
-	
+
+	// pop-up objects
+	popup_Histogram *ppopup_Histogram;
+	popup_Histogram *ppopup_Intensity;
+	popup_Histogram *ppopup_Morph;
+	popup_Histogram *ppopup_GLCM;
+	popup_Histogram *ppopup_GLRLM;
+	/*
+	popup_Intensity *ppopup_Intensity;
+	popup_Morph *ppopup_Morph;
+	popup_GLCM *ppopup_GLCM;
+	popup_GLRLM *ppopup_GLRLM;
+	*/
+		
 
 // QT layout, action 변수
 public:
@@ -100,6 +138,7 @@ public:
 	// load and save GUI state //
 	void loadSettings();
 	void saveSettings();
+	void initIsActivatedFamily(int idx);
 
 	// feature extraction //
 	void featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
@@ -136,8 +175,12 @@ public slots:
 	void setCheckedFamilyState();
 	bool checkReadyToRun();
 
+	// pop-up //
+	void showPopUp(QObject* sender);
+
 	void run();
 };
+
 
 class BorderlessMainWindow: public QMainWindow
 {

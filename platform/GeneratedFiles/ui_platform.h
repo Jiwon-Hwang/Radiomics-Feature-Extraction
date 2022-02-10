@@ -277,7 +277,7 @@ public:
 
     void retranslateUi(QMainWindow *platformClass)
     {
-        platformClass->setWindowTitle(QApplication::translate("platformClass", "\354\227\260\352\265\254\354\213\244 \355\224\214\353\236\253\355\217\274 \354\227\260\354\212\265\354\232\251", Q_NULLPTR));
+        platformClass->setWindowTitle(QApplication::translate("platformClass", "Radiomics Feature Extraction", Q_NULLPTR));
         pushButton_1->setText(QApplication::translate("platformClass", "1 case", Q_NULLPTR));
         pushButton_2->setText(QApplication::translate("platformClass", "multiple cases", Q_NULLPTR));
         groupBox->setTitle(QString());
