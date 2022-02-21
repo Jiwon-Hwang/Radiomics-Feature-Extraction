@@ -18,13 +18,13 @@ CPlatform::CPlatform(QWidget *parent)
 	setAcceptDrops(true);
 
 	init();
+	createPopup();
 	createProgressBar();
 
 	setSignalSlot();
-
 	loadSettings();
+	m_ciData.setLogPath(outputFolder + "tempLog.txt"); // error log path
 
-	//m_ciData.setLogPath(outputFolder + ~); // error log path
 }
 CPlatform::~CPlatform()
 {
@@ -190,20 +190,6 @@ void CPlatform::init()
 {
 	m_nActivatedFrameIdx = -1;
 	m_ciImage = NULL;
-
-	// create pop-up instance
-	ppopup_Histogram = new popup_Histogram; 
-	ppopup_Histogram->setModal(true);
-	/*
-	ppopup_Histogram = new popup_Histogram; 
-	ppopup_Histogram->setModal(true);
-	ppopup_Histogram = new popup_Histogram;
-	ppopup_Histogram->setModal(true);
-	ppopup_Histogram = new popup_Histogram;
-	ppopup_Histogram->setModal(true);
-	ppopup_Histogram = new popup_Histogram;
-	ppopup_Histogram->setModal(true);
-	*/
 	
 }
 void CPlatform::clear()
@@ -216,6 +202,23 @@ void CPlatform::clear()
 
 
 // Widget »ý¼º //
+void CPlatform::createPopup() {
+
+	// create pop-up instance
+	ppopup_Histogram = new popup_Histogram;
+	ppopup_Histogram->setModal(true);
+	/*
+	ppopup_Histogram = new popup_Histogram;
+	ppopup_Histogram->setModal(true);
+	ppopup_Histogram = new popup_Histogram;
+	ppopup_Histogram->setModal(true);
+	ppopup_Histogram = new popup_Histogram;
+	ppopup_Histogram->setModal(true);
+	ppopup_Histogram = new popup_Histogram;
+	ppopup_Histogram->setModal(true);
+	*/
+
+}
 void CPlatform::createProgressBar()
 {
 	progressBar = new QProgressBar(ui.statusBar);
@@ -1211,6 +1214,11 @@ void CPlatform::run()
 
 	}
 
+
+	// remove if isEmpty or change log file name
+	string txtName = outputFolder + currentTime + ".txt";
+	m_ciData.checkIsEmptyLog(txtName);
+	
 
 	// finish pop-up and exit		
 	if (QMessageBox(QMessageBox::Information, " ", "extraction finished!", QMessageBox::Close).exec() == QMessageBox::Close) {

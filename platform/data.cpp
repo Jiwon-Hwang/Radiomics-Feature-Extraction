@@ -3,11 +3,17 @@
 CData::CData() {
 	init();
 }
+CData::CData(std::string sLogPath) {
+	init(sLogPath);
+}
 CData::~CData() {
 	clear();
 }
 void CData::init() {
-	
+	m_sLogPath = "";
+}
+void CData::init(std::string sLogPath) {
+	m_sLogPath = sLogPath;
 }
 void CData::clear() {
 	for(int i=0, ni=getSeriesCount(); i<ni; i++) {
@@ -42,6 +48,19 @@ void CData::clearImages(int nSeriesIdx) {
 	}
 }
 
+std::ostream& operator<<(std::ostream& stream, const CData& obj) {
+	int nSeriesCount = obj.m_seriesList.size();
+
+	stream << "\n\n" << "[Data] (" << "Series: " << nSeriesCount << ")\n";
+	
+	for(int i=0, ni=nSeriesCount; i<ni; i++) {
+		stream << *obj.m_seriesList[i] << "\n";
+	}
+
+	return stream;
+}
+
+
 void CData::readDir(std::string sPath) {
 	// 1. image 파일 혹은 폴더를 순회하면서 읽음
 	// Path에 있는 File 혹은 Dir를 순회하면서 읽어야 할 File 목록을 생성 //
@@ -66,7 +85,7 @@ void CData::readDir(std::string sPath) {
 	sortingImageAndMask();
 }
 void CData::readImage(std::string sImagePath) {	
-	bool isLoad = false;
+	int nLoadCode = false;
 	bool isMask = false;
 
 	// 1개 파일에 여러개의 이미지 혹은 mask가 들어있는 경우를 처리하기 위함
@@ -74,19 +93,23 @@ void CData::readImage(std::string sImagePath) {
 	std::vector<CImage<unsigned char>*> ciMasks;
 	CSeries* pCiSeries = NULL;
 
+	if(m_sLogPath != "") {
+		m_sLog.open(m_sLogPath.c_str(), std::ofstream::out | std::ofstream::app);
+	}
+
 	// 1-1. 파일명 혹은 폴더명으로 mask여부 판별
 	isMask = isMask_namingRule(sImagePath);
 
 	// 1-2. 이미지를 Load 및 mask여부 판별, 파일명 혹은 폴더명으로 이미 구분된 경우, 별도 검사하지 않음
 	if(isMask) {
 		// 파일명, 확장자 등으로 Mask로 구분이 이미 된 경우
-		isLoad = loadImage(sImagePath, pCiSeries, ciMasks);
+		nLoadCode = loadImage(sImagePath, pCiSeries, ciMasks);
 	}
 	else {
 		// Image인지 Mask인지 모르는 경우, isMask_imageRule로 구분
-		isLoad = loadImage(sImagePath, pCiSeries, ciImages);
+		nLoadCode = loadImage(sImagePath, pCiSeries, ciImages);
 
-		if(isLoad) {
+		if(nLoadCode) {
 			// Mask인 경우, 자료형을 short->unsigned char로 바꿔줌
 			for(int i=0, ni=ciImages.size(); i<ni; i++) {
 				CImage<short>* pCiImage = ciImages[i];
@@ -104,7 +127,7 @@ void CData::readImage(std::string sImagePath) {
 	}
 
 	// 1-3. 파일에서 읽은 Series 정보를 사용자 임의로 수정
-	if(isLoad && pCiSeries) {
+	if(nLoadCode && pCiSeries) {
 		if(!isMask) {
 			setPatientName(pCiSeries, ciImages);
 			setStudyName(pCiSeries, ciImages);
@@ -119,7 +142,7 @@ void CData::readImage(std::string sImagePath) {
 	}
 
 	// 1-4. Series에 load한 이미지 매칭
-	if(isLoad) {
+	if(nLoadCode) {
 		if(!isMask) {
 			// 1-4-1. Image인 경우, Series 중복 검사
 			CSeries* pCiMatchedSeries = NULL;
@@ -192,15 +215,33 @@ void CData::readImage(std::string sImagePath) {
 
 
 					if(nMatchedImageIdx != -1) {
-						// 매칭되는 Image가 있는 경우
-						pCiMatchedSeries->setMask(nMatchedImageIdx, pCiMask);
+						int nMaskWidth = pCiMask->getWidth();
+						int nMaskHeight = pCiMask->getHeight();
+						int nImageWidth = pCiMatchedSeries->getImage(nMatchedImageIdx)->getWidth();
+						int nImageHeight = pCiMatchedSeries->getImage(nMatchedImageIdx)->getHeight();
+
+						if(nImageWidth == nMaskWidth && nImageHeight == nMaskHeight) {
+							// 매칭되는 Image가 있는 경우
+							pCiMatchedSeries->setMask(nMatchedImageIdx, pCiMask);
+						}
+						else {
+							m_nonMatchedMaskPaths.push_back(sImagePath);
+							SAFE_DELETE_ARRAY(pCiMask);
+
+							if(m_sLog.is_open()) {
+								m_sLog << "image와 mask width, height 불일치\t" << sImagePath << std::endl;
+							}
+						}
 					}
 					else {
 						// 매칭되는 Image가 없는 경우 (나중에 매칭할 수 있도록 일단 저장)
 						// 여기 loop로 빠지는건 데이터가 잘못되어있을 확률이 높음
 						m_nonMatchedMaskPaths.push_back(sImagePath);
-
 						SAFE_DELETE_ARRAY(pCiMask);
+
+						if(m_sLog.is_open()) {
+							m_sLog << "mask 파일만 존재\t" << sImagePath << std::endl;
+						}
 					}
 				}
 			}
@@ -214,9 +255,42 @@ void CData::readImage(std::string sImagePath) {
 			}
 		}
 	}
+	else if(nLoadCode == -1) {
+		if(m_sLog.is_open()) {
+			m_sLog << "파일 읽기 실패\t" << sImagePath << std::endl;
+		}
+	}
 
 	ciImages.clear();
 	ciMasks.clear();
+
+	if(m_sLog.is_open()) {
+		m_sLog.close();
+	}
+}
+void CData::checkIsEmptyLog(std::string sFinalLogPath) {
+
+	if (m_sLogPath != "") {
+		m_sLog.open(m_sLogPath.c_str(), std::ofstream::out | std::ofstream::app);
+	}
+
+	if (m_sLog.is_open()) {
+		m_sLog.seekp(0, std::ios_base::end);
+		size_t size = m_sLog.tellp();
+		if (size == 0) {
+			// 삭제
+			std::cout << "error log file is empty" << std::endl;
+			m_sLog.close();
+			remove(m_sLogPath.c_str()); // 먼저 닫고 삭제
+			std::cout << "deleted empty file" << std::endl;
+		}
+		else {
+			// 파일명 변경
+			rename(m_sLogPath.c_str(), sFinalLogPath.c_str());
+			m_sLog.close();
+		}
+	}
+
 }
 void CData::matchingImageAndMask() {
 	for(int i=0, ni=m_nonMatchedMaskPaths.size(); i<ni; i++) {
@@ -268,6 +342,11 @@ bool CData::addSeries(CSeries* pCiSeries) {
 
 	m_seriesList.push_back(pCiSeries);
 	return true;
+}
+
+void CData::setLogPath(std::string sLogPath)
+{
+	m_sLogPath = sLogPath;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -1197,14 +1276,15 @@ bool CData::sorting_imagePosition(CImage<T>* &pCiImage1, CImage<T>* &pCiImage2) 
 
 ////////////////////////////////////////////////////////////////////
 template <typename T>
-bool CData::loadImage(std::string sImagePath, CSeries* &pCiSeries, std::vector<CImage<T>*> &ciImages) {
+int CData::loadImage(std::string sImagePath, CSeries* &pCiSeries, std::vector<CImage<T>*> &ciImages) {
 	// series header 정보, image header 정보까지 모두 읽어야 할 때 사용
 
 	// exception
 	if(pCiSeries != NULL) {
-		return false;
+		return -1;
 	}
 
+	int nReturn = -1;
 	const char* pcImagePath = sImagePath.c_str();
 	std::string sImageName = getFileName(sImagePath);
 	std::string sImageExtension = getFileExtension(sImagePath);
@@ -1214,7 +1294,7 @@ bool CData::loadImage(std::string sImagePath, CSeries* &pCiSeries, std::vector<C
 		DcmDataset* dataSet = NULL;
 		std::vector<short*> images;
 		
-		if(loadDICOM_dcmtk(pcImagePath, dataSet, images, LAZY_LOADING)) {
+		if(nReturn = loadDICOM_dcmtk(pcImagePath, dataSet, images, LAZY_LOADING)) {
 
 			OFString OFStrPatientID, OFStrPatientName;
 			OFString OFStrStudyInstanceUID, OFStrStudyDescription, OFStrStudyDate;
@@ -1350,7 +1430,7 @@ bool CData::loadImage(std::string sImagePath, CSeries* &pCiSeries, std::vector<C
 		unsigned char* pucImage = NULL;
 		int nWidth, nHeight, nChannel;
 
-		if(loadImage_opencv(pcImagePath, false, pucImage, nWidth, nHeight, nChannel, LAZY_LOADING)) {
+		if(nReturn = loadImage_opencv(pcImagePath, false, pucImage, nWidth, nHeight, nChannel, LAZY_LOADING)) {
 
 			// 1. setImage //
 			CImage<T>* pCiImage = new CImage<T>();
@@ -1396,7 +1476,7 @@ bool CData::loadImage(std::string sImagePath, CSeries* &pCiSeries, std::vector<C
 		nifti_1_header nhdr;
 		std::vector<short*> images;
 
-		if(loadNII_libnii(pcImagePath, nhdr, images, LAZY_LOADING)) {
+		if(nReturn = loadNII_libnii(pcImagePath, nhdr, images, LAZY_LOADING)) {
 			
 			// 1. setImage //
 			int nWidth = nhdr.dim[1];
@@ -1461,11 +1541,8 @@ bool CData::loadImage(std::string sImagePath, CSeries* &pCiSeries, std::vector<C
 	else if(sImageExtension == "tiff") {
 		// todo
 	}
-	else {
-		return false;
-	}
 
-	return true;
+	return nReturn;
 }
 template <typename T>
 bool CData::loadImage(CImage<T>* &pCiImage, bool isMask) {

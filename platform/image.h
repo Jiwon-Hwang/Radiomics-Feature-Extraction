@@ -271,7 +271,7 @@ bool CImage<T>::setImage(CImage<T>* pCiImage) {
 		SAFE_DELETE_ARRAY(m_image);
 	}
 	m_image = new T[nSize];
-	memcpy_s(m_image, sizeof(T)*nSize, pCiImage, sizeof(T)*nSize);
+	memcpy_s(m_image, sizeof(T)*nSize, pCiImage->m_image, sizeof(T)*nSize);
 	
 	for(int i=0; i< nSize; i++) {
 		m_image[i] = pCiImage->m_image[i];

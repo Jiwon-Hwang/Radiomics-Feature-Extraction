@@ -2,6 +2,7 @@
 #include <vector>
 #include <list>
 #include <iostream>
+#include <fstream>
 #include <io.h>	// window
 #include <algorithm>
 
@@ -28,16 +29,25 @@ private:
 	// Image와 매칭되지 못한 Mask가 들어있음
 	std::vector<std::string> m_nonMatchedMaskPaths;
 
+	std::string m_sLogPath;
+	std::ofstream m_sLog;
+
 // function
 public:
 	CData();
+	CData(std::string sLogPath);
 	~CData();
 	void init(void);
+	void init(std::string sLogPath);
 	void clear(void);
 	void clearImages(int nSeriesIdx=-1);		// image class의 image 메모리만 소멸
 
+	// operator
+	friend std::ostream& operator<< (std::ostream& stream, const CData& obj);
+
 	void readDir(std::string sPath);			// image 파일 혹은 폴더를 순회하면서 읽음
 	void readImage(std::string sImagePath);		// image 파일을 읽음
+	void checkIsEmptyLog(std::string sFinalLogPath); // error file이 비어있는지 체크, 삭제, 파일명 변경
 	void matchingImageAndMask();				
 	void sortingImageAndMask();
 
@@ -46,6 +56,9 @@ public:
 	int getSeriesCount(void);
 	bool setSeries(CSeries* pCiSeries, int nSeriesIdx=-1);
 	bool addSeries(CSeries* pCiSeries);
+
+	// log file
+	void setLogPath(std::string sLogPath);
 
 	// 아래 함수는 개발 편의성을 위해서 제공
 	// nSliceIdx: image를 Series와 관계없이 순서대로 나열했을 때, image의 순서
@@ -138,7 +151,7 @@ private:
 	
 	// load
 	template <typename T>
-	bool loadImage(std::string sImagePath, CSeries* &pCiSeries, std::vector<CImage<T>*> &ciImages);
+	int loadImage(std::string sImagePath, CSeries* &pCiSeries, std::vector<CImage<T>*> &ciImages);
 	template <typename T>
 	bool loadImage(CImage<T>* &pCiImage, bool isMask);
 	bool loadDICOM_dcmtk(const char* pcFilePath, DcmDataset* &dataSet, std::vector<short*> &images, bool bReadHeaderOnly=false);

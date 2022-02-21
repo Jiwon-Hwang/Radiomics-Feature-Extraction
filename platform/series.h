@@ -6,19 +6,19 @@
 class CSeries {
 // variable
 public:
-	std::string m_sPatientID;			// dcm header
-	std::string m_sPatientName;			// folder
+	std::string m_sPatientID;
+	std::string m_sPatientName;
 
 	std::string m_sStudyInstanceUID;
-	std::string m_sStudyDescription;	// dcm header
+	std::string m_sStudyDescription;
 	std::string m_sStudyDate;
-	std::string m_sStudyName;			// folder
+	std::string m_sStudyName;
 
 	std::string m_sSeriesInstanceUID;
 	std::string m_sFrameOfReferenceUID;
 	std::string m_sSeriesDate;
-	std::string m_sSeriesDescription;	// dcm header
-	std::string m_sSeriesName;			// folder
+	std::string m_sSeriesDescription;
+	std::string m_sSeriesName;
 	std::string m_sModality;
 
 	std::vector<CImage<short>*> m_images;				// image
@@ -31,6 +31,9 @@ public:
 	void init();
 	void clear();
 	CSeries* copy();
+
+	// operator
+	friend std::ostream& operator<< (std::ostream& stream, const CSeries& obj);
 
 	void addImage(CImage<short>* pCiImage);
 	void setImage(int nIdx, CImage<short>* pCiImage);

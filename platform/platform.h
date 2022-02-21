@@ -131,6 +131,7 @@ public:
 	QAction* newFileAction;
 	QProgressBar* progressBar;
 
+	void createPopup();
 	void createProgressBar();
 	void setSignalSlot();
 	void setProgressBarValue(int nCurrentIdx, int nMaximumIdx);

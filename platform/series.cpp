@@ -69,6 +69,17 @@ CSeries* CSeries::copy() {
 	return pSeries;
 }
 
+std::ostream& operator<<(std::ostream& stream, const CSeries& obj) {
+	int nImageCount = obj.m_images.size();
+	int nMaskCount = obj.m_masks.size();
+
+	stream << "---------------------------------------" << "\n";
+	stream << obj.m_sPatientName << " | " << obj.m_sSeriesName << 
+		" (Image: " << nImageCount << ", " << "Mask: " << nMaskCount << ")\n";
+
+	return stream;
+}
+
 void CSeries::addImage(CImage<short>* pCiImage) {
 	pCiImage->setSeries(this);
 	m_images.push_back(pCiImage);
