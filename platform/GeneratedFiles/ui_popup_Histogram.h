@@ -185,7 +185,7 @@ public:
 
         checkBox_Mode = new QCheckBox(groupBox_Features);
         checkBox_Mode->setObjectName(QStringLiteral("checkBox_Mode"));
-        checkBox_Mode->setEnabled(false);
+        checkBox_Mode->setEnabled(true);
         checkBox_Mode->setAutoFillBackground(false);
         checkBox_Mode->setChecked(false);
         checkBox_Mode->setTristate(false);
@@ -269,7 +269,7 @@ public:
 
         checkBox_MeanAbsDev = new QCheckBox(groupBox_Features);
         checkBox_MeanAbsDev->setObjectName(QStringLiteral("checkBox_MeanAbsDev"));
-        checkBox_MeanAbsDev->setEnabled(false);
+        checkBox_MeanAbsDev->setEnabled(true);
         checkBox_MeanAbsDev->setFont(font);
         checkBox_MeanAbsDev->setAutoFillBackground(false);
         checkBox_MeanAbsDev->setChecked(false);

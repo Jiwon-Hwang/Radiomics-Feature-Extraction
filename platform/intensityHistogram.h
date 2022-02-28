@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <functional>
 #include <numeric>
+#include <deque>
 
 
 class test {
@@ -115,8 +116,8 @@ class IntensityHistogram
 		void calcInterquartileRange();
 		void calcMode();
 		void calcRange();
-		void meanAbsoluteDev(std::vector<float> vectorMatrElem);
-		void getRobustMeanAbsDev(std::vector<float> vectorMatrElem);
+		void calcMeanAbsoluteDev();
+		void calcRobustMeanAbsDev();
 		void medianAbsoluteDev(std::vector<float> vectorMatrElem);
 		void getCoeffOfVar();
 		void getQuartileCoeff();

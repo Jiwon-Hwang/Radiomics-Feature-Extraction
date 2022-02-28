@@ -282,7 +282,7 @@
     <item row="7" column="0">
      <widget class="QCheckBox" name="checkBox_Mode">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="autoFillBackground">
        <bool>false</bool>
@@ -457,7 +457,7 @@
     <item row="8" column="0">
      <widget class="QCheckBox" name="checkBox_MeanAbsDev">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="font">
        <font>

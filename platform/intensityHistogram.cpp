@@ -249,7 +249,29 @@ void IntensityHistogram::calcInterquartileRange() {
 }
 void IntensityHistogram::calcMode() {
 
+	deque<long> histCounts(1, 1);
+	deque<float> histValues(1, vectorOfDiscretizedPixels[0]);
 
+	for (int i = 1; i < nPixels; i++) {
+		if (vectorOfDiscretizedPixels[i] != histValues.back()) {
+			histValues.push_back(vectorOfDiscretizedPixels[i]);
+			histCounts.push_back(1);
+		}
+		else {
+			histCounts.back()++;
+		}
+	}
+
+	long maxIndex = 0;
+	long maxCount = histCounts.at(0);
+	for (int i = 1; i < (long)histCounts.size(); i++) {
+		if (maxCount < histCounts.at(i)) {
+			maxCount = histCounts.at(i);
+			maxIndex = i;
+		}
+	}
+
+	mode = histValues.at(maxIndex);
 
 }
 void IntensityHistogram::calcRange() {
@@ -263,6 +285,27 @@ void IntensityHistogram::calcRange() {
 	}
 
 	rangeValue = maximumValue - minimumValue;
+
+}
+void IntensityHistogram::calcMeanAbsoluteDev() {
+
+	if (isnan(meanValue)) {
+		calcMean();
+	}
+
+	vector<float> tempVector(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end());
+	transform(tempVector.begin(), tempVector.end(), tempVector.begin(), bind2nd(minus<float>(), meanValue));
+
+	meanAbsDev = 0;
+	for (int i = 0; i < nPixels; i++) {
+		meanAbsDev += abs(tempVector[i]);
+	}
+	meanAbsDev /= nPixels;
+
+}
+void IntensityHistogram::calcRobustMeanAbsDev() {
+
+
 
 }
 
@@ -329,6 +372,10 @@ void IntensityHistogram::calcFeature(int FEATURE_IDX, vector<float> &tempValues1
 			calcRange();
 			tempValues1DVec.push_back(rangeValue);
 			break;
+
+		case MEANABSDEV:
+			calcMeanAbsoluteDev();
+			tempValues1DVec.push_back(meanAbsDev);
 
 		default:
 			//cout << "error : Unknown Intensity Histogram Feature!" << endl;

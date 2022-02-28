@@ -937,7 +937,7 @@ string getCurrentTime()
 	struct tm* t = localtime(&timer);
 
 	ostringstream os;
-	os << put_time(t, "%Y-%m-%d %H.%M.%S");
+	os << put_time(t, "%Y%m%d %H%M%S");
 
 	return os.str();
 }
