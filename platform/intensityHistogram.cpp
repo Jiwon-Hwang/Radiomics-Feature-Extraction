@@ -117,11 +117,11 @@ vector<unsigned short> IntensityHistogram::getVectorOfDiffGreyLevels() {
 
 	return diffGreyLevels;
 }
-vector<unsigned int> IntensityHistogram::getHistogram() {
+vector<double> IntensityHistogram::getHistogram() {
 
 	vector<unsigned short> diffGreyLevels = getVectorOfDiffGreyLevels();
 
-	vector<unsigned int> hist;
+	vector<double> histVec;
 	unsigned int nCnt;
 	unsigned short greyLevel;
 	for (int i = 0; i < diffGreyLevels.size(); i++) {
@@ -132,10 +132,16 @@ vector<unsigned int> IntensityHistogram::getHistogram() {
 				nCnt += 1;
 			}
 		}
-		hist.push_back(nCnt);
+		histVec.push_back(nCnt);
 	}
 
-	return hist;
+	return histVec;
+}
+void IntensityHistogram::calcProbabilities() {
+
+	probabilities = hist; // 둘다 size : nBins
+	transform(probabilities.begin(), probabilities.end(), probabilities.begin(), bind2nd(divides<float>(), nPixels));
+
 }
 
 void IntensityHistogram::calcMean() {
@@ -303,9 +309,98 @@ void IntensityHistogram::calcMeanAbsoluteDev() {
 	meanAbsDev /= nPixels;
 
 }
+void getSmallerElements(vector<float> &vec, float max) {
+
+	vector<float>::iterator lessThan;
+	lessThan = remove_if(vec.begin(), vec.end(), bind2nd(less<float>(), max));
+	vec.erase(lessThan, vec.end());
+
+}
+void getGreaterElements(vector<float> &vec, float min) {
+	
+	vector<float>::iterator greaterThan;
+	greaterThan = remove_if(vec.begin(), vec.end(), bind2nd(greater<float>(), min));
+	vec.erase(greaterThan, vec.end());
+
+}
 void IntensityHistogram::calcRobustMeanAbsDev() {
+	
+	if (isnan(percentile10)) {
+		calc10percentile();
+	}
 
+	if (isnan(percentile90)) {
+		calc90percentile();
+	}
 
+	vector<float> tempVector(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end());
+	
+	getSmallerElements(tempVector, percentile10);
+	getGreaterElements(tempVector, percentile90);
+
+	float tempMeanValue = accumulate(tempVector.begin(), tempVector.end(), 0.0) / tempVector.size(); 
+	transform(tempVector.begin(), tempVector.end(), tempVector.begin(), bind2nd(minus<float>(), tempMeanValue));
+
+	robustMeanAbsDev = 0;
+	for (int i = 0; i < tempVector.size(); i++) {
+		robustMeanAbsDev += abs(tempVector[i]);
+	}
+	robustMeanAbsDev /= tempVector.size();
+
+}
+void IntensityHistogram::calcMedianAbsoluteDev() {
+
+	if (isnan(medianValue)) {
+		calcMedian();
+	}
+
+	vector<float> tempVector(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end());
+	transform(tempVector.begin(), tempVector.end(), tempVector.begin(), bind2nd(minus<float>(), medianValue));
+
+	medianAbsDev = 0;
+	for (int i = 0; i < nPixels; i++) {
+		medianAbsDev += abs(tempVector[i]);
+	}
+	medianAbsDev /= nPixels;
+
+}
+void IntensityHistogram::calcCoeffOfVar() {
+
+	if (isnan(varianceValue)) {
+		calcVariance();
+	}
+
+	if (isnan(meanValue)) {
+		calcMean();
+	}
+
+	coeffOfVar = pow(varianceValue, 0.5) / meanValue;
+
+}
+void IntensityHistogram::calcQuartileCoeff() {
+
+	unsigned short percentile75 = getPercentile(0.75);
+	unsigned short percentile25 = getPercentile(0.25);
+	quartileCoeff = (float)(percentile75 - percentile25) / (float)(percentile75 + percentile25); // float, int 나눗셈 주의
+
+}
+void IntensityHistogram::calcEntropy() {
+	
+	entropy = 0;
+
+	for (int i = 0; i < probabilities.size(); i++) {
+		if (probabilities[i] > 0) {
+			entropy -= probabilities[i] * log2(probabilities[i]);
+		}
+	}
+
+}
+void IntensityHistogram::calcUniformity() {
+
+	uniformity = 0;
+	for (int i = 0; i < probabilities.size(); i++) {
+		uniformity += pow(probabilities[i], 2);
+	}
 
 }
 
@@ -376,7 +471,38 @@ void IntensityHistogram::calcFeature(int FEATURE_IDX, vector<float> &tempValues1
 		case MEANABSDEV:
 			calcMeanAbsoluteDev();
 			tempValues1DVec.push_back(meanAbsDev);
+			break;
+			
+		case ROBUSTMEANABSDEV:
+			calcRobustMeanAbsDev();
+			tempValues1DVec.push_back(robustMeanAbsDev);
+			break;
+			
+		case MEDIANABSDEV:
+			calcMedianAbsoluteDev();
+			tempValues1DVec.push_back(medianAbsDev);
+			break;
 
+		case COEFFOFVAR:
+			calcCoeffOfVar();
+			tempValues1DVec.push_back(coeffOfVar);
+			break;
+
+		case QUARTILECOEFF:
+			calcQuartileCoeff();
+			tempValues1DVec.push_back(quartileCoeff);
+			break;
+
+		case ENTROPY:
+			calcEntropy();
+			tempValues1DVec.push_back(entropy);
+			break;
+
+		case UNIFORMITY:
+			calcUniformity();
+			tempValues1DVec.push_back(uniformity);
+			break;
+			
 		default:
 			//cout << "error : Unknown Intensity Histogram Feature!" << endl;
 			break;
@@ -387,11 +513,13 @@ void IntensityHistogram::featureExtraction(short* psImage, unsigned char* pucMas
 	// claer all values
 	clearVariable(); // 슬라이스마다 초기화
 
-	// get histogram
+	// get histogram and probabilites
 	vectorOfOriPixels = getVectorOfPixelsInROI(psImage, pucMask, nHeight, nWidth);
 	vectorOfDiscretizedPixels = getVectorOfDiscretizedPixels_nBins(); // 슬라이스마다 초기화
 	nPixels = vectorOfDiscretizedPixels.size();
 	hist = getHistogram();
+	calcProbabilities();
+
 
 	vector<float> tempValues1DVec; // 슬라이스마다 초기화
 

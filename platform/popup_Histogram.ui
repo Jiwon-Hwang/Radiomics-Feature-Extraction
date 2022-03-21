@@ -82,7 +82,7 @@
     <item row="9" column="1">
      <widget class="QCheckBox" name="checkBox_CoeffOfVar">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="font">
        <font>
@@ -155,7 +155,7 @@
     <item row="8" column="1">
      <widget class="QCheckBox" name="checkBox_RobustMeanAbsDev">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="font">
        <font>
@@ -337,7 +337,7 @@
     <item row="9" column="0">
      <widget class="QCheckBox" name="checkBox_MedianAbsDev">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="font">
        <font>
@@ -362,7 +362,7 @@
     <item row="10" column="0">
      <widget class="QCheckBox" name="checkBox_QuartileCoeff">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="autoFillBackground">
        <bool>false</bool>
@@ -381,7 +381,7 @@
     <item row="10" column="1">
      <widget class="QCheckBox" name="checkBox_Entropy">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="autoFillBackground">
        <bool>false</bool>
@@ -400,7 +400,7 @@
     <item row="11" column="0">
      <widget class="QCheckBox" name="checkBox_Uniformity">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="autoFillBackground">
        <bool>false</bool>
@@ -519,7 +519,7 @@
        </sizepolicy>
       </property>
       <property name="currentText">
-       <string>32</string>
+       <string>8</string>
       </property>
       <property name="maxVisibleItems">
        <number>5</number>

@@ -62,12 +62,14 @@ class IntensityHistogram
 		int nPixels;
 		std::vector<short> vectorOfOriPixels;					// sorted
 		std::vector<unsigned short> vectorOfDiscretizedPixels;	// sorted
-		std::vector<unsigned int> hist;
+		std::vector<double> hist;
+		std::vector<double> probabilities;
 
 		std::vector<short> getVectorOfPixelsInROI(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
 		std::vector<unsigned short> getVectorOfDiscretizedPixels_nBins();
 		std::vector<unsigned short> getVectorOfDiffGreyLevels();
-		std::vector<unsigned int> getHistogram();
+		std::vector<double> getHistogram();
+		void calcProbabilities();
 
 		// put extracted values in 2d vector //
 		std::vector<std::vector<float>> final2DVec;		// slice by slice
@@ -97,8 +99,6 @@ class IntensityHistogram
 		float maxHistGradGreyValue = NAN;
 		float minHistGradient = NAN;
 		float minHistGradGreyValue = NAN;
-		//float percentile25 = NAN;
-		//float percentile75 = NAN;
 		//vector<float> maxHistVecGradient;
 		//vector<float> minHistVecGradient;
 
@@ -118,11 +118,11 @@ class IntensityHistogram
 		void calcRange();
 		void calcMeanAbsoluteDev();
 		void calcRobustMeanAbsDev();
-		void medianAbsoluteDev(std::vector<float> vectorMatrElem);
-		void getCoeffOfVar();
-		void getQuartileCoeff();
-		void getEntropy();
-		void getHistUniformity();
+		void calcMedianAbsoluteDev();
+		void calcCoeffOfVar();
+		void calcQuartileCoeff();
+		void calcEntropy();
+		void calcUniformity();
 		void getMaxHistGradient();
 		void getMinHistGradient();
 

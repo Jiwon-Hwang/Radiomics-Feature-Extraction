@@ -88,7 +88,7 @@ public:
 
         checkBox_CoeffOfVar = new QCheckBox(groupBox_Features);
         checkBox_CoeffOfVar->setObjectName(QStringLiteral("checkBox_CoeffOfVar"));
-        checkBox_CoeffOfVar->setEnabled(false);
+        checkBox_CoeffOfVar->setEnabled(true);
         QFont font;
         font.setFamily(QString::fromUtf8("\352\265\264\353\246\274"));
         font.setPointSize(8);
@@ -125,7 +125,7 @@ public:
 
         checkBox_RobustMeanAbsDev = new QCheckBox(groupBox_Features);
         checkBox_RobustMeanAbsDev->setObjectName(QStringLiteral("checkBox_RobustMeanAbsDev"));
-        checkBox_RobustMeanAbsDev->setEnabled(false);
+        checkBox_RobustMeanAbsDev->setEnabled(true);
         checkBox_RobustMeanAbsDev->setFont(font);
         checkBox_RobustMeanAbsDev->setAcceptDrops(false);
         checkBox_RobustMeanAbsDev->setAutoFillBackground(false);
@@ -214,7 +214,7 @@ public:
 
         checkBox_MedianAbsDev = new QCheckBox(groupBox_Features);
         checkBox_MedianAbsDev->setObjectName(QStringLiteral("checkBox_MedianAbsDev"));
-        checkBox_MedianAbsDev->setEnabled(false);
+        checkBox_MedianAbsDev->setEnabled(true);
         checkBox_MedianAbsDev->setFont(font);
         checkBox_MedianAbsDev->setAutoFillBackground(false);
         checkBox_MedianAbsDev->setChecked(false);
@@ -224,7 +224,7 @@ public:
 
         checkBox_QuartileCoeff = new QCheckBox(groupBox_Features);
         checkBox_QuartileCoeff->setObjectName(QStringLiteral("checkBox_QuartileCoeff"));
-        checkBox_QuartileCoeff->setEnabled(false);
+        checkBox_QuartileCoeff->setEnabled(true);
         checkBox_QuartileCoeff->setAutoFillBackground(false);
         checkBox_QuartileCoeff->setChecked(false);
         checkBox_QuartileCoeff->setTristate(false);
@@ -233,7 +233,7 @@ public:
 
         checkBox_Entropy = new QCheckBox(groupBox_Features);
         checkBox_Entropy->setObjectName(QStringLiteral("checkBox_Entropy"));
-        checkBox_Entropy->setEnabled(false);
+        checkBox_Entropy->setEnabled(true);
         checkBox_Entropy->setAutoFillBackground(false);
         checkBox_Entropy->setChecked(false);
         checkBox_Entropy->setTristate(false);
@@ -242,7 +242,7 @@ public:
 
         checkBox_Uniformity = new QCheckBox(groupBox_Features);
         checkBox_Uniformity->setObjectName(QStringLiteral("checkBox_Uniformity"));
-        checkBox_Uniformity->setEnabled(false);
+        checkBox_Uniformity->setEnabled(true);
         checkBox_Uniformity->setAutoFillBackground(false);
         checkBox_Uniformity->setChecked(false);
         checkBox_Uniformity->setTristate(false);
@@ -349,7 +349,7 @@ public:
          << QApplication::translate("popup_Histogram", "32", Q_NULLPTR)
          << QApplication::translate("popup_Histogram", "64", Q_NULLPTR)
         );
-        comboBox_nBins->setCurrentText(QApplication::translate("popup_Histogram", "32", Q_NULLPTR));
+        comboBox_nBins->setCurrentText(QApplication::translate("popup_Histogram", "8", Q_NULLPTR));
     } // retranslateUi
 
 };
