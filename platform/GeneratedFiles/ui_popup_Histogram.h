@@ -136,7 +136,7 @@ public:
 
         checkBox_MaxHisGradient = new QCheckBox(groupBox_Features);
         checkBox_MaxHisGradient->setObjectName(QStringLiteral("checkBox_MaxHisGradient"));
-        checkBox_MaxHisGradient->setEnabled(false);
+        checkBox_MaxHisGradient->setEnabled(true);
         checkBox_MaxHisGradient->setAutoFillBackground(false);
         checkBox_MaxHisGradient->setChecked(false);
         checkBox_MaxHisGradient->setTristate(false);
@@ -145,7 +145,7 @@ public:
 
         checkBox_MinHistGradGrey = new QCheckBox(groupBox_Features);
         checkBox_MinHistGradGrey->setObjectName(QStringLiteral("checkBox_MinHistGradGrey"));
-        checkBox_MinHistGradGrey->setEnabled(false);
+        checkBox_MinHistGradGrey->setEnabled(true);
         checkBox_MinHistGradGrey->setAutoFillBackground(false);
         checkBox_MinHistGradGrey->setChecked(false);
         checkBox_MinHistGradGrey->setTristate(false);
@@ -251,7 +251,7 @@ public:
 
         checkBox_MaxHistGradGrey = new QCheckBox(groupBox_Features);
         checkBox_MaxHistGradGrey->setObjectName(QStringLiteral("checkBox_MaxHistGradGrey"));
-        checkBox_MaxHistGradGrey->setEnabled(false);
+        checkBox_MaxHistGradGrey->setEnabled(true);
         checkBox_MaxHistGradGrey->setAutoFillBackground(false);
         checkBox_MaxHistGradGrey->setChecked(false);
         checkBox_MaxHistGradGrey->setTristate(false);
@@ -260,7 +260,7 @@ public:
 
         checkBox_MinHistGradient = new QCheckBox(groupBox_Features);
         checkBox_MinHistGradient->setObjectName(QStringLiteral("checkBox_MinHistGradient"));
-        checkBox_MinHistGradient->setEnabled(false);
+        checkBox_MinHistGradient->setEnabled(true);
         checkBox_MinHistGradient->setAutoFillBackground(false);
         checkBox_MinHistGradient->setChecked(false);
         checkBox_MinHistGradient->setTristate(false);

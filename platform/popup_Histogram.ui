@@ -183,7 +183,7 @@
     <item row="11" column="1">
      <widget class="QCheckBox" name="checkBox_MaxHisGradient">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="autoFillBackground">
        <bool>false</bool>
@@ -202,7 +202,7 @@
     <item row="13" column="0">
      <widget class="QCheckBox" name="checkBox_MinHistGradGrey">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="autoFillBackground">
        <bool>false</bool>
@@ -419,7 +419,7 @@
     <item row="12" column="0">
      <widget class="QCheckBox" name="checkBox_MaxHistGradGrey">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="autoFillBackground">
        <bool>false</bool>
@@ -438,7 +438,7 @@
     <item row="12" column="1">
      <widget class="QCheckBox" name="checkBox_MinHistGradient">
       <property name="enabled">
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <property name="autoFillBackground">
        <bool>false</bool>

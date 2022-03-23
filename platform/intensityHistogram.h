@@ -61,15 +61,18 @@ class IntensityHistogram
 		int nBins = 32;
 		int nPixels;
 		std::vector<short> vectorOfOriPixels;					// sorted
-		std::vector<unsigned short> vectorOfDiscretizedPixels;	// sorted
+		std::vector<unsigned short> vectorOfDiscretizedPixels;  // sorted
+		std::vector<unsigned short> diffGreyLevels;
 		std::vector<double> hist;
 		std::vector<double> probabilities;
+		std::vector<double> histGradient;
 
 		std::vector<short> getVectorOfPixelsInROI(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
 		std::vector<unsigned short> getVectorOfDiscretizedPixels_nBins();
 		std::vector<unsigned short> getVectorOfDiffGreyLevels();
 		std::vector<double> getHistogram();
-		void calcProbabilities();
+		std::vector<double> getProbabilities();
+		std::vector<double> getHistGradient();
 
 		// put extracted values in 2d vector //
 		std::vector<std::vector<float>> final2DVec;		// slice by slice
@@ -99,8 +102,6 @@ class IntensityHistogram
 		float maxHistGradGreyValue = NAN;
 		float minHistGradient = NAN;
 		float minHistGradGreyValue = NAN;
-		//vector<float> maxHistVecGradient;
-		//vector<float> minHistVecGradient;
 
 		// calculate feature value //
 		void calcMean();
@@ -123,8 +124,10 @@ class IntensityHistogram
 		void calcQuartileCoeff();
 		void calcEntropy();
 		void calcUniformity();
-		void getMaxHistGradient();
-		void getMinHistGradient();
+		void calcMaxHistGradient();
+		void calcMaxHistGradGreyValue();
+		void calcMinHistGradient();
+		void calcMinHistGradGreyValue();
 
 		// feature extraction - slice by slice //
 		void calcFeature(int FEATURE_IDX, std::vector<float> &tempValues1DVec);

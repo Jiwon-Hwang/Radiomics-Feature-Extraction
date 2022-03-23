@@ -119,8 +119,6 @@ vector<unsigned short> IntensityHistogram::getVectorOfDiffGreyLevels() {
 }
 vector<double> IntensityHistogram::getHistogram() {
 
-	vector<unsigned short> diffGreyLevels = getVectorOfDiffGreyLevels();
-
 	vector<double> histVec;
 	unsigned int nCnt;
 	unsigned short greyLevel;
@@ -137,11 +135,34 @@ vector<double> IntensityHistogram::getHistogram() {
 
 	return histVec;
 }
-void IntensityHistogram::calcProbabilities() {
+vector<double> IntensityHistogram::getProbabilities() {
 
-	probabilities = hist; // 둘다 size : nBins
+	vector<double> probabilities(hist.begin(), hist.end()); // 둘다 size : nBins
 	transform(probabilities.begin(), probabilities.end(), probabilities.begin(), bind2nd(divides<float>(), nPixels));
 
+	return probabilities;
+}
+vector<double> IntensityHistogram::getHistGradient() {
+
+	vector<double> histGradient;
+	double actualGradient;
+	
+	for (int i = 1; i < probabilities.size(); i++) {
+		if (i == 1) {
+			actualGradient = (hist[i] - hist[i - 1]);
+		}
+		else if (i == probabilities.size() - 1) {
+			actualGradient = (hist[i] - hist[i - 1]);
+		}
+		else {
+			actualGradient = (hist[i + 1] - hist[i - 1]) / 2;
+		}
+		histGradient.push_back(actualGradient);
+	}
+
+	histGradient.push_back((hist[probabilities.size() - 1] - hist[probabilities.size() - 2]));
+
+	return histGradient;
 }
 
 void IntensityHistogram::calcMean() {
@@ -403,6 +424,64 @@ void IntensityHistogram::calcUniformity() {
 	}
 
 }
+void IntensityHistogram::calcMaxHistGradient() {
+
+	vector<float> maxHistVecGradient(histGradient.begin(), histGradient.end());
+	if (maxHistVecGradient.size() == 0) maxHistVecGradient.push_back(0);
+
+	if (maxHistVecGradient.size() == 1 && maxHistVecGradient[0] == 0) {
+		maxHistGradient = 0;
+		cout << "The histogram gradients could not be calculated, check intensity values in VOI" << endl;
+	}
+	else {
+		maxHistGradient = *max_element(maxHistVecGradient.begin(), maxHistVecGradient.end());
+	}
+
+}
+void IntensityHistogram::calcMaxHistGradGreyValue() {
+
+	vector<float> maxHistVecGradient(histGradient.begin(), histGradient.end());
+	if (maxHistVecGradient.size() == 0) maxHistVecGradient.push_back(0);
+
+	if (maxHistVecGradient.size() == 1 && maxHistVecGradient[0] == 0) {
+		maxHistGradGreyValue = 0;
+		cout << "The histogram gradients could not be calculated, check intensity values in VOI" << endl;
+	}
+	else {
+		maxHistGradGreyValue = max_element(maxHistVecGradient.begin(), maxHistVecGradient.end()) - maxHistVecGradient.begin();
+		maxHistGradGreyValue = diffGreyLevels[maxHistGradGreyValue + 1];
+	}
+
+}
+void IntensityHistogram::calcMinHistGradient() {
+
+	vector<float> minHistVecGradient(histGradient.begin(), histGradient.end());
+	if (minHistVecGradient.size() == 0) minHistVecGradient.push_back(0);
+
+	if (minHistVecGradient.size() == 1 && minHistVecGradient[0] == 0) {
+		minHistGradient = 0;
+		cout << "The histogram gradients could not be calculated, check intensity values in VOI" << endl;
+	}
+	else {
+		minHistGradient = *min_element(minHistVecGradient.begin(), minHistVecGradient.end());
+	}
+
+}
+void IntensityHistogram::calcMinHistGradGreyValue() {
+
+	vector<float> minHistVecGradient(histGradient.begin(), histGradient.end());
+	if (minHistVecGradient.size() == 0) minHistVecGradient.push_back(0);
+
+	if (minHistVecGradient.size() == 1 && minHistVecGradient[0] == 0) {
+		minHistGradGreyValue = 0;
+		cout << "The histogram gradients could not be calculated, check intensity values in VOI" << endl;
+	}
+	else {
+		minHistGradGreyValue = min_element(minHistVecGradient.begin(), minHistVecGradient.end()) - minHistVecGradient.begin();
+		minHistGradGreyValue = diffGreyLevels[minHistGradGreyValue + 1];
+	}
+
+}
 
 void IntensityHistogram::calcFeature(int FEATURE_IDX, vector<float> &tempValues1DVec) {
 	
@@ -502,6 +581,26 @@ void IntensityHistogram::calcFeature(int FEATURE_IDX, vector<float> &tempValues1
 			calcUniformity();
 			tempValues1DVec.push_back(uniformity);
 			break;
+
+		case MAXHISTGRADIENT:
+			calcMaxHistGradient();
+			tempValues1DVec.push_back(maxHistGradient);
+			break;
+
+		case MAXHISTGRADGREY:
+			calcMaxHistGradGreyValue();
+			tempValues1DVec.push_back(maxHistGradGreyValue);
+			break;
+
+		case MINHISTGRADIENT:
+			calcMinHistGradient();
+			tempValues1DVec.push_back(minHistGradient);
+			break;
+
+		case MINHISTGRADGREY:
+			calcMinHistGradGreyValue();
+			tempValues1DVec.push_back(minHistGradGreyValue);
+			break;
 			
 		default:
 			//cout << "error : Unknown Intensity Histogram Feature!" << endl;
@@ -513,12 +612,14 @@ void IntensityHistogram::featureExtraction(short* psImage, unsigned char* pucMas
 	// claer all values
 	clearVariable(); // 슬라이스마다 초기화
 
-	// get histogram and probabilites
+	// get histogram and etc
 	vectorOfOriPixels = getVectorOfPixelsInROI(psImage, pucMask, nHeight, nWidth);
 	vectorOfDiscretizedPixels = getVectorOfDiscretizedPixels_nBins(); // 슬라이스마다 초기화
 	nPixels = vectorOfDiscretizedPixels.size();
+	diffGreyLevels = getVectorOfDiffGreyLevels();
 	hist = getHistogram();
-	calcProbabilities();
+	probabilities = getProbabilities();
+	histGradient = getHistGradient();
 
 
 	vector<float> tempValues1DVec; // 슬라이스마다 초기화
