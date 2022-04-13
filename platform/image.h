@@ -1,5 +1,4 @@
 #pragma once
-#include <iostream>
 #include <string>
 
 #define SAFE_DELETE(p) {if(p) delete(p); p=NULL;}
@@ -11,35 +10,47 @@ template <typename T>
 class CImage {
 // variable
 public:
-	std::string m_sImagePath;		// image file path
-	std::string m_sImageName;		// image file name
-	std::string m_sImageExtension;	// image file extension
+	// image
+	std::string m_sImagePath;			// image file path
+	std::string m_sImageName;			// image file name
+	std::string m_sImageNameRemoveTag;	// imagename에서 tag를 제거한 이름
+	std::string m_sImageExtension;		// image file extension
+	
+	T* m_image;							// image
+	int m_nWidth;						// image width
+	int m_nHeight;						// image height
+	int m_nChannel;						// image channel
 
-	T* m_image;						// image
-	int m_nWidth;					// image width
-	int m_nHeight;					// image height
-	int m_nChannel;					// image channel
+	float m_fImagePositionX;			// image position X
+	float m_fImagePositionY;			// image position Y
+	float m_fImagePositionZ;			// image position Z
 
-	float m_fImagePositionX;		// image position X
-	float m_fImagePositionY;		// image position Y
-	float m_fImagePositionZ;		// image position Z
+	float m_fImageOrientationRowX;		// image orientaiton row X
+	float m_fImageOrientationRowY;		// image orientaiton row Y
+	float m_fImageOrientationRowZ;		// image orientaiton row Z
+	float m_fImageOrientationColX;		// image orientation col X
+	float m_fImageOrientationColY;		// image orientation col Y
+	float m_fImageOrientationColZ;		// image orientation col Z
 
-	float m_fImageOrientationRowX;	// image orientaiton row X
-	float m_fImageOrientationRowY;	// image orientaiton row Y
-	float m_fImageOrientationRowZ;	// image orientaiton row Z
-	float m_fImageOrientationColX;	// image orientation col X
-	float m_fImageOrientationColY;	// image orientation col Y
-	float m_fImageOrientationColZ;	// image orientation col Z
+	float m_fPixelSpacingX;				// pixel spacing
+	float m_fPixelSpacingY;				// pixel spacing
+	float m_fSliceThickness;			// slice thickness
 
-	float m_fPixelSpacingX;			// pixel spacing
-	float m_fPixelSpacingY;			// pixel spacing
-	float m_fSliceThickness;		// slice thickness
+	int m_nWL;							// window level
+	int m_nWW;							// window width
+	int m_nInstanceNumber;				// instance number
 
-	int m_nWL;						// window level
-	int m_nWW;						// window width
-	int m_nInstanceNumber;			// instance number
+	// mask
+	std::string m_sMaskPath;			// mask file path
+	std::string m_sMaskName;			// mask file name
+	std::string m_sMaskNameRemoveTag;	// maskname에서 tag를 제거한 이름
+	std::string m_sMaskExtension;		// mask file extension
+	
+	unsigned char* m_pucMask;			// mask
+	int m_nMaskChannel;					// mask channel
 
-	CSeries* m_series;				// series
+	// series
+	CSeries* m_series;					// series
 
 // function
 public:
@@ -51,11 +62,14 @@ public:
 	template <typename T2>
 	void convertTo(CImage<T2>* &pCiOtherTypeImage);
 
+	// image ///////////////////////////////////////////////////
 	// image path, name, extension
 	std::string getImagePath();
 	void setImagePath(std::string sImagePath);
 	std::string getImageName();
 	void setImageName(std::string sImageName);
+	std::string getImageNameRemoveTag();
+	void setImageNameRemoveTag(std::string sImageNameRemoveTag);
 	std::string getImageExtension();
 	void setImageExtension(std::string sImageExtension);
 
@@ -96,6 +110,22 @@ public:
 	int getInstanceNumber();
 	void setInstanceNumber(int nInstanceNumber);
 
+	// mask ///////////////////////////////////////////////////
+	// mask path, name, extension
+	std::string getMaskPath();
+	void setMaskPath(std::string sMaskPath);
+	std::string getMaskName();
+	void setMaskName(std::string sMaskName);
+	std::string getMaskNameRemoveTag();
+	void setMaskNameRemoveTag(std::string sMaskNameRemoveTag);
+	std::string getMaskExtension();
+	void setMaskExtension(std::string sMaskExtension);
+
+	unsigned char* getMask();
+	bool setMask(unsigned char* pucMask, int nWidth, int nHeight, int nChannel=1);
+	bool copyMask(unsigned char* &pucMask, int &nWidth, int &nHeight);
+	bool copyMask(unsigned char* &pucMask, int &nWidth, int &nHeight, int &nChannel);
+
 	// series 정보
 	CSeries* getSeries();
 	void setSeries(CSeries* pCiSeries);
@@ -117,7 +147,6 @@ void CImage<T>::init() {
 	m_sImagePath = "";
 	m_sImageName = "";
 	m_sImageExtension = "";
-	m_series = NULL;
 
 	m_image = NULL;
 	m_nWidth = 0;
@@ -142,6 +171,15 @@ void CImage<T>::init() {
 	m_nWL = 0;
 	m_nWW = 0;
 	m_nInstanceNumber = 0;
+
+	m_sImageNameRemoveTag = "";
+	m_sMaskPath = "";
+	m_sMaskName = "";
+	m_sMaskExtension = "";
+	m_pucMask = NULL;
+	m_nMaskChannel = 0;
+
+	m_series = NULL;
 }
 template <typename T>
 void CImage<T>::clear() {
@@ -151,7 +189,6 @@ template <typename T>
 CImage<T>* CImage<T>::copy() {
 	CImage<T>* pCiImage = new CImage<T>();
 
-	pCiImage->m_series = m_series;
 	pCiImage->m_sImagePath = m_sImagePath;
 	pCiImage->m_sImageName = m_sImageName;
 	pCiImage->m_sImageExtension = m_sImageExtension;
@@ -176,6 +213,14 @@ CImage<T>* CImage<T>::copy() {
 	pCiImage->m_nWW = m_nWW;
 	pCiImage->m_nInstanceNumber = m_nInstanceNumber;
 
+	pCiImage->m_sMaskPath = m_sMaskPath;
+	pCiImage->m_sMaskName = m_sMaskName;
+	pCiImage->m_sMaskExtension = m_sMaskExtension;
+	pCiImage->m_pucMask = m_pucMask;
+	pCiImage->m_nMaskChannel = m_nMaskChannel;
+
+	pCiImage->m_series = m_series;
+
 	return pCiImage;
 }
 template <typename T> template <typename T2>
@@ -184,8 +229,6 @@ void CImage<T>::convertTo(CImage<T2>* &pCiOtherTypeImage) {
 		return;
 	}
 	pCiOtherTypeImage = new CImage<T2>();
-
-	pCiOtherTypeImage->m_series = m_series;
 	pCiOtherTypeImage->m_sImagePath = m_sImagePath;
 	pCiOtherTypeImage->m_sImageName = m_sImageName;
 	pCiOtherTypeImage->m_sImageExtension = m_sImageExtension;
@@ -216,6 +259,14 @@ void CImage<T>::convertTo(CImage<T2>* &pCiOtherTypeImage) {
 	pCiOtherTypeImage->m_nWL = m_nWL;
 	pCiOtherTypeImage->m_nWW = m_nWW;
 	pCiOtherTypeImage->m_nInstanceNumber = m_nInstanceNumber;
+
+	pCiOtherTypeImage->m_sMaskPath = m_sMaskPath;
+	pCiOtherTypeImage->m_sMaskName = m_sMaskName;
+	pCiOtherTypeImage->m_sMaskExtension = m_sMaskExtension;
+	pCiOtherTypeImage->m_pucMask = m_pucMask;
+	pCiOtherTypeImage->m_nMaskChannel = m_nMaskChannel;
+
+	pCiOtherTypeImage->m_series = m_series;
 }
 
 template <typename T>
@@ -236,6 +287,14 @@ void CImage<T>::setImageName(std::string sImageName) {
 	m_sImageName = sImageName;
 }
 template <typename T>
+std::string CImage<T>::getImageNameRemoveTag() {
+	return m_sImageNameRemoveTag;
+}
+template <typename T>
+void CImage<T>::setImageNameRemoveTag(std::string sImageNameRemoveTag) {
+	m_sImageNameRemoveTag = sImageNameRemoveTag;
+}
+template <typename T>
 std::string CImage<T>::getImageExtension() {
 	return m_sImageExtension;
 }
@@ -244,12 +303,24 @@ void CImage<T>::setImageExtension(std::string sImageExtension) {
 	m_sImageExtension = sImageExtension;
 }
 
+
 template<typename T>
 void CImage<T>::clearImage() {
+	// image
 	m_nWidth = 0;
 	m_nHeight = 0;
 	m_nChannel = 0;
-	SAFE_DELETE_ARRAY(m_image);
+	if(m_image != NULL) {
+		SAFE_DELETE_ARRAY(m_image);
+	}	
+	m_image = NULL;
+
+	// mask
+	m_nMaskChannel = 0;
+	if(m_pucMask != NULL) {
+		SAFE_DELETE_ARRAY(m_pucMask);
+	}
+	m_pucMask = NULL;
 }
 template<typename T>
 bool CImage<T>::setImage(CImage<T>* pCiImage) {
@@ -271,8 +342,6 @@ bool CImage<T>::setImage(CImage<T>* pCiImage) {
 		SAFE_DELETE_ARRAY(m_image);
 	}
 	m_image = new T[nSize];
-	memcpy_s(m_image, sizeof(T)*nSize, pCiImage->m_image, sizeof(T)*nSize);
-	
 	for(int i=0; i< nSize; i++) {
 		m_image[i] = pCiImage->m_image[i];
 	}
@@ -287,17 +356,18 @@ bool CImage<T>::setImage(T* pImage, int nWidth, int nHeight, int nChannel=1) {
 		return false;
 	}
 
+	m_nWidth = nWidth;
+	m_nHeight = nHeight;
+	m_nChannel = nChannel;
 	int nSize = nWidth * nHeight* nChannel;
 
 	if(m_image != NULL) {
 		SAFE_DELETE_ARRAY(m_image);
 	}
 	m_image = new T[nSize];
-	memcpy_s(m_image, sizeof(T)*nSize, pImage, sizeof(T)*nSize);
-
-	m_nWidth = nWidth;
-	m_nHeight = nHeight;
-	m_nChannel = nChannel;
+	for(int i=0; i< nSize; i++) {
+		m_image[i] = pImage[i];
+	}
 
 	return true;
 }
@@ -330,7 +400,9 @@ bool CImage<T>::copyImage(T* &pImage, int& nWidth, int& nHeight, int& nChannel) 
 		int nSize = m_nWidth * m_nHeight* m_nChannel;
 
 		pImage = new T[nSize];
-		memcpy_s(pImage, sizeof(T)*nSize, m_image, sizeof(T)*nSize);
+		for(int i=0; i< nSize; i++) {
+			pImage[i] = m_image[i];
+		}
 
 		nWidth = m_nWidth;
 		nHeight = m_nHeight;
@@ -426,6 +498,103 @@ int CImage<T>::getInstanceNumber() {
 template <typename T>
 void CImage<T>::setInstanceNumber(int nInstanceNumber) {
 	m_nInstanceNumber = nInstanceNumber;
+}
+
+template <typename T>
+std::string CImage<T>:: getMaskPath() {
+	return m_sMaskPath;
+}
+template <typename T>
+void CImage<T>::setMaskPath(std::string sMaskPath) {
+	m_sMaskPath = sMaskPath;
+}
+
+template <typename T>
+std::string CImage<T>::getMaskName() {
+	return m_sMaskName;
+}
+template <typename T>
+void CImage<T>::setMaskName(std::string sMaskName) {
+	m_sMaskName = sMaskName;
+}
+
+template <typename T>
+std::string CImage<T>::getMaskNameRemoveTag() {
+	return m_sMaskNameRemoveTag;
+}
+template <typename T>
+void CImage<T>::setMaskNameRemoveTag(std::string sMaskNameRemoveTag) {
+	m_sMaskNameRemoveTag = sMaskNameRemoveTag;
+}
+
+template <typename T>
+std::string CImage<T>::getMaskExtension() {
+	return m_sMaskExtension;
+}
+template <typename T>
+void CImage<T>::setMaskExtension(std::string sMaskExtension) {
+	m_sMaskExtension = sMaskExtension;
+}
+
+template <typename T>
+unsigned char* CImage<T>::getMask() {
+	return m_pucMask;
+}
+template <typename T>
+bool CImage<T>::setMask(unsigned char* pucMask, int nWidth, int nHeight, int nChannel) {
+	// exception
+	if(pucMask == NULL || nWidth != m_nWidth || nHeight != m_nHeight || nChannel <= 0) {
+		return false;
+	}
+
+	int nSize = nWidth * nHeight * nChannel;
+
+	if(m_pucMask != NULL) {
+		SAFE_DELETE_ARRAY(m_pucMask);
+	}
+	m_pucMask = new unsigned char[nSize];
+	for(int i=0; i< nSize; i++) {
+		m_pucMask[i] = pucMask[i];
+	}
+	m_nMaskChannel = nChannel;
+
+	return true;
+}
+template <typename T>
+bool CImage<T>::copyMask(unsigned char* &pucMask, int &nWidth, int &nHeight) {
+	int nChannel = 1;
+
+	return copyMask(pucMask, nWidth, nHeight, nChannel);
+}
+template <typename T>
+bool CImage<T>::copyMask(unsigned char* &pucMask, int &nWidth, int &nHeight, int &nChannel) {
+	// exception
+	if(pucMask != NULL) {
+		return false;
+	}
+
+	if(m_pucMask == NULL) {
+		pucMask = NULL;
+		nWidth = 0;
+		nHeight = 0;
+		nChannel = 0;
+
+		return false;
+	}
+	else {
+		int nSize = m_nWidth * m_nHeight * m_nMaskChannel;
+
+		pucMask = new unsigned char[nSize];
+		for(int i=0; i< nSize; i++) {
+			pucMask[i] = m_pucMask[i];
+		}
+
+		nWidth = m_nWidth;
+		nHeight = m_nHeight;
+		nChannel = m_nMaskChannel;
+
+		return true;
+	}
 }
 
 template <typename T>

@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+
 #include "image.h"
 
 class CSeries {
@@ -21,8 +22,9 @@ public:
 	std::string m_sSeriesName;
 	std::string m_sModality;
 
+	std::string m_sSeriesPath;
+
 	std::vector<CImage<short>*> m_images;				// image
-	std::vector<CImage<unsigned char>*> m_masks;		// mask
 
 // function
 public:
@@ -39,9 +41,4 @@ public:
 	void setImage(int nIdx, CImage<short>* pCiImage);
 	CImage<short>* getImage(int nIdx);
 	int getImageCount(void);
-	
-	void addMask(CImage<unsigned char>* pCiMask);
-	void setMask(int nIdx, CImage<unsigned char>* pCiMask);
-	CImage<unsigned char>* getMask(int nIdx);
-	int getMaskCount(void);
 };

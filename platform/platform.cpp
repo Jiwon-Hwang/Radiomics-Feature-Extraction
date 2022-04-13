@@ -207,9 +207,11 @@ void CPlatform::createPopup() {
 	// create pop-up instance
 	ppopup_Histogram = new popup_Histogram;
 	ppopup_Histogram->setModal(true);
+
+	ppopup_GLCM = new popup_GLCM;
+	ppopup_GLCM->setModal(true);
+
 	/*
-	ppopup_Histogram = new popup_Histogram;
-	ppopup_Histogram->setModal(true);
 	ppopup_Histogram = new popup_Histogram;
 	ppopup_Histogram->setModal(true);
 	ppopup_Histogram = new popup_Histogram;
@@ -267,7 +269,7 @@ void CPlatform::showPopUp(QObject* sender) {
 	}
 
 	if (sender == ui.checkBox_GLCM) {
-		//ppopup_Histogram->show();
+		ppopup_GLCM->show();
 	}
 
 	if (sender == ui.checkBox_GLRLM) {
@@ -334,6 +336,18 @@ void CPlatform::loadSettings() {
 		settings.endGroup();
 
 
+		// GLCM (popup) 
+		settings.beginGroup("popup_GLCM");
+
+		int nfeatures_GLCM = ppopup_GLCM->ui->groupBox_Features->findChildren<QCheckBox *>().size();
+		for (int i = 0; i < nfeatures_GLCM; i++) {
+			ppopup_GLCM->filterGroup->button(i)->setChecked(settings.value(ppopup_GLCM->filterGroup->button(i)->objectName(), false).toBool());
+		}
+
+		ppopup_GLCM->ui->comboBox_nBins->setCurrentText(settings.value(ppopup_GLCM->ui->comboBox_nBins->objectName(), "32").toString());
+
+		settings.endGroup();
+
 		ui.pushButton_run->setEnabled(true); // enable run button
 
 	}
@@ -391,6 +405,22 @@ void CPlatform::saveSettings() {
 	// Morphological (popup)
 
 	// GLCM (popup)
+	settings.beginGroup("popup_GLCM");
+
+	glcm.isCheckedFeature.assign(GLCM::FEATURE_COUNT, false);
+	glcm.nCheckedFeatures = 0;
+
+	int nfeatures_GLCM = ppopup_GLCM->ui->groupBox_Features->findChildren<QCheckBox *>().size();
+	for (int i = 0; i < nfeatures_GLCM; i++) {
+		settings.setValue(ppopup_GLCM->filterGroup->button(i)->objectName(), QVariant(ppopup_GLCM->filterGroup->button(i)->isChecked()));
+		glcm.isCheckedFeature[i] = ppopup_GLCM->filterGroup->button(i)->isChecked();
+		if (glcm.isCheckedFeature[i] == true) glcm.nCheckedFeatures++;
+	}
+
+	settings.setValue(ppopup_GLCM->ui->comboBox_nBins->objectName(), ppopup_GLCM->ui->comboBox_nBins->currentText());
+	glcm.nBins = ppopup_GLCM->ui->comboBox_nBins->currentText().toInt(); // nBins == sizeMatrix
+
+	settings.endGroup();
 
 	// GLRLM (popup)
 
@@ -404,31 +434,31 @@ void CPlatform::initIsActivatedFamily(int FAMILY_IDX) {
 
 	switch (FAMILY_IDX) 
 	{
-		case INTENSEHISTO:
+		case E_INTENSEHISTO:
 			if (settings.value(ui.checkBox_Histogram->objectName()).toBool() == true) {
 				intenseHisto.isActivatedFamily = true;
 			}
 			break;
 
-		case LOCALINTENSE:
+		case E_LOCALINTENSE:
 			if (settings.value(ui.checkBox_Intensity->objectName()).toBool() == true) {
 				localIntense.isActivatedFamily = true;
 			}
 			break;
 
-		case MORPHOLOGY:
+		case E_MORPHOLOGY:
 			if (settings.value(ui.checkBox_Morph->objectName()).toBool() == true) {
 				morphology.isActivatedFamily = true;
 			}
 			break;
 
-		case GLCM:
+		case E_GLCM:
 			if (settings.value(ui.checkBox_GLCM->objectName()).toBool() == true) {
 				glcm.isActivatedFamily = true;
 			}
 			break;
 
-		case GLRLM:
+		case E_GLRLM:
 			if (settings.value(ui.checkBox_GLRLM->objectName()).toBool() == true) {
 				glrlm.isActivatedFamily = true;
 			}
@@ -633,8 +663,8 @@ void CPlatform::readImage(QStringList list)
 		setProgressBarValue(i, ni);
 	}
 
-	m_ciData.matchingImageAndMask();
-	m_ciData.sortingImageAndMask();
+	//m_ciData.matchingImageAndMask();
+	//m_ciData.sortingImageAndMask();
 
 	// 첫번째 Series, 첫번째 image
 	showImage(0);
@@ -777,7 +807,11 @@ void CPlatform::setCheckedFamilyState() { // check box 클릭될 때마다(시그널) 호�
 	}
 
 	if (obj == ui.checkBox_GLCM) {
+		glcm.isActivatedFamily = !glcm.isActivatedFamily;
 
+		if (glcm.isActivatedFamily == true) {
+			showPopUp(obj); // pop-up
+		}
 	}
 
 	if (obj == ui.checkBox_GLRLM) {
@@ -800,10 +834,13 @@ void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, int nH
 
 	}
 
-	if (ui.checkBox_GLCM->isChecked()) {
-
+	if (glcm.isActivatedFamily) {
+		glcm.featureExtraction(psImage, pucMask, nHeight, nWidth);
 	}
 
+	if (glrlm.isActivatedFamily) {
+		//glrlm.featureExtraction(psImage, pucMask, nHeight, nWidth);
+	}
 }
 
 void CPlatform::averageAllSlices() {
@@ -820,7 +857,11 @@ void CPlatform::averageAllSlices() {
 
 	}
 
-	if (ui.checkBox_GLCM->isChecked()) {
+	if (glcm.isActivatedFamily) {
+		glcm.averageAllValues();
+	}
+
+	if (ui.checkBox_GLRLM->isChecked()) {
 
 	}
 
@@ -953,6 +994,11 @@ void CPlatform::presetCSVFile(string csvName) {
 			resultCSV << "Histogram" << ",";
 		}
 	}
+	if (glcm.isActivatedFamily) {
+		for (int i = 0; i < glcm.nCheckedFeatures; i++) {
+			resultCSV << "GLCM" << ",";
+		}
+	}
 	/*
 	if (localIntense.isActivatedFamily) {
 	for (int i = 0; i < localIntense.nCheckedFeatures; i++) {
@@ -964,9 +1010,9 @@ void CPlatform::presetCSVFile(string csvName) {
 	resultCSV << "Morphology" << ",";
 	}
 	}
-	if (glcm.isActivatedFamily) {
-	for (int i = 0; i < glcm.nCheckedFeatures; i++) {
-	resultCSV << "GLCM" << ",";
+	if (glrlm.isActivatedFamily) {
+	for (int i = 0; i < glrlm.nCheckedFeatures; i++) {
+	resultCSV << "GLRLM" << ",";
 	}
 	}
 	*/
@@ -994,7 +1040,16 @@ void CPlatform::presetCSVFile(string csvName) {
 
 	}
 
-	if (ui.checkBox_GLCM->isChecked()) {
+	if (glcm.isActivatedFamily) {
+		vector<string> featureNames(GLCM::FEATURE_COUNT, "");
+		glcm.defineFeatureNames(featureNames); // 일단 전체 feature name들 get
+		for (int i = 0; i < featureNames.size(); i++) {
+			if (glcm.isCheckedFeature[i]) {
+				resultCSV << featureNames[i] << ",";
+			}
+		}
+	}
+	if (ui.checkBox_GLRLM->isChecked()) {
 
 	}
 
@@ -1047,7 +1102,11 @@ void CPlatform::writeCSVFeatureValue(string csvName) {
 
 	}
 
-	if (ui.checkBox_GLCM->isChecked()) {
+	if (glcm.isActivatedFamily) {
+		writeCSVCheckedValue(glcm.final1DVec, csvName);
+	}
+
+	if (ui.checkBox_GLRLM->isChecked()) {
 
 	}
 
@@ -1064,10 +1123,11 @@ void CPlatform::writeCSVFile(int seriesIdx, string csvName) {
 void CPlatform::clearAll(int seriesIdx) {
 	// for loop으로 대체 가능 (for auto, break)
 	intenseHisto.clearVector();
+	glcm.clearVector();
 	/*
 	localIntense.clear();
 	morphology.clear();
-	glcm.clear();
+	glrlm.clear();
 	*/
 
 	cout << "clear series[" << seriesIdx << "]'s all values!" << endl;
@@ -1179,10 +1239,11 @@ void CPlatform::run()
 		int nMaskCnt = 0;	
 		short** ppsImages = NULL;
 		unsigned char** ppucMasks = NULL;
-
+		
 		// copy series //
 		m_ciData.copyImages(i, ppsImages, nImageCnt, nWidth, nHeight);
 		m_ciData.copyMasks(i, ppucMasks, nMaskCnt, nWidth, nHeight);
+		m_ciData.clearImages(i); // clear ori m_ciData (images, masks)
 
 		// slice by slice //
 		for (int j = 0; j < nImageCnt; j++) {
@@ -1196,12 +1257,12 @@ void CPlatform::run()
 				ppsImages[j] = (short*)img_filtered.data; // 주소 변경
 
 				// feature extraction //
-				featureExtraction(ppsImages[j], ppucMasks[j], nHeight, nWidth);
+				featureExtraction(ppsImages[j], ppucMasks[j], nHeight, nWidth); // final2DVec에 각 슬라이스들 값 누적
 			}
 		}
 
 		// mean all ROI slices //
-		averageAllSlices();
+		averageAllSlices(); // final1DVec에 각 슬라이스 평균값 넣기
 
 		// write csv file //
 		writeCSVFile(i, csvName);
@@ -1211,6 +1272,7 @@ void CPlatform::run()
 
 		// 메모리 소멸 //
 		SAFE_DELETE_VOLUME(ppucMasks, nMaskCnt);
+
 
 	}
 

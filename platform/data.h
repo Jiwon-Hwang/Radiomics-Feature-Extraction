@@ -1,11 +1,38 @@
 #pragma once
-#include <vector>
-#include <list>
-#include <iostream>
-#include <fstream>
-#include <io.h>	// window
-#include <algorithm>
 
+// config
+#define DEBUG 0							// 0: false, 1: true (VLD)
+#define THREAD 1						// 0: false, 1: true (Thread on/off)
+#define LAZY_LOADING 1					// 0: false, 1: true (Lazy loading on/off)
+#define QT 0							// 0: false, 1: true (QT에서 사용하는 경우)
+
+/////////////////////////////////////////////////////////////////////////////
+
+// standard lib
+#include <vector>
+#include <iostream>
+#include <io.h>					// window
+#include <algorithm>
+#include <functional>
+#include <direct.h>				// mkdir
+
+// thread lib
+#if THREAD
+#include <concurrent_vector.h>	// thread safe vector
+#include <thread>
+#include <mutex>
+#include <future>
+#endif
+
+// qt lib (https://doc.qt.io/qt-5/qthread.html)
+// (http://greenday96.blogspot.com/2020/11/qt-movetothread-qthread-wait.html)
+// https://evileg.com/en/post/152/
+#if QT
+#include <QObject>
+#include <qthread.h>
+#endif
+
+// 3rdparty lib
 #include <opencv.hpp>
 #include "dcmtk/dcmimgle/dcmimage.h"
 #include "dcmtk/config/osconfig.h" 
@@ -14,42 +41,102 @@
 #include "tiffio.h"
 #include "nifti1_io.h"
 
-#include "series.h"
+//
 #include "image.h"
+#include "series.h"
 
-#define LAZY_LOADING true
+//
+#if DEBUG
+#define DEBUG_LOG(x) std::cout << x
+#define DEBUG_LOG_DETAIL(function, line, x) std::cout << function << "[" << line << "]" << std::endl << x
+#include <vld.h>
+#else
+#define DEBUG_LOG(x)
+#define DEBUG_LOG_DETAIL(function, line, x)
+#endif
 
+/////////////////////////////////////////////////////////////////////////////
+#if QT
+class CData: public QObject
+#else
 class CData
+#endif
 {
+public:
+	enum SAVE_TYPE {SAVE_IMAGE_ONLY, SAVE_MASK_ONLY, SAVE_OVERLAY};
+	enum SAVE_OPTION {SAVE_DEFAULT, SAVE_IMAGE_WINDOW, SAVE_MASK_BINARY};
+	enum LOAD_STATUS {
+		SUCCESS=1, UNREADBLE_FILE_FORMAT=0, UNREADBLE_FILE=-1, INPUT_PARAM_ERR=-2, DUPLICATE_FILE=-3, 
+		DCM_FILE_FORMAT_ERR=-4, DCM_IMG_ERR=-5, EXCEPT_FILE=-6,
+		BAD_ALLOC=-999
+	};
+
 // variable
+public:
+	bool m_isLoading;
+
 private:
-	// Series(Image, Mask) 정보, 단, image와 Mask는 항상 같은 짝으로 유지되어야 한다
-	std::vector<CSeries*> m_seriesList;		
-
-	// Image와 매칭되지 못한 Mask가 들어있음
-	std::vector<std::string> m_nonMatchedMaskPaths;
-
+	// preference
 	std::string m_sLogPath;
 	std::ofstream m_sLog;
 
+
+#if THREAD
+	Concurrency::concurrent_vector<CSeries*> m_seriesList;
+#else
+	std::vector<CSeries*> m_seriesList;
+#endif
+
+#if QT
+	QThread* m_pThread;
+	std::vector<std::string> m_sPaths;
+	bool m_bReadRecursive;
+#endif
+	
+	// Preload용 (Image, Image 정보가 mapping 되어 있지 않은 상태)
+	struct PreLoadContainer {
+		int isLoad;
+		bool isMask;
+
+		std::string sFilePath;
+		CSeries* pCiSeries;
+		std::vector<CImage<short>*> pCiImages;
+		std::vector<CImage<unsigned char>*> pCiMasks;
+	};
+	std::vector<PreLoadContainer*> m_preLoad;
+
 // function
+
+#if QT
+	Q_OBJECT
 public:
 	CData();
-	CData(std::string sLogPath);
+	CData(QThread* pThread);
 	~CData();
+	void setQThread(QThread* pThread);
+	void setQThreadParam(std::vector<std::string> sPaths, bool bReadRecursive);
+signals:
+	void sendDataProgress(int, int, int, int);
+public slots:
+	void doWork();
+
+#else
+public:
+	CData();
+	~CData();
+#endif
+
+public:
 	void init(void);
-	void init(std::string sLogPath);
 	void clear(void);
 	void clearImages(int nSeriesIdx=-1);		// image class의 image 메모리만 소멸
 
 	// operator
 	friend std::ostream& operator<< (std::ostream& stream, const CData& obj);
 
-	void readDir(std::string sPath);			// image 파일 혹은 폴더를 순회하면서 읽음
-	void readImage(std::string sImagePath);		// image 파일을 읽음
-	void checkIsEmptyLog(std::string sFinalLogPath); // error file이 비어있는지 체크, 삭제, 파일명 변경
-	void matchingImageAndMask();				
-	void sortingImageAndMask();
+	// readImage
+	void readImage(std::string sPath, bool bReadRecursive=true, std::function<void(int, int)>* pCallback=NULL);
+	void readImage(std::vector<std::string> sPaths, bool bReadRecursive=true, std::function<void(int, int)>* pCallback=NULL);
 
 	// series
 	CSeries* getSeries(int nSeriesIdx);
@@ -58,41 +145,50 @@ public:
 	bool addSeries(CSeries* pCiSeries);
 
 	// log file
-	void setLogPath(std::string sLogPath);
+	void setLogPath(std::string sPath);
+	void checkIsEmptyLog(std::string sFinalLogPath);
 
 	// 아래 함수는 개발 편의성을 위해서 제공
 	// nSliceIdx: image를 Series와 관계없이 순서대로 나열했을 때, image의 순서
 	CImage<short>* getCImage(int nSliceIdx);
 	CImage<short>* getCImage(int nSeriesIdx, int nImageIdx);
 	short* getImage(int nSliceIdx);
-	bool setImage(int nSliceIdx, CImage<short>* pCiImage);
+	short* getImage(int nSeriesIdx, int nImageIdx);
 	bool setImage(int nSliceIdx, short* psImage, int nWidth, int nHeight, int nChannel=1);
-	bool setImage(int nSeriesIdx, int nImageIdx, CImage<short>* pCiImage);
 	bool setImage(int nSeriesIdx, int nImageIdx, short* psImage, int nWidth, int nHeight, int nChannel=1);
 	bool setImages(int nSeriesIdx, short** ppsImages, int nImageCnt, int nWidth, int nHeight, int nChannel=1);
-	bool setImages(int nStartSliceIdx, int nEndSliceIdx, short** ppsImages, int nImageCnt, int nWidth, int nHeight, int nChannel=1);
 	bool copyImage(int nSliceIdx, short* &psImage, int &nWidth, int &nHeight);
 	bool copyImage(int nSliceIdx, short* &psImage, int &nWidth, int &nHeight, int &nChannel);
+	bool copyImage(int nSeriesIdx, int nImageIdx, short* &psImage, int &nWidth, int &nHeight);
+	bool copyImage(int nSeriesIdx, int nImageIdx, short* &psImage, int &nWidth, int &nHeight, int &nChannel);
 	bool copyImages(int nSeriesIdx, short** &ppsImages, int &nImageCnt, int &nWidth, int &nHeight);
 	bool copyImages(int nSeriesIdx, short** &ppsImages, int &nImageCnt, int &nWidth, int &nHeight, int &nChannel);
-	bool copyImages(int nStartSliceIdx, int nEndSliceIdx, short** &ppsImages, int &nImageCnt, int &nWidth, int &nHeight);
-	bool copyImages(int nStartSliceIdx, int nEndSliceIdx, short** &ppsImages, int &nImageCnt, int &nWidth, int &nHeight, int &nChannel);
 
-	CImage<unsigned char>* getCMask(int nSliceIdx);
-	CImage<unsigned char>* getCMask(int nSeriesIdx, int nMaskIdx);
 	unsigned char* getMask(int nSliceIdx);
-	bool setMask(int nSliceIdx, CImage<unsigned char>* pCiImage);
+	unsigned char* getMask(int nSeriesIdx, int nMaskIdx);
 	bool setMask(int nSliceIdx, unsigned char* pucMask, int nWidth, int nHeight, int nChannel=1);
-	bool setMask(int nSeriesIdx, int nImageIdx, CImage<unsigned char>* pCiMask);
 	bool setMask(int nSeriesIdx, int nImageIdx, unsigned char* pucMask, int nWidth, int nHeight, int nChannel=1);
 	bool setMasks(int nSeriesIdx, unsigned char** ppucMasks, int nMaskCnt, int nWidth, int nHeight, int nChannel=1);
-	bool setMasks(int nStartSliceIdx, int nEndSliceIdx, unsigned char** ppucMasks, int nMaskCnt, int nWidth, int nHeight, int nChannel=1);
 	bool copyMask(int nSliceIdx, unsigned char* &pucMask, int &nWidth, int &nHeight);
 	bool copyMask(int nSliceIdx, unsigned char* &pucMask, int &nWidth, int &nHeight, int &nChannel);
+	bool copyMask(int nSeriesIdx, int nImageIdx, unsigned char* &pucMask, int &nWidth, int &nHeight);
+	bool copyMask(int nSeriesIdx, int nImageIdx, unsigned char* &pucMask, int &nWidth, int &nHeight, int &nChannel);
 	bool copyMasks(int nSeriesIdx, unsigned char** &ppucMasks, int &nMaskCnt, int &nWidth, int &nHeight);
 	bool copyMasks(int nSeriesIdx, unsigned char** &ppucMasks, int &nMaskCnt, int &nWidth, int &nHeight, int &nChannel);
-	bool copyMasks(int nStartSliceIdx, int nEndSliceIdx, unsigned char** &ppucMasks, int &nMaskCnt, int &nWidth, int &nHeight);
-	bool copyMasks(int nStartSliceIdx, int nEndSliceIdx, unsigned char** &ppucMasks, int &nMaskCnt, int &nWidth, int &nHeight, int &nChannel);
+
+	std::string getImagePath(int nSliceIdx);
+	std::string getImagePath(int nSeriesIdx, int nImageIdx);
+	std::string getImageName(int nSliceIdx);
+	std::string getImageName(int nSeriesIdx, int nImageIdx);
+	std::string getImageExtension(int nSliceIdx);
+	std::string getImageExtension(int nSeriesIdx, int nImageIdx);
+
+	std::string getMaskPath(int nSliceIdx);
+	std::string getMaskPath(int nSeriesIdx, int nImageIdx);
+	std::string getMaskImage(int nSliceIdx);
+	std::string getMaskImage(int nSeriesIdx, int nImageIdx);
+	std::string getMaskExtension(int nSliceIdx);
+	std::string getMaskExtension(int nSeriesIdx, int nImageIdx);
 
 	int getWidth(int nSliceIdx);
 	int getWidth(int nSeriesIdx, int nImageIdx);
@@ -100,14 +196,8 @@ public:
 	int getHeight(int nSeriesIdx, int nImageIdx);
 	int getChannel(int nSliceIdx);
 	int getChannel(int nSeriesIdx, int nImageIdx);
-
-	// image information
-	std::string getImagePath(int nSliceIdx);
-	std::string getImagePath(int nSeriesIdx, int nImageIdx);
-	std::string getImageName(int nSliceIdx);
-	std::string getImageName(int nSeriesIdx, int nImageIdx);
-	std::string getImageExtension(int nSliceIdx);
-	std::string getImageExtension(int nSeriesIdx, int nImageIdx);
+	int getMaskChannel(int nSliceIdx);
+	int getMaskChannel(int nSeriesIdx, int nImageIdx);
 
 	void getImagePosition(int nSliceIdx, float& fImagePositionX, float& fImagePositionY, float& fImagePositionZ);
 	void getImagePosition(int nSeriesIdx, int nImageIdx, float& fImagePositionX, float& fImagePositionY, float& fImagePositionZ);
@@ -123,21 +213,58 @@ public:
 	void getWLWW(int nSeriesIdx, int nImageIdx, int& nWL, int& nWW);
 	int getInstanceNumber(int nSliceIdx);
 	int getInstanceNumber(int nSeriesIdx, int nImageIdx);
-	
+
 private:
-	// mask file check rule
-	bool isMask_namingRule(std::string sPath);
-	template<typename T>
-	bool isMask_imageRule(CImage<T>* pCiImage);
+	void analyzeFile(std::vector<PreLoadContainer*>::iterator start, std::vector<PreLoadContainer*>::iterator end, int& nFileCount, std::function<void(int, int)>* pCallback);
 
-	// patient rule
-	template<typename T>
-	void setPatientName(CSeries* pCiSeries, std::vector<CImage<T>*> pCiImages);
-	template<typename T>
-	void setStudyName(CSeries* pCiSeries, std::vector<CImage<T>*> pCiImages);
-	template<typename T>
-	void setSeriesName(CSeries* pCiSeries, std::vector<CImage<T>*> pCiImages);
+	// load
+public:
+	template <typename T>
+	int loadImage(std::string sImagePath, CSeries* &pCiSeries, std::vector<CImage<T>*> &pCiImages);
+private:
+	template <typename T>
+	int loadImage(CImage<T>* pCiImage, bool isMask);
+public:
+	static int loadDICOM_dcmtk(const char* pcFilePath, DcmDataset* &dataSet, std::vector<short*> &images, bool bReadHeaderOnly=false);
+	static int loadImage_opencv(const char* pcFilePath, bool isColor, unsigned char* &pucImage, int &nWidth, int &nHeight, int &nChannel, bool bReadHeaderOnly=false);
+	static int loadNII_libnii(const char* pcImagePath, nifti_1_header &nhdr, std::vector<short*> &images, bool bReadHeaderOnly=false);
+	static int loadTIFF_libtiff(const char* pcImagePath, TIFF* &pTiff, std::vector<unsigned char*> &images, bool bReadHeaderOnly=false);
 
+	// save
+public:
+	bool saveImage(int nSliceIdx, const char* pcImagePath, int nSaveType=SAVE_IMAGE_ONLY, int nSaveOption=SAVE_DEFAULT);
+	bool saveImage(int nSeriesIdx, int nImageIdx, const char* pcImagePath, int nSaveType=SAVE_IMAGE_ONLY, int nSaveOption=SAVE_DEFAULT);
+	bool saveImages(int nSeriesIdx, const char* pcSaveDir, const char* pcExtension="png", int nSaveType=SAVE_IMAGE_ONLY, int nSaveOption=SAVE_DEFAULT);
+private:
+	bool saveImage_opencv(int nSeriesIdx, int nImageIdx, const char* pcImagePath, int nSaveType=SAVE_IMAGE_ONLY, int nSaveOption=SAVE_DEFAULT);
+	bool saveImage_libtiff(int nSeriesIdx, int nImageIdx, const char* pcImagePath, int nSaveType=SAVE_IMAGE_ONLY, int nSaveOption=SAVE_DEFAULT);	// nImageIdx이 -1이면 multiple page
+	bool saveImage_dcmtk(int nSeriesIdx, int nImageIdx, const char* pcImagePath, int nSaveType=SAVE_IMAGE_ONLY, int nSaveOption=SAVE_DEFAULT);
+
+//////////////////////////////////////////////////////////////////////////////////////////
+	// file
+public:
+	static int find(std::string string, std::string value, int n=1);
+	static int rfind(std::string string, std::string value, int n=1);
+	static std::vector<std::string> splitPath(std::string sPath);
+	static std::vector<std::string> splitString(std::string string, char separator);
+	static std::string replaceAll(std::string &str, const std::string& from, const std::string& to);
+	static void makeDir(std::string sPath);
+	static std::string getFileExtension(std::string sFilePath);
+	static std::string getFileName(std::string sFilePath);
+
+private:
+	bool isFile(std::string sPath);
+	bool isFile(_finddata_t fd);
+	void searchingDir(std::string path, std::vector<std::string>& sFilePaths);
+	
+	// rescale
+public:
+	template<typename T>
+	static bool convertDefaultImage (T* &pImage, int nWidth, int nHeight);
+	template<typename T>
+	static bool convertWindowImage (T* &pImage, int nWidth, int nHeight, int nWL, int nWW);
+
+//////////////////////////////////////////////////////////////////////////////////////////
 	// matching, compare rule
 	template<typename T1, typename T2>
 	bool isSameImage(CImage<T1>* pCiImage1, CImage<T2>* pCiImage2);
@@ -145,26 +272,21 @@ private:
 
 	// sorting rule
 	template <typename T>
+	static bool sorting(CImage<T>* &pCiImage1, CImage<T>* &pCiImage2);
+	template <typename T>
 	static bool sorting_fileName(CImage<T>* &pCiImage1, CImage<T>* &pCiImage2);
-	template <typename T>
-	static bool sorting_imagePosition(CImage<T>* &pCiImage1, CImage<T>* &pCiImage2);
-	
-	// load
-	template <typename T>
-	int loadImage(std::string sImagePath, CSeries* &pCiSeries, std::vector<CImage<T>*> &ciImages);
-	template <typename T>
-	bool loadImage(CImage<T>* &pCiImage, bool isMask);
-	bool loadDICOM_dcmtk(const char* pcFilePath, DcmDataset* &dataSet, std::vector<short*> &images, bool bReadHeaderOnly=false);
-	bool loadImage_opencv(const char* pcFilePath, bool isColor, unsigned char* &pucImage, int &nWidth, int &nHeight, int &nChannel, bool bReadHeaderOnly=false);
-	bool loadNII_libnii(const char* pcImagePath, nifti_1_header &nhdr, std::vector<short*> &images, bool bReadHeaderOnly=false);
-	bool loadTIFF_libtiff(const char* pcImagePath, std::vector<unsigned char*> &images, bool bReadImageOnly=false);
 
-	// file
-	bool isFile(std::string sPath);
-	bool isFile(_finddata_t fd);
-	void searchingDir(std::string path, std::list<std::string>& sFilePaths);
-	std::string getFileExtension(std::string sFilePath);
-	std::string getFileName(std::string sFilePath);
-	std::vector<std::string> splitPath(std::string sPath);
-	std::string replaceAll(std::string &str, const std::string& from, const std::string& to);
+	// mask file check rule
+	bool isMask_namingRule(std::string sPath);
+
+	// file 제외 조건
+	bool isExcludeFile(std::string sPath);
+
+	// series, image 내용 변경 rule
+	std::string removeNameTag(std::string sFileName);
+	template<typename T>
+	bool modifySeries(CSeries* pCiSeries, std::vector<CImage<T>*> pCiImages);
+
+	// 저장 경로 rule
+	std::string convertImageSavePath(int nSeriesIdx, int nImageIdx, const char* pcSaveDir, const char* pcExtension, int nSaveType, int nSaveOption);
 };

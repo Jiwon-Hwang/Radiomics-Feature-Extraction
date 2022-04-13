@@ -7,34 +7,48 @@ CSeries::~CSeries() {
 	clear();
 }
 void CSeries::init() {
-	m_sPatientID = "";
-	m_sPatientName = "";
+	m_sPatientID = "";				// (0010,0020)
+	m_sPatientName = "";			// (0010,0010)
 
-	m_sStudyInstanceUID = "";
-	m_sStudyDescription = "";
-	m_sStudyDate = "";
-	m_sStudyName = "";
+	m_sStudyInstanceUID = "";		// (0020,000D)
+	m_sStudyDescription = "";		// (0008,1030)
+	m_sStudyDate = "";				// (0008,0020)
+	m_sStudyName = "";				// none
 
-	m_sSeriesInstanceUID = "";
-	m_sFrameOfReferenceUID = "";
-	m_sSeriesDate = "";
-	m_sSeriesDescription = "";
-	m_sSeriesName = "";
-	m_sModality = "";
+	m_sSeriesInstanceUID = "";		// (0020,000E)
+	m_sFrameOfReferenceUID = "";	// (0020,0052)
+	m_sSeriesDate = "";				// (0008,0021)
+	m_sSeriesDescription = "";		// (0008,103E)
+	m_sSeriesName = "";				// none
+	m_sModality = "";				// (0008,0060)
+
+	m_sSeriesPath = "";
 
 	m_images.clear();
-	m_masks.clear();
 }
 void CSeries::clear() {
 	for(int i=0, ni=m_images.size(); i<ni; i++) {
 		SAFE_DELETE(m_images[i]);
 	}
-	for(int i=0, ni=m_masks.size(); i<ni; i++) {
-		SAFE_DELETE(m_masks[i]);
-	}
+
+	m_sPatientID = "";				// (0010,0020)
+	m_sPatientName = "";			// (0010,0010)
+
+	m_sStudyInstanceUID = "";		// (0020,000D)
+	m_sStudyDescription = "";		// (0008,1030)
+	m_sStudyDate = "";				// (0008,0020)
+	m_sStudyName = "";				// none
+
+	m_sSeriesInstanceUID = "";		// (0020,000E)
+	m_sFrameOfReferenceUID = "";	// (0020,0052)
+	m_sSeriesDate = "";				// (0008,0021)
+	m_sSeriesDescription = "";		// (0008,103E)
+	m_sSeriesName = "";				// none
+	m_sModality = "";				// (0008,0060)
+
+	m_sSeriesPath = "";
 
 	m_images.clear();
-	m_masks.clear();
 }
 CSeries* CSeries::copy() {
 	CSeries* pSeries = new CSeries();
@@ -54,16 +68,12 @@ CSeries* CSeries::copy() {
 	pSeries->m_sSeriesName = m_sSeriesName;
 	pSeries->m_sModality = m_sModality;
 
+	pSeries->m_sSeriesPath = m_sSeriesPath;
+
 	int nImageCount = m_images.size();
 	pSeries->m_images.reserve(nImageCount);
 	for(int i=0, ni=nImageCount; i<ni; i++) {
 		pSeries->m_images[i] = m_images[i]->copy();
-	}
-
-	int nMaskCount = m_masks.size();
-	pSeries->m_masks.reserve(nMaskCount);
-	for(int i=0, ni=nMaskCount; i<ni; i++) {
-		pSeries->m_masks[i] = m_masks[i]->copy();
 	}
 
 	return pSeries;
@@ -71,11 +81,25 @@ CSeries* CSeries::copy() {
 
 std::ostream& operator<<(std::ostream& stream, const CSeries& obj) {
 	int nImageCount = obj.m_images.size();
-	int nMaskCount = obj.m_masks.size();
+	int nImageLoad = 0;
+	int nMaskCount = 0;
+	int nMaskLoad = 0;
+
+	for(int i=0; i< nImageCount; i++) {
+		if(obj.m_images[i]->m_image) {
+			nImageLoad++;
+		}
+		if(obj.m_images[i]->m_pucMask) {
+			nMaskLoad++;
+		}
+		if(obj.m_images[i]->getMaskPath() != "") {
+			nMaskCount++;
+		}
+	}
 
 	stream << "---------------------------------------" << "\n";
-	stream << obj.m_sPatientName << " | " << obj.m_sSeriesName << 
-		" (Image: " << nImageCount << ", " << "Mask: " << nMaskCount << ")\n";
+	stream << obj.m_sPatientName << " | " << obj.m_sStudyName << " | " << obj.m_sSeriesName << 
+		" (Image: " << nImageCount << "(" << nImageLoad << "), " << "Mask: " << nMaskCount << "(" << nMaskLoad << "))\n";
 
 	return stream;
 }
@@ -101,23 +125,4 @@ CImage<short>* CSeries::getImage(int nIdx) {
 }
 int CSeries::getImageCount(void) {
 	return m_images.size();
-}
-
-void CSeries::addMask(CImage<unsigned char>* pCiMask) {
-	pCiMask->setSeries(this);
-	m_masks.push_back(pCiMask);
-}
-void CSeries::setMask(int nIdx, CImage<unsigned char>* mask) {
-	if(m_masks[nIdx]->m_image != NULL) {
-		SAFE_DELETE(m_masks[nIdx]);
-	}
-
-	mask->setSeries(this);
-	m_masks[nIdx] = mask;
-}
-CImage<unsigned char>* CSeries::getMask(int nIdx) {
-	return m_masks[nIdx];
-}
-int CSeries::getMaskCount(void) {
-	return m_masks.size();
 }

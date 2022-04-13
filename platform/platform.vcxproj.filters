@@ -77,6 +77,24 @@
     <ClCompile Include="GeneratedFiles\Release\moc_popup_Histogram.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_data.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_data.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="popup_GLCM.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_popup_GLCM.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_popup_GLCM.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="glcm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="platform.h">
@@ -100,13 +118,19 @@
     <CustomBuild Include="popup_Histogram.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="data.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="popup_GLCM.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="popup_GLCM.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_platform.h">
       <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="data.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="series.h">
       <Filter>Header Files</Filter>
@@ -116,6 +140,12 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_popup_Histogram.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_popup_GLCM.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="glcm.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -39,13 +39,13 @@
 #include "ui_platform.h"
 #include "ui_popup_Histogram.h"
 #include "popup_Histogram.h"
+#include "ui_popup_GLCM.h"
+#include "popup_GLCM.h"
 /*
 #include "ui_popup_Intensity.h"
 #include "popup_Intensity.h"
 #include "ui_popup_Morph.h"
 #include "popup_Morph.h"
-#include "ui_popup_GLCM.h"
-#include "popup_GLCM.h"
 #include "ui_popup_GLRLM.h"
 #include "popup_GLRLM.h"
 */
@@ -61,7 +61,8 @@
 
 #include "imageView.h"
 #include "data.h"
-#include "IntensityHistogram.h"
+#include "intensityHistogram.h"
+#include "glcm.h"
 
 
 #define MAX_FILE_LENGTH 64
@@ -93,18 +94,17 @@ public:
 	
 
 public:	
-	enum FAMILY { INTENSEHISTO, LOCALINTENSE, MORPHOLOGY, GLCM, GLRLM, FAMILY_COUNT };
+	enum FAMILY { E_INTENSEHISTO, E_LOCALINTENSE, E_MORPHOLOGY, E_GLCM, E_GLRLM, FAMILY_COUNT };
 
 	// Feature Family objects
 	IntensityHistogram intenseHisto;
 	IntensityHistogram localIntense;
 	IntensityHistogram morphology;
-	IntensityHistogram glcm;
+	GLCM glcm;
 	IntensityHistogram glrlm;
 	/*
 	LocalIntensity localIntense;
 	Morphological morphology;
-	GLCM glcm;
 	GLRLM glrlm;
 	*/
 
@@ -112,12 +112,11 @@ public:
 	popup_Histogram *ppopup_Histogram;
 	popup_Histogram *ppopup_Intensity;
 	popup_Histogram *ppopup_Morph;
-	popup_Histogram *ppopup_GLCM;
+	popup_GLCM *ppopup_GLCM;
 	popup_Histogram *ppopup_GLRLM;
 	/*
 	popup_Intensity *ppopup_Intensity;
 	popup_Morph *ppopup_Morph;
-	popup_GLCM *ppopup_GLCM;
 	popup_GLRLM *ppopup_GLRLM;
 	*/
 		

@@ -214,7 +214,7 @@ public:
 
         checkBox_Intensity = new QCheckBox(groupBox_Families);
         checkBox_Intensity->setObjectName(QStringLiteral("checkBox_Intensity"));
-        checkBox_Intensity->setEnabled(true);
+        checkBox_Intensity->setEnabled(false);
         checkBox_Intensity->setCheckable(true);
         checkBox_Intensity->setChecked(false);
         checkBox_Intensity->setTristate(false);
@@ -229,7 +229,7 @@ public:
 
         checkBox_GLCM = new QCheckBox(groupBox_Families);
         checkBox_GLCM->setObjectName(QStringLiteral("checkBox_GLCM"));
-        checkBox_GLCM->setEnabled(false);
+        checkBox_GLCM->setEnabled(true);
         checkBox_GLCM->setChecked(false);
 
         verticalLayout_6->addWidget(checkBox_GLCM);

@@ -8,10 +8,6 @@
 #include <deque>
 
 
-class test {
-
-};
-
 class IntensityHistogram 
 {
 	public:

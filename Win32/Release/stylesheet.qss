@@ -7,12 +7,6 @@ QToolTip
      opacity: 100;
 }
 
-QWidget
-{
-    color: #b1b1b1;
-    background-color: #323232;
-}
-
 QWidget:item:hover
 {
     background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #ca0619);
@@ -22,6 +16,11 @@ QWidget:item:hover
 QWidget:item:selected
 {
     background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #d7801a);
+}
+
+QDoubleSpinBox
+{
+	color: #000000;
 }
 
 QMenuBar::item
@@ -85,7 +84,6 @@ QWidget:disabled
 
 QAbstractItemView
 {
-    /*background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #4d4d4d, stop: 0.1 #646464, stop: 1 #5d5d5d);*/
 	background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #4d4d4d, stop: 0.1 #646464, stop: 1 #5d5d5d);
 
 }
@@ -107,7 +105,9 @@ QLineEdit
 QPushButton
 {
     color: #b1b1b1;
-    background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #565656, stop: 0.1 #525252, stop: 0.5 #4e4e4e, stop: 0.9 #4a4a4a, stop: 1 #464646);
+    /*background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #565656, stop: 0.1 #525252, stop: 0.5 #4e4e4e, stop: 0.9 #4a4a4a, stop: 1 #464646);*/
+	background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #bababa, stop: 0.1 #a9a9a9, stop: 0.5 #989898, stop: 0.9 #878787, stop: 1 #767676);
+
     border-width: 1px;
     border-color: #1e1e1e;
     border-style: solid;
@@ -328,6 +328,15 @@ QDockWidget::close-button:pressed, QDockWidget::float-button:pressed
     padding: 1px -1px -1px 1px;
 }
 
+QMainWindow
+{
+    /*background-color: qradialgradient(cx: 0.3, cy: -0.4, fx: 0.3, fy: -0.4, radius: 1.35, stop: 0 #fff, stop: 1 #888);*/
+	/*background: #f4ffe2;*/
+	background-color: #ffffff;
+	border-bottom: 1px solid palette(highlight);
+	border-right: 1px solid palette(highlight);
+	border-left: 1px solid palette(highlight);
+}
 QMainWindow::separator
 {
     background-color: QLinearGradient(x1:0, y1:0, x2:0, y2:1, stop:0 #161616, stop: 0.5 #151515, stop: 0.6 #212121, stop:1 #343434);
@@ -381,20 +390,30 @@ QProgressBar::chunk
 }
 
 QTabBar::tab {
-    color: #b1b1b1;
+    /*color: #b1b1b1;*/
+	color: #ffffff;
     border: 1px solid #444;
-    border-bottom-style: none;
-    background-color: #323232;
+    /*border-bottom-style: none;*/
+    /*background-color: #323232;*/
+	background-color: #81b44b;
+
     padding-left: 10px;
     padding-right: 10px;
     padding-top: 3px;
     padding-bottom: 2px;
-    margin-right: -1px;
+    /*margin-right: -1px;*/
 }
 
+QTabWidget {
+    color: #000000;
+}
 QTabWidget::pane {
+    color: #000000;
     border: 1px solid #444;
     top: 1px;
+    /*background-color: #787878;*/
+	/*background-color: #d1dabe;*/
+	background-color: #f3f3f3;
 }
 
 QTabBar::tab:last
@@ -405,9 +424,7 @@ QTabBar::tab:last
 
 QTabBar::tab:first:!selected
 {
- margin-left: 0px; /* the last selected tab has nothing to overlap with on the right */
-
-
+	margin-left: 0px; /* the last selected tab has nothing to overlap with on the right */
     border-top-left-radius: 3px;
 }
 
@@ -473,7 +490,14 @@ QRadioButton::indicator:hover, QCheckBox::indicator:hover
 
 QCheckBox::indicator:checked
 {
-    image:url(:/images/checkbox.png);
+    /*image:url(:/Resources/checkbox.png);*/
+	background-color: qradialgradient(
+        cx: 0.5, cy: 0.5,
+        fx: 0.5, fy: 0.5,
+        radius: 1.0,
+        stop: 0.25 #ffaa00,
+        stop: 0.3 #323232
+    );
 }
 
 QCheckBox::indicator:disabled, QRadioButton::indicator:disabled
@@ -481,10 +505,9 @@ QCheckBox::indicator:disabled, QRadioButton::indicator:disabled
     border: 1px solid #444;
 }
 
-
-
 #borderlessMainWindow{
-	border:1px solid palette(highlight);
+	/*border:1px solid palette(highlight);*/
+	/*border: 1px solid #81b44b*/
 }
 
 #minimizeButton,#restoreButton,#maximizeButton,#closeButton{
@@ -501,14 +524,21 @@ QCheckBox::indicator:disabled, QRadioButton::indicator:disabled
 	background-color:palette(highlight);
 }
 #minimizeButton{
-	image:url(:/darkstyle/icon_window_minimize.png);
+	image:url(:/Resources/icon_window_minimize.png);
 }
 #restoreButton{
-	image:url(:/darkstyle/icon_window_restore.png);
+	image:url(:/Resources/icon_window_restore.png);
 }
 #maximizeButton{
-	image:url(:/darkstyle/icon_window_maximize.png);
+	image:url(:/Resources/icon_window_maximize.png);
 }
 #closeButton{
-	image:url(:/darkstyle/icon_window_close.png);
+	image:url(:/Resources/icon_window_close.png);
+}
+#titlebarWidget {
+	/*background-color: #81B44B*/
+	background-color: #17a81a;
+	border-bottom: 2px solid #555;
+	border-right: 1px solid #17a81a;
+	border-left: 1px solid #17a81a;
 }
