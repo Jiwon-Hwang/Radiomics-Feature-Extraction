@@ -81,7 +81,7 @@ public:
         gridLayout->setContentsMargins(12, 10, 12, 10);
         checkBox_FirstMCorrelation = new QCheckBox(groupBox_Features);
         checkBox_FirstMCorrelation->setObjectName(QStringLiteral("checkBox_FirstMCorrelation"));
-        checkBox_FirstMCorrelation->setEnabled(false);
+        checkBox_FirstMCorrelation->setEnabled(true);
         checkBox_FirstMCorrelation->setAutoFillBackground(false);
         checkBox_FirstMCorrelation->setChecked(false);
         checkBox_FirstMCorrelation->setTristate(false);
@@ -90,7 +90,7 @@ public:
 
         checkBox_ClusterProminence = new QCheckBox(groupBox_Features);
         checkBox_ClusterProminence->setObjectName(QStringLiteral("checkBox_ClusterProminence"));
-        checkBox_ClusterProminence->setEnabled(false);
+        checkBox_ClusterProminence->setEnabled(true);
         checkBox_ClusterProminence->setAutoFillBackground(false);
         checkBox_ClusterProminence->setChecked(false);
         checkBox_ClusterProminence->setTristate(false);
@@ -99,7 +99,7 @@ public:
 
         checkBox_Autocorrelation = new QCheckBox(groupBox_Features);
         checkBox_Autocorrelation->setObjectName(QStringLiteral("checkBox_Autocorrelation"));
-        checkBox_Autocorrelation->setEnabled(false);
+        checkBox_Autocorrelation->setEnabled(true);
         checkBox_Autocorrelation->setAutoFillBackground(false);
         checkBox_Autocorrelation->setChecked(false);
         checkBox_Autocorrelation->setTristate(false);
@@ -108,7 +108,7 @@ public:
 
         checkBox_InverseDiff = new QCheckBox(groupBox_Features);
         checkBox_InverseDiff->setObjectName(QStringLiteral("checkBox_InverseDiff"));
-        checkBox_InverseDiff->setEnabled(false);
+        checkBox_InverseDiff->setEnabled(true);
         QFont font;
         font.setFamily(QString::fromUtf8("\352\265\264\353\246\274"));
         font.setPointSize(9);
@@ -122,21 +122,21 @@ public:
 
         checkBox_SumAverage = new QCheckBox(groupBox_Features);
         checkBox_SumAverage->setObjectName(QStringLiteral("checkBox_SumAverage"));
-        checkBox_SumAverage->setEnabled(false);
+        checkBox_SumAverage->setEnabled(true);
         checkBox_SumAverage->setChecked(false);
 
         gridLayout->addWidget(checkBox_SumAverage, 5, 1, 1, 1);
 
         checkBox_DifferenceVariance = new QCheckBox(groupBox_Features);
         checkBox_DifferenceVariance->setObjectName(QStringLiteral("checkBox_DifferenceVariance"));
-        checkBox_DifferenceVariance->setEnabled(false);
+        checkBox_DifferenceVariance->setEnabled(true);
         checkBox_DifferenceVariance->setChecked(false);
 
         gridLayout->addWidget(checkBox_DifferenceVariance, 4, 1, 1, 1);
 
         checkBox_SumEntropy = new QCheckBox(groupBox_Features);
         checkBox_SumEntropy->setObjectName(QStringLiteral("checkBox_SumEntropy"));
-        checkBox_SumEntropy->setEnabled(false);
+        checkBox_SumEntropy->setEnabled(true);
         checkBox_SumEntropy->setCheckable(true);
         checkBox_SumEntropy->setChecked(false);
         checkBox_SumEntropy->setTristate(false);
@@ -145,7 +145,7 @@ public:
 
         checkBox_AngSecMoment = new QCheckBox(groupBox_Features);
         checkBox_AngSecMoment->setObjectName(QStringLiteral("checkBox_AngSecMoment"));
-        checkBox_AngSecMoment->setEnabled(false);
+        checkBox_AngSecMoment->setEnabled(true);
         checkBox_AngSecMoment->setAutoFillBackground(false);
         checkBox_AngSecMoment->setChecked(false);
         checkBox_AngSecMoment->setTristate(false);
@@ -154,7 +154,7 @@ public:
 
         checkBox_SumVariance = new QCheckBox(groupBox_Features);
         checkBox_SumVariance->setObjectName(QStringLiteral("checkBox_SumVariance"));
-        checkBox_SumVariance->setEnabled(false);
+        checkBox_SumVariance->setEnabled(true);
         checkBox_SumVariance->setAutoFillBackground(false);
         checkBox_SumVariance->setChecked(false);
         checkBox_SumVariance->setTristate(false);
@@ -163,7 +163,7 @@ public:
 
         checkBox_Contrast = new QCheckBox(groupBox_Features);
         checkBox_Contrast->setObjectName(QStringLiteral("checkBox_Contrast"));
-        checkBox_Contrast->setEnabled(false);
+        checkBox_Contrast->setEnabled(true);
         checkBox_Contrast->setAutoFillBackground(false);
         checkBox_Contrast->setChecked(false);
         checkBox_Contrast->setTristate(false);
@@ -172,7 +172,7 @@ public:
 
         checkBox_InverseDiffMom = new QCheckBox(groupBox_Features);
         checkBox_InverseDiffMom->setObjectName(QStringLiteral("checkBox_InverseDiffMom"));
-        checkBox_InverseDiffMom->setEnabled(false);
+        checkBox_InverseDiffMom->setEnabled(true);
         checkBox_InverseDiffMom->setFont(font);
         checkBox_InverseDiffMom->setAutoFillBackground(false);
         checkBox_InverseDiffMom->setChecked(false);
@@ -190,14 +190,14 @@ public:
 
         checkBox_JointEntropy = new QCheckBox(groupBox_Features);
         checkBox_JointEntropy->setObjectName(QStringLiteral("checkBox_JointEntropy"));
-        checkBox_JointEntropy->setEnabled(false);
+        checkBox_JointEntropy->setEnabled(true);
         checkBox_JointEntropy->setChecked(false);
 
         gridLayout->addWidget(checkBox_JointEntropy, 1, 1, 1, 1);
 
         checkBox_JointAverage = new QCheckBox(groupBox_Features);
         checkBox_JointAverage->setObjectName(QStringLiteral("checkBox_JointAverage"));
-        checkBox_JointAverage->setEnabled(false);
+        checkBox_JointAverage->setEnabled(true);
         checkBox_JointAverage->setCheckable(true);
         checkBox_JointAverage->setChecked(false);
         checkBox_JointAverage->setTristate(false);
@@ -206,27 +206,27 @@ public:
 
         checkBox_DifferenceEntropy = new QCheckBox(groupBox_Features);
         checkBox_DifferenceEntropy->setObjectName(QStringLiteral("checkBox_DifferenceEntropy"));
-        checkBox_DifferenceEntropy->setEnabled(false);
+        checkBox_DifferenceEntropy->setEnabled(true);
         checkBox_DifferenceEntropy->setChecked(false);
 
         gridLayout->addWidget(checkBox_DifferenceEntropy, 5, 0, 1, 1);
 
         checkBox_JointVariance = new QCheckBox(groupBox_Features);
         checkBox_JointVariance->setObjectName(QStringLiteral("checkBox_JointVariance"));
-        checkBox_JointVariance->setEnabled(false);
+        checkBox_JointVariance->setEnabled(true);
 
         gridLayout->addWidget(checkBox_JointVariance, 1, 0, 1, 1);
 
         checkBox_DifferenceAverage = new QCheckBox(groupBox_Features);
         checkBox_DifferenceAverage->setObjectName(QStringLiteral("checkBox_DifferenceAverage"));
-        checkBox_DifferenceAverage->setEnabled(false);
+        checkBox_DifferenceAverage->setEnabled(true);
         checkBox_DifferenceAverage->setChecked(false);
 
         gridLayout->addWidget(checkBox_DifferenceAverage, 4, 0, 1, 1);
 
         checkBox_InverseDiffNorm = new QCheckBox(groupBox_Features);
         checkBox_InverseDiffNorm->setObjectName(QStringLiteral("checkBox_InverseDiffNorm"));
-        checkBox_InverseDiffNorm->setEnabled(false);
+        checkBox_InverseDiffNorm->setEnabled(true);
         checkBox_InverseDiffNorm->setFont(font);
         checkBox_InverseDiffNorm->setAutoFillBackground(false);
         checkBox_InverseDiffNorm->setChecked(false);
@@ -236,7 +236,7 @@ public:
 
         checkBox_InverseDiffMomNorm = new QCheckBox(groupBox_Features);
         checkBox_InverseDiffMomNorm->setObjectName(QStringLiteral("checkBox_InverseDiffMomNorm"));
-        checkBox_InverseDiffMomNorm->setEnabled(false);
+        checkBox_InverseDiffMomNorm->setEnabled(true);
         checkBox_InverseDiffMomNorm->setAutoFillBackground(false);
         checkBox_InverseDiffMomNorm->setChecked(false);
         checkBox_InverseDiffMomNorm->setTristate(false);
@@ -245,7 +245,7 @@ public:
 
         checkBox_InverseVariance = new QCheckBox(groupBox_Features);
         checkBox_InverseVariance->setObjectName(QStringLiteral("checkBox_InverseVariance"));
-        checkBox_InverseVariance->setEnabled(false);
+        checkBox_InverseVariance->setEnabled(true);
         checkBox_InverseVariance->setAutoFillBackground(false);
         checkBox_InverseVariance->setChecked(false);
         checkBox_InverseVariance->setTristate(false);
@@ -254,7 +254,7 @@ public:
 
         checkBox_Correlation = new QCheckBox(groupBox_Features);
         checkBox_Correlation->setObjectName(QStringLiteral("checkBox_Correlation"));
-        checkBox_Correlation->setEnabled(false);
+        checkBox_Correlation->setEnabled(true);
         checkBox_Correlation->setAutoFillBackground(false);
         checkBox_Correlation->setChecked(false);
         checkBox_Correlation->setTristate(false);
@@ -263,7 +263,7 @@ public:
 
         checkBox_ClusterTendency = new QCheckBox(groupBox_Features);
         checkBox_ClusterTendency->setObjectName(QStringLiteral("checkBox_ClusterTendency"));
-        checkBox_ClusterTendency->setEnabled(false);
+        checkBox_ClusterTendency->setEnabled(true);
         checkBox_ClusterTendency->setAutoFillBackground(false);
         checkBox_ClusterTendency->setChecked(false);
         checkBox_ClusterTendency->setTristate(false);
@@ -272,7 +272,7 @@ public:
 
         checkBox_Dissimilarity = new QCheckBox(groupBox_Features);
         checkBox_Dissimilarity->setObjectName(QStringLiteral("checkBox_Dissimilarity"));
-        checkBox_Dissimilarity->setEnabled(false);
+        checkBox_Dissimilarity->setEnabled(true);
         checkBox_Dissimilarity->setFont(font);
         checkBox_Dissimilarity->setAutoFillBackground(false);
         checkBox_Dissimilarity->setChecked(false);
@@ -282,7 +282,7 @@ public:
 
         checkBox_ClusterShade = new QCheckBox(groupBox_Features);
         checkBox_ClusterShade->setObjectName(QStringLiteral("checkBox_ClusterShade"));
-        checkBox_ClusterShade->setEnabled(false);
+        checkBox_ClusterShade->setEnabled(true);
         checkBox_ClusterShade->setAutoFillBackground(false);
         checkBox_ClusterShade->setChecked(false);
         checkBox_ClusterShade->setTristate(false);
@@ -291,7 +291,7 @@ public:
 
         checkBox_SecondMCorrelation = new QCheckBox(groupBox_Features);
         checkBox_SecondMCorrelation->setObjectName(QStringLiteral("checkBox_SecondMCorrelation"));
-        checkBox_SecondMCorrelation->setEnabled(false);
+        checkBox_SecondMCorrelation->setEnabled(true);
         checkBox_SecondMCorrelation->setAutoFillBackground(false);
         checkBox_SecondMCorrelation->setChecked(false);
         checkBox_SecondMCorrelation->setTristate(false);
@@ -372,7 +372,7 @@ public:
          << QApplication::translate("popup_GLCM", "32", Q_NULLPTR)
          << QApplication::translate("popup_GLCM", "64", Q_NULLPTR)
         );
-        comboBox_nBins->setCurrentText(QApplication::translate("popup_GLCM", "8", Q_NULLPTR));
+        comboBox_nBins->setCurrentText(QApplication::translate("popup_GLCM", "32", Q_NULLPTR));
     } // retranslateUi
 
 };
