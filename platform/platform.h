@@ -174,6 +174,8 @@ public slots:
 	void setFilterMode();
 	void setCheckedFamilyState();
 	bool checkReadyToRun();
+	void selectAll(bool checked);
+	void checkFeatureBoxState();
 
 	// pop-up //
 	void showPopUp(QObject* sender);

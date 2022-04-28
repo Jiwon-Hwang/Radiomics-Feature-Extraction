@@ -251,7 +251,24 @@ void CPlatform::setSignalSlot()
 		connect(familyBox[i], SIGNAL(clicked()), this, SLOT(checkReadyToRun()));
 	}
 
-	// feature (pop-up)
+	// pop-up
+	// Intensity Histogram (popup)
+	connect(ppopup_Histogram->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool))); // 'All' btn 눌렀을 때 나머지 체크박스 선택/해제
+	QList<QCheckBox *> featureBox = ppopup_Histogram->ui->groupBox_Features->findChildren<QCheckBox *>(); // 나머지 체크박스들 눌렀을 때 'All' 선택/해제
+	for (int i = 0; i < featureBox.size(); i++) {
+		if (featureBox[i]->objectName() == "checkBox_All") continue;
+		connect(featureBox[i], SIGNAL(clicked()), this, SLOT(checkFeatureBoxState()));
+	}
+	featureBox.clear();
+
+	// GLCM (popup)
+	connect(ppopup_GLCM->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool)));
+	featureBox = ppopup_GLCM->ui->groupBox_Features->findChildren<QCheckBox *>();
+	for (int i = 0; i < featureBox.size(); i++) {
+		if (featureBox[i]->objectName() == "checkBox_All") continue;
+		connect(featureBox[i], SIGNAL(clicked()), this, SLOT(checkFeatureBoxState()));
+	}
+	featureBox.clear();
 
 }
 void CPlatform::showPopUp(QObject* sender) {
@@ -326,8 +343,9 @@ void CPlatform::loadSettings() {
 		// Intensity Histogram (popup) 
 		settings.beginGroup("popup_Histogram");
 
-		int nfeatures_Histogram = ppopup_Histogram->ui->groupBox_Features->findChildren<QCheckBox *>().size();
-		for (int i = 0; i < nfeatures_Histogram; i++) {
+		//int nfeatures_Histogram = ppopup_Histogram->ui->groupBox_Features->findChildren<QCheckBox *>().size();
+		int nfeatures_Histogram = IntensityHistogram::FEATURE_COUNT;
+		for (int i = 0; i < nfeatures_Histogram + 1; i++) {
 			ppopup_Histogram->filterGroup->button(i)->setChecked(settings.value(ppopup_Histogram->filterGroup->button(i)->objectName(), false).toBool());
 		}
 		
@@ -339,8 +357,9 @@ void CPlatform::loadSettings() {
 		// GLCM (popup) 
 		settings.beginGroup("popup_GLCM");
 
-		int nfeatures_GLCM = ppopup_GLCM->ui->groupBox_Features->findChildren<QCheckBox *>().size();
-		for (int i = 0; i < nfeatures_GLCM; i++) {
+		//int nfeatures_GLCM = ppopup_GLCM->ui->groupBox_Features->findChildren<QCheckBox *>().size();
+		int nfeatures_GLCM = GLCM::FEATURE_COUNT;
+		for (int i = 0; i < nfeatures_GLCM + 1; i++) {
 			ppopup_GLCM->filterGroup->button(i)->setChecked(settings.value(ppopup_GLCM->filterGroup->button(i)->objectName(), false).toBool());
 		}
 
@@ -387,9 +406,11 @@ void CPlatform::saveSettings() {
 	intenseHisto.isCheckedFeature.assign(IntensityHistogram::FEATURE_COUNT, false);
 	intenseHisto.nCheckedFeatures = 0;
 
-	int nfeatures_Histogram = ppopup_Histogram->ui->groupBox_Features->findChildren<QCheckBox *>().size();
-	for (int i = 0; i < nfeatures_Histogram; i++) {
+	//int nfeatures_Histogram = ppopup_Histogram->ui->groupBox_Features->findChildren<QCheckBox *>().size();
+	int nfeatures_Histogram = IntensityHistogram::FEATURE_COUNT;
+	for (int i = 0; i < nfeatures_Histogram + 1; i++) {
 		settings.setValue(ppopup_Histogram->filterGroup->button(i)->objectName(), QVariant(ppopup_Histogram->filterGroup->button(i)->isChecked()));
+		if (i == nfeatures_Histogram) break; // exclude 'All' btn
 		intenseHisto.isCheckedFeature[i] = ppopup_Histogram->filterGroup->button(i)->isChecked();
 		if (intenseHisto.isCheckedFeature[i] == true) intenseHisto.nCheckedFeatures++;
 	}
@@ -410,9 +431,11 @@ void CPlatform::saveSettings() {
 	glcm.isCheckedFeature.assign(GLCM::FEATURE_COUNT, false);
 	glcm.nCheckedFeatures = 0;
 
-	int nfeatures_GLCM = ppopup_GLCM->ui->groupBox_Features->findChildren<QCheckBox *>().size();
+	//int nfeatures_GLCM = ppopup_GLCM->ui->groupBox_Features->findChildren<QCheckBox *>().size();
+	int nfeatures_GLCM = GLCM::FEATURE_COUNT;
 	for (int i = 0; i < nfeatures_GLCM; i++) {
 		settings.setValue(ppopup_GLCM->filterGroup->button(i)->objectName(), QVariant(ppopup_GLCM->filterGroup->button(i)->isChecked()));
+		if (i == nfeatures_Histogram) break; // exclude 'All' btn
 		glcm.isCheckedFeature[i] = ppopup_GLCM->filterGroup->button(i)->isChecked();
 		if (glcm.isCheckedFeature[i] == true) glcm.nCheckedFeatures++;
 	}
@@ -494,6 +517,31 @@ bool CPlatform::checkReadyToRun() {
 	}
 
 	return false;
+}
+void CPlatform::selectAll(bool checked) {
+
+	QObject* obj = sender(); // 'All' checkBox
+	QList<QCheckBox *> featureBox = obj->parent()->findChildren<QCheckBox *>();
+
+	for (int i = 0; i < featureBox.size(); i++) {
+		featureBox[i]->setChecked(checked); // checked, unchecked에 따라 전체 선택, 전체 해제
+	}
+}
+void CPlatform::checkFeatureBoxState() {
+	
+	QObject* obj = sender(); // 'the other' checkBoxes
+	QList<QCheckBox *> featureBox = obj->parent()->findChildren<QCheckBox *>();
+	
+	bool isAllChecked = true;
+	for (int i = 0; i < featureBox.size(); i++) {
+		if (!featureBox[i]->isChecked() && featureBox[i]->objectName() != "checkBox_All") {
+			isAllChecked = false;
+			break;
+		}
+	}
+	
+	obj->parent()->findChild<QCheckBox *>("checkBox_All")->setChecked(isAllChecked);
+
 }
 
 // 화면 resize event //

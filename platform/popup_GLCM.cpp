@@ -35,6 +35,8 @@ popup_GLCM::popup_GLCM(QWidget *parent) :
 	filterGroup->addButton(ui->checkBox_FirstMCorrelation, GLCM::FIRSTMCORRELATION);
 	filterGroup->addButton(ui->checkBox_SecondMCorrelation, GLCM::SECONDMCORRELATION);
 	
+	filterGroup->addButton(ui->checkBox_All, GLCM::FEATURE_COUNT);
+
 }
 
 popup_GLCM::~popup_GLCM()

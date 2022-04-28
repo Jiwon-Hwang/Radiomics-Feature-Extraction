@@ -33,6 +33,8 @@ popup_Histogram::popup_Histogram(QWidget *parent) :
 	filterGroup->addButton(ui->checkBox_MinHistGradient, IntensityHistogram::MINHISTGRADIENT);
 	filterGroup->addButton(ui->checkBox_MinHistGradGrey, IntensityHistogram::MINHISTGRADGREY);
 
+	filterGroup->addButton(ui->checkBox_All, IntensityHistogram::FEATURE_COUNT); 
+
 }
 
 popup_Histogram::~popup_Histogram()

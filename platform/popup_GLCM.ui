@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>680</height>
+    <height>740</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>230</x>
-     <y>620</y>
+     <y>680</y>
      <width>151</width>
      <height>32</height>
     </rect>
@@ -38,7 +38,7 @@
      <x>20</x>
      <y>30</y>
      <width>361</width>
-     <height>531</height>
+     <height>581</height>
     </rect>
    </property>
    <property name="title">
@@ -60,8 +60,8 @@
     <property name="bottomMargin">
      <number>10</number>
     </property>
-    <item row="13" column="1">
-     <widget class="QCheckBox" name="checkBox_FirstMCorrelation">
+    <item row="12" column="0">
+     <widget class="QCheckBox" name="checkBox_Correlation">
       <property name="enabled">
        <bool>true</bool>
       </property>
@@ -69,7 +69,7 @@
        <bool>false</bool>
       </property>
       <property name="text">
-       <string>Correlation 1</string>
+       <string>Correlation</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -79,8 +79,8 @@
       </property>
      </widget>
     </item>
-    <item row="13" column="0">
-     <widget class="QCheckBox" name="checkBox_ClusterProminence">
+    <item row="11" column="0">
+     <widget class="QCheckBox" name="checkBox_InverseDiffMomNorm">
       <property name="enabled">
        <bool>true</bool>
       </property>
@@ -88,7 +88,32 @@
        <bool>false</bool>
       </property>
       <property name="text">
-       <string>Cluster Prominence</string>
+       <string>Inverse Diff Mom Norm</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+      <property name="tristate">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="10" column="0">
+     <widget class="QCheckBox" name="checkBox_InverseDiffNorm">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>굴림</family>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Inverse Diff Normalised</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -99,7 +124,7 @@
      </widget>
     </item>
     <item row="11" column="1">
-     <widget class="QCheckBox" name="checkBox_Autocorrelation">
+     <widget class="QCheckBox" name="checkBox_InverseVariance">
       <property name="enabled">
        <bool>true</bool>
       </property>
@@ -107,7 +132,7 @@
        <bool>false</bool>
       </property>
       <property name="text">
-       <string>Autocorrelation</string>
+       <string>Inverse Variance</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -117,7 +142,7 @@
       </property>
      </widget>
     </item>
-    <item row="8" column="1">
+    <item row="9" column="1">
      <widget class="QCheckBox" name="checkBox_InverseDiff">
       <property name="enabled">
        <bool>true</bool>
@@ -145,7 +170,7 @@
       </property>
      </widget>
     </item>
-    <item row="5" column="1">
+    <item row="6" column="1">
      <widget class="QCheckBox" name="checkBox_SumAverage">
       <property name="enabled">
        <bool>true</bool>
@@ -158,29 +183,35 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="1">
-     <widget class="QCheckBox" name="checkBox_DifferenceVariance">
+    <item row="14" column="1">
+     <widget class="QCheckBox" name="checkBox_FirstMCorrelation">
       <property name="enabled">
        <bool>true</bool>
       </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
       <property name="text">
-       <string>Difference Variance</string>
+       <string>Correlation 1</string>
       </property>
       <property name="checked">
        <bool>false</bool>
       </property>
+      <property name="tristate">
+       <bool>false</bool>
+      </property>
      </widget>
     </item>
-    <item row="6" column="1">
-     <widget class="QCheckBox" name="checkBox_SumEntropy">
+    <item row="14" column="0">
+     <widget class="QCheckBox" name="checkBox_ClusterProminence">
       <property name="enabled">
        <bool>true</bool>
       </property>
-      <property name="text">
-       <string>Sum Entropy</string>
+      <property name="autoFillBackground">
+       <bool>false</bool>
       </property>
-      <property name="checkable">
-       <bool>true</bool>
+      <property name="text">
+       <string>Cluster Prominence</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -191,25 +222,6 @@
      </widget>
     </item>
     <item row="7" column="0">
-     <widget class="QCheckBox" name="checkBox_AngSecMoment">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Angular Second Moment</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="0">
      <widget class="QCheckBox" name="checkBox_SumVariance">
       <property name="enabled">
        <bool>true</bool>
@@ -228,8 +240,8 @@
       </property>
      </widget>
     </item>
-    <item row="7" column="1">
-     <widget class="QCheckBox" name="checkBox_Contrast">
+    <item row="12" column="1">
+     <widget class="QCheckBox" name="checkBox_Autocorrelation">
       <property name="enabled">
        <bool>true</bool>
       </property>
@@ -237,7 +249,7 @@
        <bool>false</bool>
       </property>
       <property name="text">
-       <string>Contrast</string>
+       <string>Autocorrelation</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -247,7 +259,129 @@
       </property>
      </widget>
     </item>
-    <item row="9" column="1">
+    <item row="8" column="0">
+     <widget class="QCheckBox" name="checkBox_AngSecMoment">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Angular Second Moment</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+      <property name="tristate">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="1">
+     <widget class="QCheckBox" name="checkBox_SumEntropy">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>Sum Entropy</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+      <property name="tristate">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QCheckBox" name="checkBox_JointEntropy">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>Joint Entropy</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QCheckBox" name="checkBox_JointMaximum">
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Joint Maximum</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+      <property name="tristate">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QCheckBox" name="checkBox_JointAverage">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>Joint Average</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+      <property name="tristate">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0">
+     <widget class="QCheckBox" name="checkBox_DifferenceEntropy">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>Difference Entropy</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="1">
+     <widget class="QCheckBox" name="checkBox_DifferenceVariance">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>Difference Variance</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QCheckBox" name="checkBox_JointVariance">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>Joint Variance</string>
+      </property>
+     </widget>
+    </item>
+    <item row="10" column="1">
      <widget class="QCheckBox" name="checkBox_InverseDiffMom">
       <property name="enabled">
        <bool>true</bool>
@@ -272,117 +406,8 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="0">
-     <widget class="QCheckBox" name="checkBox_JointMaximum">
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Joint Maximum</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QCheckBox" name="checkBox_JointEntropy">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="text">
-       <string>Joint Entropy</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QCheckBox" name="checkBox_JointAverage">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="text">
-       <string>Joint Average</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="0">
-     <widget class="QCheckBox" name="checkBox_DifferenceEntropy">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="text">
-       <string>Difference Entropy</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QCheckBox" name="checkBox_JointVariance">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="text">
-       <string>Joint Variance</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0">
-     <widget class="QCheckBox" name="checkBox_DifferenceAverage">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="text">
-       <string>Difference Average</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="9" column="0">
-     <widget class="QCheckBox" name="checkBox_InverseDiffNorm">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="font">
-       <font>
-        <family>굴림</family>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Inverse Diff Normalised</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="10" column="0">
-     <widget class="QCheckBox" name="checkBox_InverseDiffMomNorm">
+    <item row="8" column="1">
+     <widget class="QCheckBox" name="checkBox_Contrast">
       <property name="enabled">
        <bool>true</bool>
       </property>
@@ -390,7 +415,7 @@
        <bool>false</bool>
       </property>
       <property name="text">
-       <string>Inverse Diff Mom Norm</string>
+       <string>Contrast</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -400,8 +425,8 @@
       </property>
      </widget>
     </item>
-    <item row="10" column="1">
-     <widget class="QCheckBox" name="checkBox_InverseVariance">
+    <item row="13" column="1">
+     <widget class="QCheckBox" name="checkBox_ClusterShade">
       <property name="enabled">
        <bool>true</bool>
       </property>
@@ -409,7 +434,7 @@
        <bool>false</bool>
       </property>
       <property name="text">
-       <string>Inverse Variance</string>
+       <string>Cluster Shade</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -419,26 +444,7 @@
       </property>
      </widget>
     </item>
-    <item row="11" column="0">
-     <widget class="QCheckBox" name="checkBox_Correlation">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Correlation</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="12" column="0">
+    <item row="13" column="0">
      <widget class="QCheckBox" name="checkBox_ClusterTendency">
       <property name="enabled">
        <bool>true</bool>
@@ -457,7 +463,39 @@
       </property>
      </widget>
     </item>
-    <item row="8" column="0">
+    <item row="15" column="0">
+     <widget class="QCheckBox" name="checkBox_SecondMCorrelation">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Correlation 2</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+      <property name="tristate">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QCheckBox" name="checkBox_DifferenceAverage">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>Difference Average</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="0">
      <widget class="QCheckBox" name="checkBox_Dissimilarity">
       <property name="enabled">
        <bool>true</bool>
@@ -482,35 +520,24 @@
       </property>
      </widget>
     </item>
-    <item row="12" column="1">
-     <widget class="QCheckBox" name="checkBox_ClusterShade">
+    <item row="0" column="0">
+     <widget class="QCheckBox" name="checkBox_All">
       <property name="enabled">
        <bool>true</bool>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+        <underline>false</underline>
+        <kerning>true</kerning>
+       </font>
       </property>
       <property name="autoFillBackground">
        <bool>false</bool>
       </property>
       <property name="text">
-       <string>Cluster Shade</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="14" column="0">
-     <widget class="QCheckBox" name="checkBox_SecondMCorrelation">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Correlation 2</string>
+       <string>All</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -526,7 +553,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>560</y>
+     <y>620</y>
      <width>361</width>
      <height>51</height>
     </rect>
@@ -560,7 +587,7 @@
        </sizepolicy>
       </property>
       <property name="currentText">
-       <string>32</string>
+       <string>8</string>
       </property>
       <property name="maxVisibleItems">
        <number>5</number>
