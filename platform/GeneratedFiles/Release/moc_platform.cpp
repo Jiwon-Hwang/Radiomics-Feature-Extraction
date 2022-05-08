@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_CPlatform_t {
-    QByteArrayData data[18];
-    char stringdata0[197];
+    QByteArrayData data[20];
+    char stringdata0[228];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -32,26 +32,29 @@ struct qt_meta_stringdata_CPlatform_t {
 static const qt_meta_stringdata_CPlatform_t qt_meta_stringdata_CPlatform = {
     {
 QT_MOC_LITERAL(0, 0, 9), // "CPlatform"
-QT_MOC_LITERAL(1, 10, 9), // "showImage"
-QT_MOC_LITERAL(2, 20, 0), // ""
-QT_MOC_LITERAL(3, 21, 9), // "nFrameIdx"
-QT_MOC_LITERAL(4, 31, 16), // "QTreeWidgetItem*"
-QT_MOC_LITERAL(5, 48, 4), // "item"
-QT_MOC_LITERAL(6, 53, 6), // "column"
-QT_MOC_LITERAL(7, 60, 17), // "scrollChangeImage"
-QT_MOC_LITERAL(8, 78, 6), // "nValue"
-QT_MOC_LITERAL(9, 85, 13), // "setFilterMode"
-QT_MOC_LITERAL(10, 99, 21), // "setCheckedFamilyState"
-QT_MOC_LITERAL(11, 121, 15), // "checkReadyToRun"
-QT_MOC_LITERAL(12, 137, 9), // "selectAll"
-QT_MOC_LITERAL(13, 147, 7), // "checked"
-QT_MOC_LITERAL(14, 155, 20), // "checkFeatureBoxState"
-QT_MOC_LITERAL(15, 176, 9), // "showPopUp"
-QT_MOC_LITERAL(16, 186, 6), // "sender"
-QT_MOC_LITERAL(17, 193, 3) // "run"
+QT_MOC_LITERAL(1, 10, 20), // "addFileDirectoryItem"
+QT_MOC_LITERAL(2, 31, 0), // ""
+QT_MOC_LITERAL(3, 32, 9), // "seriesIdx"
+QT_MOC_LITERAL(4, 42, 9), // "showImage"
+QT_MOC_LITERAL(5, 52, 9), // "nFrameIdx"
+QT_MOC_LITERAL(6, 62, 16), // "QTreeWidgetItem*"
+QT_MOC_LITERAL(7, 79, 4), // "item"
+QT_MOC_LITERAL(8, 84, 6), // "column"
+QT_MOC_LITERAL(9, 91, 17), // "scrollChangeImage"
+QT_MOC_LITERAL(10, 109, 6), // "nValue"
+QT_MOC_LITERAL(11, 116, 13), // "setFilterMode"
+QT_MOC_LITERAL(12, 130, 21), // "setCheckedFamilyState"
+QT_MOC_LITERAL(13, 152, 15), // "checkReadyToRun"
+QT_MOC_LITERAL(14, 168, 9), // "selectAll"
+QT_MOC_LITERAL(15, 178, 7), // "checked"
+QT_MOC_LITERAL(16, 186, 20), // "checkFeatureBoxState"
+QT_MOC_LITERAL(17, 207, 9), // "showPopUp"
+QT_MOC_LITERAL(18, 217, 6), // "sender"
+QT_MOC_LITERAL(19, 224, 3) // "run"
 
     },
-    "CPlatform\0showImage\0\0nFrameIdx\0"
+    "CPlatform\0addFileDirectoryItem\0\0"
+    "seriesIdx\0showImage\0nFrameIdx\0"
     "QTreeWidgetItem*\0item\0column\0"
     "scrollChangeImage\0nValue\0setFilterMode\0"
     "setCheckedFamilyState\0checkReadyToRun\0"
@@ -66,7 +69,7 @@ static const uint qt_meta_data_CPlatform[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      10,   14, // methods
+      11,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -74,27 +77,29 @@ static const uint qt_meta_data_CPlatform[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    1,   64,    2, 0x0a /* Public */,
-       1,    2,   67,    2, 0x0a /* Public */,
-       7,    1,   72,    2, 0x0a /* Public */,
-       9,    0,   75,    2, 0x0a /* Public */,
-      10,    0,   76,    2, 0x0a /* Public */,
-      11,    0,   77,    2, 0x0a /* Public */,
-      12,    1,   78,    2, 0x0a /* Public */,
-      14,    0,   81,    2, 0x0a /* Public */,
-      15,    1,   82,    2, 0x0a /* Public */,
-      17,    0,   85,    2, 0x0a /* Public */,
+       1,    1,   69,    2, 0x0a /* Public */,
+       4,    1,   72,    2, 0x0a /* Public */,
+       4,    2,   75,    2, 0x0a /* Public */,
+       9,    1,   80,    2, 0x0a /* Public */,
+      11,    0,   83,    2, 0x0a /* Public */,
+      12,    0,   84,    2, 0x0a /* Public */,
+      13,    0,   85,    2, 0x0a /* Public */,
+      14,    1,   86,    2, 0x0a /* Public */,
+      16,    0,   89,    2, 0x0a /* Public */,
+      17,    1,   90,    2, 0x0a /* Public */,
+      19,    0,   93,    2, 0x0a /* Public */,
 
  // slots: parameters
     QMetaType::Void, QMetaType::Int,    3,
-    QMetaType::Void, 0x80000000 | 4, QMetaType::Int,    5,    6,
-    QMetaType::Void, QMetaType::Int,    8,
+    QMetaType::Void, QMetaType::Int,    5,
+    QMetaType::Void, 0x80000000 | 6, QMetaType::Int,    7,    8,
+    QMetaType::Void, QMetaType::Int,   10,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Bool,
-    QMetaType::Void, QMetaType::Bool,   13,
+    QMetaType::Void, QMetaType::Bool,   15,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::QObjectStar,   16,
+    QMetaType::Void, QMetaType::QObjectStar,   18,
     QMetaType::Void,
 
        0        // eod
@@ -106,17 +111,18 @@ void CPlatform::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         CPlatform *_t = static_cast<CPlatform *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->showImage((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 1: _t->showImage((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 2: _t->scrollChangeImage((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 3: _t->setFilterMode(); break;
-        case 4: _t->setCheckedFamilyState(); break;
-        case 5: { bool _r = _t->checkReadyToRun();
+        case 0: _t->addFileDirectoryItem((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 1: _t->showImage((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 2: _t->showImage((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 3: _t->scrollChangeImage((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 4: _t->setFilterMode(); break;
+        case 5: _t->setCheckedFamilyState(); break;
+        case 6: { bool _r = _t->checkReadyToRun();
             if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = std::move(_r); }  break;
-        case 6: _t->selectAll((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 7: _t->checkFeatureBoxState(); break;
-        case 8: _t->showPopUp((*reinterpret_cast< QObject*(*)>(_a[1]))); break;
-        case 9: _t->run(); break;
+        case 7: _t->selectAll((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 8: _t->checkFeatureBoxState(); break;
+        case 9: _t->showPopUp((*reinterpret_cast< QObject*(*)>(_a[1]))); break;
+        case 10: _t->run(); break;
         default: ;
         }
     }
@@ -147,13 +153,13 @@ int CPlatform::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 10)
+        if (_id < 11)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 10;
+        _id -= 11;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 10)
+        if (_id < 11)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 10;
+        _id -= 11;
     }
     return _id;
 }

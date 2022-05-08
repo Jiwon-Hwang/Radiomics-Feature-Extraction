@@ -164,6 +164,7 @@ protected:
 
 public slots:
 	// load + fileDirectory //
+	void addFileDirectoryItem(int seriesIdx);	// tree widget
 	void showImage(int nFrameIdx);
 	void showImage(QTreeWidgetItem* item, int column);
 

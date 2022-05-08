@@ -304,7 +304,7 @@ void CPlatform::setProgressBarValue(int nCurrentIdx, int nMaximumIdx)
 
 	progressBar->setValue(fValue);
 
-	if((nCurrentIdx+1) == nMaximumIdx) {
+	if((nCurrentIdx+1) >= nMaximumIdx) {
 		progressBar->setValue(0);
 		progressBar->setVisible(false);
 	}
@@ -644,15 +644,15 @@ void CPlatform::dragEnterEvent(QDragEnterEvent* event)
         event->acceptProposedAction();
     }
 }
-void CPlatform::dropEvent(QDropEvent* event)
+void CPlatform::dropEvent(QDropEvent * event)
 {
 	QStringList list;
 
-	foreach (const QUrl &url, event->mimeData()->urls()) {
+	foreach(const QUrl &url, event->mimeData()->urls()) {
 		list.push_back(url.toLocalFile());
 	}
 
-	readImage(list);	
+	readImage(list);
 }
 
 // keyboard event //
@@ -700,6 +700,7 @@ void CPlatform::readImage(QStringList list)
 
 	sort(fileList.begin(), fileList.end(), compareNames);
 
+#if 1
 	for (int i = 0, ni = fileList.size(); i<ni; i++) {
 		char cInputPath[1024] = { 0 };
 		QString path = fileList.at(i).toUtf8().constData();
@@ -710,9 +711,25 @@ void CPlatform::readImage(QStringList list)
 		m_ciData.readImage(cInputPath);
 		setProgressBarValue(i, ni);
 	}
+#else
+	std::vector<std::string> convertedFileList;
+	convertedFileList.reserve(fileList.size());
 
-	//m_ciData.matchingImageAndMask();
-	//m_ciData.sortingImageAndMask();
+	for (int i = 0, ni = fileList.size(); i<ni; i++) {
+		char cInputPath[1024] = { 0 };
+		QString path = fileList.at(i).toUtf8().constData();
+		QTextCodec* c = QTextCodec::codecForLocale();
+		QByteArray b = c->fromUnicode(path);
+		std::memcpy(cInputPath, b.data(), b.size() + 1);
+
+		convertedFileList.push_back(cInputPath);
+	}
+
+	if (m_workerThread != NULL) {
+		m_ciData.setQThreadParam(convertedFileList, false);
+		m_workerThread->start();
+	}
+#endif
 
 	// 첫번째 Series, 첫번째 image
 	showImage(0);
@@ -721,6 +738,47 @@ void CPlatform::readImage(QStringList list)
 	int nEndFrameIdx = m_ciData.getSeries(0)->getImageCount() - 1;
 	ui.horizontalScrollBar->setMaximum(nEndFrameIdx - nStartFrameIdx);
 	ui.horizontalScrollBar->setMinimum(0);
+
+	// add items in tree widget (receiveTreeState())
+	int nSeriesCnt = m_ciData.getSeriesCount();
+	for (int i = 0; i < nSeriesCnt; i++) {
+		addFileDirectoryItem(i);
+	}
+	setProgressBarValue(1, 1); // tree 생성 끝나면 나머지 20% 채우고 꺼버리기
+	
+}
+void CPlatform::addFileDirectoryItem(int seriesIdx) {
+
+	CSeries* pCiSeries = m_ciData.getSeries(seriesIdx);
+
+	QString patientName = pCiSeries->m_sPatientName.c_str();
+	QString studyName = pCiSeries->m_sStudyName.c_str();
+	QString seriesName = pCiSeries->m_sSeriesName.c_str();
+
+	QTreeWidgetItem* row_patientName = new QTreeWidgetItem(ui.treeWidget_FileDirectory); // "100"
+	row_patientName->setText(0, patientName);
+	//row_patientName->setIcon(0, QIcon(QPixmap("Resources/folder.png")));
+
+	QTreeWidgetItem* row_studyName = new QTreeWidgetItem(row_patientName); // "CT"
+	row_studyName->setText(0, studyName);
+	//row_studyName->setIcon(0, QIcon(QPixmap("")));
+
+	QTreeWidgetItem* row_seriesName = new QTreeWidgetItem(row_studyName); // "ap"
+	row_seriesName->setText(0, seriesName);
+	//row_seriesName->setIcon(0, QIcon(QPixmap("")));
+
+	
+	int nSlices = pCiSeries->getImageCount();
+	for (int i = 0; i < nSlices; i++) {
+		QTreeWidgetItem* row_slice = new QTreeWidgetItem(row_seriesName);
+		//row_slice->setIcon(0, QIcon(QPixmap("Resources/dcm.png")));
+		QString sliceName = pCiSeries->getImage(i)->getImageName().c_str();
+		row_slice->setText(0, sliceName);
+		row_slice->setText(1, QString::number(seriesIdx));
+		row_slice->setText(2, QString::number(i));
+		ui.treeWidget_FileDirectory->setCurrentItem(row_slice); // 실제 아이템 추가 부분
+	}
+
 }
 void CPlatform::showImage(int nFrameIdx)
 {
@@ -1321,7 +1379,8 @@ void CPlatform::run()
 		// 메모리 소멸 //
 		SAFE_DELETE_VOLUME(ppucMasks, nMaskCnt);
 
-
+		// progress bar //
+		setProgressBarValue(i, nSeriesCnt);
 	}
 
 

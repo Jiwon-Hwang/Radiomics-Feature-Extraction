@@ -26,7 +26,7 @@
 #include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QSplitter>
 #include <QtWidgets/QStatusBar>
-#include <QtWidgets/QTreeView>
+#include <QtWidgets/QTreeWidget>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 
@@ -40,11 +40,8 @@ public:
     QGridLayout *gridLayout_3;
     QHBoxLayout *horizontalLayout_3;
     QVBoxLayout *verticalLayout_3;
-    QHBoxLayout *horizontalLayout;
-    QPushButton *pushButton_1;
-    QPushButton *pushButton_2;
     QHBoxLayout *horizontalLayout_9;
-    QTreeView *treeView;
+    QTreeWidget *treeWidget_FileDirectory;
     QVBoxLayout *verticalLayout_2;
     QGridLayout *gridLayout_4;
     QSpacerItem *verticalSpacer;
@@ -102,29 +99,18 @@ public:
         verticalLayout_3 = new QVBoxLayout();
         verticalLayout_3->setSpacing(6);
         verticalLayout_3->setObjectName(QStringLiteral("verticalLayout_3"));
-        horizontalLayout = new QHBoxLayout();
-        horizontalLayout->setSpacing(6);
-        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        pushButton_1 = new QPushButton(centralWidget);
-        pushButton_1->setObjectName(QStringLiteral("pushButton_1"));
-
-        horizontalLayout->addWidget(pushButton_1);
-
-        pushButton_2 = new QPushButton(centralWidget);
-        pushButton_2->setObjectName(QStringLiteral("pushButton_2"));
-
-        horizontalLayout->addWidget(pushButton_2);
-
-
-        verticalLayout_3->addLayout(horizontalLayout);
-
         horizontalLayout_9 = new QHBoxLayout();
         horizontalLayout_9->setSpacing(6);
         horizontalLayout_9->setObjectName(QStringLiteral("horizontalLayout_9"));
-        treeView = new QTreeView(centralWidget);
-        treeView->setObjectName(QStringLiteral("treeView"));
+        treeWidget_FileDirectory = new QTreeWidget(centralWidget);
+        QTreeWidgetItem *__qtreewidgetitem = new QTreeWidgetItem();
+        __qtreewidgetitem->setText(0, QStringLiteral("1"));
+        treeWidget_FileDirectory->setHeaderItem(__qtreewidgetitem);
+        treeWidget_FileDirectory->setObjectName(QStringLiteral("treeWidget_FileDirectory"));
+        sizePolicy.setHeightForWidth(treeWidget_FileDirectory->sizePolicy().hasHeightForWidth());
+        treeWidget_FileDirectory->setSizePolicy(sizePolicy);
 
-        horizontalLayout_9->addWidget(treeView);
+        horizontalLayout_9->addWidget(treeWidget_FileDirectory);
 
         verticalLayout_2 = new QVBoxLayout();
         verticalLayout_2->setSpacing(6);
@@ -148,7 +134,6 @@ public:
 
         horizontalLayout_9->addLayout(verticalLayout_2);
 
-        horizontalLayout_9->setStretch(0, 1);
         horizontalLayout_9->setStretch(1, 4);
 
         verticalLayout_3->addLayout(horizontalLayout_9);
@@ -278,8 +263,6 @@ public:
     void retranslateUi(QMainWindow *platformClass)
     {
         platformClass->setWindowTitle(QApplication::translate("platformClass", "Radiomics Feature Extraction", Q_NULLPTR));
-        pushButton_1->setText(QApplication::translate("platformClass", "1 case", Q_NULLPTR));
-        pushButton_2->setText(QApplication::translate("platformClass", "multiple cases", Q_NULLPTR));
         groupBox->setTitle(QString());
         groupBox_Filters->setTitle(QApplication::translate("platformClass", "Filter", Q_NULLPTR));
         radioButton_None->setText(QApplication::translate("platformClass", "None", Q_NULLPTR));

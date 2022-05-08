@@ -49,34 +49,31 @@
        <number>5</number>
       </property>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0">
+       <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout">
+         <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="0,4">
           <item>
-           <widget class="QPushButton" name="pushButton_1">
-            <property name="text">
-             <string>1 case</string>
+           <widget class="QTreeWidget" name="treeWidget_FileDirectory">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
+            <column>
+             <property name="text">
+              <string notr="true">1</string>
+             </property>
+            </column>
            </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_2">
-            <property name="text">
-             <string>multiple cases</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="1,4">
-          <item>
-           <widget class="QTreeView" name="treeView"/>
           </item>
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
              <layout class="QGridLayout" name="gridLayout_4">
+              <property name="spacing">
+               <number>6</number>
+              </property>
               <item row="0" column="0">
                <spacer name="verticalSpacer">
                 <property name="orientation">
