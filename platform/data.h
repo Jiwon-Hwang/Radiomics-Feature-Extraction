@@ -1,10 +1,12 @@
 #pragma once
 
+// v 1.411 (20220509)
+
 // config
 #define DEBUG 0							// 0: false, 1: true (VLD)
 #define THREAD 1						// 0: false, 1: true (Thread on/off)
-#define LAZY_LOADING 1					// 0: false, 1: true (Lazy loading on/off)
-#define QT 0							// 0: false, 1: true (QT에서 사용하는 경우)
+#define QT 1							// 0: false, 1: true (QT에서 사용하는 경우)
+#define PROGRESS_BAR 1					// 0: hide, 1: show (console)
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -15,6 +17,8 @@
 #include <algorithm>
 #include <functional>
 #include <direct.h>				// mkdir
+#include <Windows.h>
+
 
 // thread lib
 #if THREAD
@@ -56,18 +60,26 @@
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
 #if QT
 class CData: public QObject
 #else
 class CData
 #endif
 {
+#if QT
+	Q_OBJECT
+public:
+	QThread* m_pThread;
+	std::vector<std::string> readFileList;
+#endif
+
 public:
 	enum SAVE_TYPE {SAVE_IMAGE_ONLY, SAVE_MASK_ONLY, SAVE_OVERLAY};
 	enum SAVE_OPTION {SAVE_DEFAULT, SAVE_IMAGE_WINDOW, SAVE_MASK_BINARY};
 	enum LOAD_STATUS {
-		SUCCESS=1, UNREADBLE_FILE_FORMAT=0, UNREADBLE_FILE=-1, INPUT_PARAM_ERR=-2, DUPLICATE_FILE=-3, 
-		DCM_FILE_FORMAT_ERR=-4, DCM_IMG_ERR=-5, EXCEPT_FILE=-6,
+		SUCCESS=1, UNREAD=0, UNREADBLE_FILE=-1, UNREADBLE_FILE_FORMAT=-2, INPUT_PARAM_ERR=-3, DUPLICATE_FILE=-4, 
+		DCM_FILE_FORMAT_ERR=-5, DCM_IMG_ERR=-6, EXCEPT_FILE=-7,
 		BAD_ALLOC=-999
 	};
 
@@ -79,7 +91,9 @@ private:
 	// preference
 	std::string m_sLogPath;
 	std::ofstream m_sLog;
-
+	std::vector<std::string> m_sReadableExtensions;
+	std::vector<std::string> m_sMaskKeywords;
+	std::vector<std::string> m_sExceptKeywords;
 
 #if THREAD
 	Concurrency::concurrent_vector<CSeries*> m_seriesList;
@@ -87,38 +101,30 @@ private:
 	std::vector<CSeries*> m_seriesList;
 #endif
 
-#if QT
-	QThread* m_pThread;
-	std::vector<std::string> m_sPaths;
-	bool m_bReadRecursive;
-#endif
-	
 	// Preload용 (Image, Image 정보가 mapping 되어 있지 않은 상태)
 	struct PreLoadContainer {
 		int isLoad;
 		bool isMask;
-
 		std::string sFilePath;
-		CSeries* pCiSeries;
-		std::vector<CImage<short>*> pCiImages;
-		std::vector<CImage<unsigned char>*> pCiMasks;
+		std::string sFileName;
+		std::string sFileExtension;
 	};
 	std::vector<PreLoadContainer*> m_preLoad;
 
 // function
 
 #if QT
-	Q_OBJECT
 public:
-	CData();
-	CData(QThread* pThread);
-	~CData();
+	explicit CData(QObject* parent = nullptr);
+	virtual ~CData();
 	void setQThread(QThread* pThread);
-	void setQThreadParam(std::vector<std::string> sPaths, bool bReadRecursive);
 signals:
-	void sendDataProgress(int, int, int, int);
+	void signalReadImage(std::vector<std::string> sPaths, bool bReadRecursive, bool bLazyLoading, std::function<void(int, int)>* pCallback);
+	void signalDataScanFinish();
+	void signalDataProgress(int, int);
 public slots:
-	void doWork();
+	void slotReadImage(void);
+	void slotReadImage(std::vector<std::string> sPaths, bool bReadRecursive, bool bLazyLoading, std::function<void(int, int)>* pCallback);
 
 #else
 public:
@@ -135,9 +141,41 @@ public:
 	friend std::ostream& operator<< (std::ostream& stream, const CData& obj);
 
 	// readImage
-	void readImage(std::string sPath, bool bReadRecursive=true, std::function<void(int, int)>* pCallback=NULL);
-	void readImage(std::vector<std::string> sPaths, bool bReadRecursive=true, std::function<void(int, int)>* pCallback=NULL);
+	void readImage(std::string sPath, bool bReadRecursive=true, bool bLazyLoading=true, std::function<void(int, int)>* pCallback=NULL);
+	void readImage(std::vector<std::string> sPaths, bool bReadRecursive=true, bool bLazyLoading=true, std::function<void(int, int)>* pCallback=NULL);
 
+private:
+	void analyzeImage(PreLoadContainer* plc, int &nFileCount, int nTotal, std::function<void(int, int)>* pCallback=NULL);
+
+	// load
+private:
+	template <typename T>
+	int loadImage(std::string sImagePath, CSeries* &pCiSeries, std::vector<CImage<T>*> &pCiImages, bool bReadHeaderOnly=false);
+	template <typename T>
+	int loadImage_lazyLoading(CImage<T>* &pCiImage, bool isMask);
+	int loadImage_lazyLoading_image_thread(CSeries* pCiSeries, int nImageIdx, int &nFileCount, std::function<void(int, int)>* pCallback=NULL);
+	int loadImage_lazyLoading_mask_thread(CSeries* pCiSeries, int nImageIdx, int &nFileCount, std::function<void(int, int)>* pCallback=NULL);
+	int loadImages_lazyLoading_thread(CSeries* pCiSeries, bool isMask, std::function<void(int, int)>* pCallback=NULL);
+public:
+	static int loadDICOM_dcmtk(const char* pcFilePath, DcmDataset* &dataSet, std::vector<short*> &images, bool bReadHeaderOnly=false);
+	static int loadImage_opencv(const char* pcFilePath, bool isColor, unsigned char* &pucImage, int &nWidth, int &nHeight, int &nChannel, bool bReadHeaderOnly=false);
+	static int loadNII_libnii(const char* pcImagePath, nifti_1_header &nhdr, std::vector<short*> &images, bool bReadHeaderOnly=false);
+	static int loadTIFF_libtiff(const char* pcImagePath, TIFF* &pTiff, std::vector<unsigned char*> &images, bool bReadHeaderOnly=false);
+private:
+	void loadStart();
+	void loadFinish();
+
+	// save
+public:
+	bool saveImage(int nSliceIdx, const char* pcImagePath, int nSaveType=SAVE_IMAGE_ONLY, int nSaveOption=SAVE_DEFAULT);
+	bool saveImage(int nSeriesIdx, int nImageIdx, const char* pcImagePath, int nSaveType=SAVE_IMAGE_ONLY, int nSaveOption=SAVE_DEFAULT);
+	bool saveImages(int nSeriesIdx, const char* pcSaveDir, const char* pcExtension="png", int nSaveType=SAVE_IMAGE_ONLY, int nSaveOption=SAVE_DEFAULT);
+private:
+	bool saveImage_opencv(int nSeriesIdx, int nImageIdx, const char* pcImagePath, int nSaveType=SAVE_IMAGE_ONLY, int nSaveOption=SAVE_DEFAULT);
+	bool saveImage_libtiff(int nSeriesIdx, int nImageIdx, const char* pcImagePath, int nSaveType=SAVE_IMAGE_ONLY, int nSaveOption=SAVE_DEFAULT);	// nImageIdx이 -1이면 multiple page
+	bool saveImage_dcmtk(int nSeriesIdx, int nImageIdx, const char* pcImagePath, int nSaveType=SAVE_IMAGE_ONLY, int nSaveOption=SAVE_DEFAULT);
+
+public:
 	// series
 	CSeries* getSeries(int nSeriesIdx);
 	int getSeriesCount(void);
@@ -214,32 +252,6 @@ public:
 	int getInstanceNumber(int nSliceIdx);
 	int getInstanceNumber(int nSeriesIdx, int nImageIdx);
 
-private:
-	void analyzeFile(std::vector<PreLoadContainer*>::iterator start, std::vector<PreLoadContainer*>::iterator end, int& nFileCount, std::function<void(int, int)>* pCallback);
-
-	// load
-public:
-	template <typename T>
-	int loadImage(std::string sImagePath, CSeries* &pCiSeries, std::vector<CImage<T>*> &pCiImages);
-private:
-	template <typename T>
-	int loadImage(CImage<T>* pCiImage, bool isMask);
-public:
-	static int loadDICOM_dcmtk(const char* pcFilePath, DcmDataset* &dataSet, std::vector<short*> &images, bool bReadHeaderOnly=false);
-	static int loadImage_opencv(const char* pcFilePath, bool isColor, unsigned char* &pucImage, int &nWidth, int &nHeight, int &nChannel, bool bReadHeaderOnly=false);
-	static int loadNII_libnii(const char* pcImagePath, nifti_1_header &nhdr, std::vector<short*> &images, bool bReadHeaderOnly=false);
-	static int loadTIFF_libtiff(const char* pcImagePath, TIFF* &pTiff, std::vector<unsigned char*> &images, bool bReadHeaderOnly=false);
-
-	// save
-public:
-	bool saveImage(int nSliceIdx, const char* pcImagePath, int nSaveType=SAVE_IMAGE_ONLY, int nSaveOption=SAVE_DEFAULT);
-	bool saveImage(int nSeriesIdx, int nImageIdx, const char* pcImagePath, int nSaveType=SAVE_IMAGE_ONLY, int nSaveOption=SAVE_DEFAULT);
-	bool saveImages(int nSeriesIdx, const char* pcSaveDir, const char* pcExtension="png", int nSaveType=SAVE_IMAGE_ONLY, int nSaveOption=SAVE_DEFAULT);
-private:
-	bool saveImage_opencv(int nSeriesIdx, int nImageIdx, const char* pcImagePath, int nSaveType=SAVE_IMAGE_ONLY, int nSaveOption=SAVE_DEFAULT);
-	bool saveImage_libtiff(int nSeriesIdx, int nImageIdx, const char* pcImagePath, int nSaveType=SAVE_IMAGE_ONLY, int nSaveOption=SAVE_DEFAULT);	// nImageIdx이 -1이면 multiple page
-	bool saveImage_dcmtk(int nSeriesIdx, int nImageIdx, const char* pcImagePath, int nSaveType=SAVE_IMAGE_ONLY, int nSaveOption=SAVE_DEFAULT);
-
 //////////////////////////////////////////////////////////////////////////////////////////
 	// file
 public:
@@ -264,11 +276,17 @@ public:
 	template<typename T>
 	static bool convertWindowImage (T* &pImage, int nWidth, int nHeight, int nWL, int nWW);
 
+	// progressbar
+private: 
+	void progressBar(int step, int total);
+
 //////////////////////////////////////////////////////////////////////////////////////////
 	// matching, compare rule
 	template<typename T1, typename T2>
 	bool isSameImage(CImage<T1>* pCiImage1, CImage<T2>* pCiImage2);
 	bool isSameSeries(CSeries* pCiSeries1, CSeries* pCiSeries2);
+	bool isMask_namingRule(std::string sPath);
+	bool isExcludeFile(std::string sPath);
 
 	// sorting rule
 	template <typename T>
@@ -276,16 +294,11 @@ public:
 	template <typename T>
 	static bool sorting_fileName(CImage<T>* &pCiImage1, CImage<T>* &pCiImage2);
 
-	// mask file check rule
-	bool isMask_namingRule(std::string sPath);
-
-	// file 제외 조건
-	bool isExcludeFile(std::string sPath);
-
 	// series, image 내용 변경 rule
-	std::string removeNameTag(std::string sFileName);
-	template<typename T>
-	bool modifySeries(CSeries* pCiSeries, std::vector<CImage<T>*> pCiImages);
+	bool modifySeries(CSeries* pCiSeries);
+
+	std::string renameImage(std::string sFileName);
+	std::string renameSeries(std::string sSeriesName);
 
 	// 저장 경로 rule
 	std::string convertImageSavePath(int nSeriesIdx, int nImageIdx, const char* pcSaveDir, const char* pcExtension, int nSaveType, int nSaveOption);

@@ -86,10 +86,10 @@ std::ostream& operator<<(std::ostream& stream, const CSeries& obj) {
 	int nMaskLoad = 0;
 
 	for(int i=0; i< nImageCount; i++) {
-		if(obj.m_images[i]->m_image) {
+		if(obj.m_images[i]->getImage()) {
 			nImageLoad++;
 		}
-		if(obj.m_images[i]->m_pucMask) {
+		if(obj.m_images[i]->getMask()) {
 			nMaskLoad++;
 		}
 		if(obj.m_images[i]->getMaskPath() != "") {

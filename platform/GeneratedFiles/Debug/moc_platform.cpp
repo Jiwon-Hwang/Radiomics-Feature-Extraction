@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_CPlatform_t {
-    QByteArrayData data[15];
-    char stringdata0[158];
+    QByteArrayData data[24];
+    char stringdata0[288];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -32,26 +32,38 @@ struct qt_meta_stringdata_CPlatform_t {
 static const qt_meta_stringdata_CPlatform_t qt_meta_stringdata_CPlatform = {
     {
 QT_MOC_LITERAL(0, 0, 9), // "CPlatform"
-QT_MOC_LITERAL(1, 10, 9), // "showImage"
-QT_MOC_LITERAL(2, 20, 0), // ""
-QT_MOC_LITERAL(3, 21, 9), // "nFrameIdx"
-QT_MOC_LITERAL(4, 31, 16), // "QTreeWidgetItem*"
-QT_MOC_LITERAL(5, 48, 4), // "item"
-QT_MOC_LITERAL(6, 53, 6), // "column"
-QT_MOC_LITERAL(7, 60, 17), // "scrollChangeImage"
-QT_MOC_LITERAL(8, 78, 6), // "nValue"
-QT_MOC_LITERAL(9, 85, 13), // "setFilterMode"
-QT_MOC_LITERAL(10, 99, 21), // "setCheckedFamilyState"
-QT_MOC_LITERAL(11, 121, 15), // "checkReadyToRun"
-QT_MOC_LITERAL(12, 137, 9), // "showPopUp"
-QT_MOC_LITERAL(13, 147, 6), // "sender"
-QT_MOC_LITERAL(14, 154, 3) // "run"
+QT_MOC_LITERAL(1, 10, 18), // "slotDataScanFinish"
+QT_MOC_LITERAL(2, 29, 0), // ""
+QT_MOC_LITERAL(3, 30, 16), // "slotDataProgress"
+QT_MOC_LITERAL(4, 47, 11), // "nCurrentIdx"
+QT_MOC_LITERAL(5, 59, 11), // "nMaximumIdx"
+QT_MOC_LITERAL(6, 71, 20), // "addFileDirectoryItem"
+QT_MOC_LITERAL(7, 92, 9), // "seriesIdx"
+QT_MOC_LITERAL(8, 102, 9), // "showImage"
+QT_MOC_LITERAL(9, 112, 9), // "nFrameIdx"
+QT_MOC_LITERAL(10, 122, 16), // "QTreeWidgetItem*"
+QT_MOC_LITERAL(11, 139, 4), // "item"
+QT_MOC_LITERAL(12, 144, 6), // "column"
+QT_MOC_LITERAL(13, 151, 17), // "scrollChangeImage"
+QT_MOC_LITERAL(14, 169, 6), // "nValue"
+QT_MOC_LITERAL(15, 176, 13), // "setFilterMode"
+QT_MOC_LITERAL(16, 190, 21), // "setCheckedFamilyState"
+QT_MOC_LITERAL(17, 212, 15), // "checkReadyToRun"
+QT_MOC_LITERAL(18, 228, 9), // "selectAll"
+QT_MOC_LITERAL(19, 238, 7), // "checked"
+QT_MOC_LITERAL(20, 246, 20), // "checkFeatureBoxState"
+QT_MOC_LITERAL(21, 267, 9), // "showPopUp"
+QT_MOC_LITERAL(22, 277, 6), // "sender"
+QT_MOC_LITERAL(23, 284, 3) // "run"
 
     },
-    "CPlatform\0showImage\0\0nFrameIdx\0"
-    "QTreeWidgetItem*\0item\0column\0"
+    "CPlatform\0slotDataScanFinish\0\0"
+    "slotDataProgress\0nCurrentIdx\0nMaximumIdx\0"
+    "addFileDirectoryItem\0seriesIdx\0showImage\0"
+    "nFrameIdx\0QTreeWidgetItem*\0item\0column\0"
     "scrollChangeImage\0nValue\0setFilterMode\0"
     "setCheckedFamilyState\0checkReadyToRun\0"
+    "selectAll\0checked\0checkFeatureBoxState\0"
     "showPopUp\0sender\0run"
 };
 #undef QT_MOC_LITERAL
@@ -62,7 +74,7 @@ static const uint qt_meta_data_CPlatform[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       8,   14, // methods
+      13,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -70,23 +82,33 @@ static const uint qt_meta_data_CPlatform[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    1,   54,    2, 0x0a /* Public */,
-       1,    2,   57,    2, 0x0a /* Public */,
-       7,    1,   62,    2, 0x0a /* Public */,
-       9,    0,   65,    2, 0x0a /* Public */,
-      10,    0,   66,    2, 0x0a /* Public */,
-      11,    0,   67,    2, 0x0a /* Public */,
-      12,    1,   68,    2, 0x0a /* Public */,
-      14,    0,   71,    2, 0x0a /* Public */,
+       1,    0,   79,    2, 0x0a /* Public */,
+       3,    2,   80,    2, 0x0a /* Public */,
+       6,    1,   85,    2, 0x0a /* Public */,
+       8,    1,   88,    2, 0x0a /* Public */,
+       8,    2,   91,    2, 0x0a /* Public */,
+      13,    1,   96,    2, 0x0a /* Public */,
+      15,    0,   99,    2, 0x0a /* Public */,
+      16,    0,  100,    2, 0x0a /* Public */,
+      17,    0,  101,    2, 0x0a /* Public */,
+      18,    1,  102,    2, 0x0a /* Public */,
+      20,    0,  105,    2, 0x0a /* Public */,
+      21,    1,  106,    2, 0x0a /* Public */,
+      23,    0,  109,    2, 0x0a /* Public */,
 
  // slots: parameters
-    QMetaType::Void, QMetaType::Int,    3,
-    QMetaType::Void, 0x80000000 | 4, QMetaType::Int,    5,    6,
-    QMetaType::Void, QMetaType::Int,    8,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int, QMetaType::Int,    4,    5,
+    QMetaType::Void, QMetaType::Int,    7,
+    QMetaType::Void, QMetaType::Int,    9,
+    QMetaType::Void, 0x80000000 | 10, QMetaType::Int,   11,   12,
+    QMetaType::Void, QMetaType::Int,   14,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Bool,
-    QMetaType::Void, QMetaType::QObjectStar,   13,
+    QMetaType::Void, QMetaType::Bool,   19,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::QObjectStar,   22,
     QMetaType::Void,
 
        0        // eod
@@ -98,15 +120,20 @@ void CPlatform::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         CPlatform *_t = static_cast<CPlatform *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->showImage((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 1: _t->showImage((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 2: _t->scrollChangeImage((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 3: _t->setFilterMode(); break;
-        case 4: _t->setCheckedFamilyState(); break;
-        case 5: { bool _r = _t->checkReadyToRun();
+        case 0: _t->slotDataScanFinish(); break;
+        case 1: _t->slotDataProgress((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 2: _t->addFileDirectoryItem((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 3: _t->showImage((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 4: _t->showImage((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 5: _t->scrollChangeImage((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 6: _t->setFilterMode(); break;
+        case 7: _t->setCheckedFamilyState(); break;
+        case 8: { bool _r = _t->checkReadyToRun();
             if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = std::move(_r); }  break;
-        case 6: _t->showPopUp((*reinterpret_cast< QObject*(*)>(_a[1]))); break;
-        case 7: _t->run(); break;
+        case 9: _t->selectAll((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 10: _t->checkFeatureBoxState(); break;
+        case 11: _t->showPopUp((*reinterpret_cast< QObject*(*)>(_a[1]))); break;
+        case 12: _t->run(); break;
         default: ;
         }
     }
@@ -137,13 +164,13 @@ int CPlatform::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 8)
+        if (_id < 13)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 8;
+        _id -= 13;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 8)
+        if (_id < 13)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 8;
+        _id -= 13;
     }
     return _id;
 }

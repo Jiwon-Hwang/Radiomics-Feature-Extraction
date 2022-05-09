@@ -22,6 +22,7 @@
 #include <QSettings>
 #include <QDebug>
 #include <QDialog>
+#include <qthread.h>
 
 #define _CRT_SECURE_NO_WARNINGS
 #include <ctime>
@@ -91,7 +92,12 @@ public:
 	CImageView* m_ciImage;				// image
 	CData m_ciData;						// data
 	int m_nActivatedFrameIdx;			// 현재 화면에 가시화된 Frame 번호
-	
+
+public:
+	QThread m_thread;
+
+public:
+	void setThread();
 
 public:	
 	enum FAMILY { E_INTENSEHISTO, E_LOCALINTENSE, E_MORPHOLOGY, E_GLCM, E_GLRLM, FAMILY_COUNT };
@@ -163,6 +169,10 @@ protected:
 	void keyReleaseEvent(QKeyEvent* event);
 
 public slots:
+	// data list scan signal //
+	void slotDataScanFinish();
+	void slotDataProgress(int nCurrentIdx, int nMaximumIdx);
+
 	// load + fileDirectory //
 	void addFileDirectoryItem(int seriesIdx);	// tree widget
 	void showImage(int nFrameIdx);

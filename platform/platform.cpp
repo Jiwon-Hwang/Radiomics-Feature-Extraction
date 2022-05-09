@@ -13,7 +13,10 @@ CPlatform::CPlatform(QWidget *parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);	// ui setting 
-
+	/*test
+	m_ciData.readImage("C:/Users/jiwon/Desktop/[jiwon]/dilab/Lab Projects/5. Radiomics/211201_pancreas_sample data", true, true);
+	std::cout << m_ciData << std::endl;
+	*/
 	setMouseTracking(true);
 	setAcceptDrops(true);
 
@@ -22,6 +25,7 @@ CPlatform::CPlatform(QWidget *parent)
 	createProgressBar();
 
 	setSignalSlot();
+	setThread();
 	loadSettings();
 	m_ciData.setLogPath(outputFolder + "tempLog.txt"); // error log path
 
@@ -296,15 +300,15 @@ void CPlatform::showPopUp(QObject* sender) {
 }
 void CPlatform::setProgressBarValue(int nCurrentIdx, int nMaximumIdx)
 {
-	float fValue = (float)(nCurrentIdx+1) / (float)nMaximumIdx * 100;
+	float fValue = (float)(nCurrentIdx + 1) / (float)nMaximumIdx * 100;
 
-	if(nCurrentIdx == 0) {
+	if (nCurrentIdx == 1) {
 		progressBar->setVisible(true);
 	}
 
 	progressBar->setValue(fValue);
 
-	if((nCurrentIdx+1) >= nMaximumIdx) {
+	if ((nCurrentIdx + 1) >= nMaximumIdx) {
 		progressBar->setValue(0);
 		progressBar->setVisible(false);
 	}
@@ -673,8 +677,38 @@ void CPlatform::keyReleaseEvent(QKeyEvent* event)
 	}
 }
 
+// scan data list and emit signal //
+void CPlatform::setThread() {
+	m_ciData.moveToThread(&m_thread);
+	m_ciData.setQThread(&m_thread);
+
+	connect(&m_thread, SIGNAL(started()), &m_ciData, SLOT(slotReadImage()));
+	connect(&m_ciData, SIGNAL(signalDataScanFinish()), this, SLOT(slotDataScanFinish()));
+	connect(&m_ciData, SIGNAL(signalDataProgress(int, int)), this, SLOT(slotDataProgress(int, int)));
+}
+void CPlatform::slotDataScanFinish() {
+
+	// 첫번째 Series, 첫번째 image
+	showImage(0);
+
+	int nStartFrameIdx = 0;
+	int nEndFrameIdx = m_ciData.getSeries(0)->getImageCount() - 1;
+	ui.horizontalScrollBar->setMaximum(nEndFrameIdx - nStartFrameIdx);
+	ui.horizontalScrollBar->setMinimum(0);
+
+	// add items in tree widget (receiveTreeState())
+	int nSeriesCnt = m_ciData.getSeriesCount();
+	for (int i = 0; i < nSeriesCnt; i++) {
+		addFileDirectoryItem(i);
+	}
+	//setProgressBarValue(1, 1); // tree 생성 끝나면 나머지 20% 채우고 꺼버리기
+}
+void CPlatform::slotDataProgress(int nCurrentIdx, int nMaximumIdx) {
+	setProgressBarValue(nCurrentIdx, nMaximumIdx);
+}
+
 // open, load, Image //
-void CPlatform::readImage(QStringList list) 
+void CPlatform::readImage(QStringList list)
 {
 	m_ciData.clear();
 
@@ -700,18 +734,6 @@ void CPlatform::readImage(QStringList list)
 
 	sort(fileList.begin(), fileList.end(), compareNames);
 
-#if 1
-	for (int i = 0, ni = fileList.size(); i<ni; i++) {
-		char cInputPath[1024] = { 0 };
-		QString path = fileList.at(i).toUtf8().constData();
-		QTextCodec* c = QTextCodec::codecForLocale();
-		QByteArray b = c->fromUnicode(path);
-		std::memcpy(cInputPath, b.data(), b.size() + 1);
-
-		m_ciData.readImage(cInputPath);
-		setProgressBarValue(i, ni);
-	}
-#else
 	std::vector<std::string> convertedFileList;
 	convertedFileList.reserve(fileList.size());
 
@@ -725,27 +747,8 @@ void CPlatform::readImage(QStringList list)
 		convertedFileList.push_back(cInputPath);
 	}
 
-	if (m_workerThread != NULL) {
-		m_ciData.setQThreadParam(convertedFileList, false);
-		m_workerThread->start();
-	}
-#endif
-
-	// 첫번째 Series, 첫번째 image
-	showImage(0);
-
-	int nStartFrameIdx = 0;
-	int nEndFrameIdx = m_ciData.getSeries(0)->getImageCount() - 1;
-	ui.horizontalScrollBar->setMaximum(nEndFrameIdx - nStartFrameIdx);
-	ui.horizontalScrollBar->setMinimum(0);
-
-	// add items in tree widget (receiveTreeState())
-	int nSeriesCnt = m_ciData.getSeriesCount();
-	for (int i = 0; i < nSeriesCnt; i++) {
-		addFileDirectoryItem(i);
-	}
-	setProgressBarValue(1, 1); // tree 생성 끝나면 나머지 20% 채우고 꺼버리기
-	
+	m_ciData.readFileList = convertedFileList;
+	m_thread.start();
 }
 void CPlatform::addFileDirectoryItem(int seriesIdx) {
 
@@ -755,28 +758,93 @@ void CPlatform::addFileDirectoryItem(int seriesIdx) {
 	QString studyName = pCiSeries->m_sStudyName.c_str();
 	QString seriesName = pCiSeries->m_sSeriesName.c_str();
 
-	QTreeWidgetItem* row_patientName = new QTreeWidgetItem(ui.treeWidget_FileDirectory); // "100"
-	row_patientName->setText(0, patientName);
-	//row_patientName->setIcon(0, QIcon(QPixmap("Resources/folder.png")));
+	QList<QTreeWidgetItem*> list = ui.treeWidget_FileDirectory->findItems(patientName, Qt::MatchExactly | Qt::MatchRecursive, 0);
 
-	QTreeWidgetItem* row_studyName = new QTreeWidgetItem(row_patientName); // "CT"
-	row_studyName->setText(0, studyName);
-	//row_studyName->setIcon(0, QIcon(QPixmap("")));
+	if (list.size() == 0) {
+		// 이전에 중복되는 환자가 없었을 경우 ("100") => patient, study, series, slice 새로 추가
+		QTreeWidgetItem* row_patientName = new QTreeWidgetItem(ui.treeWidget_FileDirectory); // "100"
+		row_patientName->setText(0, patientName);
+		row_patientName->setIcon(0, QIcon(QPixmap("Resources/folder.png")));
 
-	QTreeWidgetItem* row_seriesName = new QTreeWidgetItem(row_studyName); // "ap"
-	row_seriesName->setText(0, seriesName);
-	//row_seriesName->setIcon(0, QIcon(QPixmap("")));
+		QTreeWidgetItem* row_studyName = new QTreeWidgetItem(row_patientName); // "CT"
+		row_studyName->setText(0, studyName);
+		row_studyName->setIcon(0, QIcon(QPixmap("Resources/folder.png")));
 
-	
-	int nSlices = pCiSeries->getImageCount();
-	for (int i = 0; i < nSlices; i++) {
-		QTreeWidgetItem* row_slice = new QTreeWidgetItem(row_seriesName);
-		//row_slice->setIcon(0, QIcon(QPixmap("Resources/dcm.png")));
-		QString sliceName = pCiSeries->getImage(i)->getImageName().c_str();
-		row_slice->setText(0, sliceName);
-		row_slice->setText(1, QString::number(seriesIdx));
-		row_slice->setText(2, QString::number(i));
-		ui.treeWidget_FileDirectory->setCurrentItem(row_slice); // 실제 아이템 추가 부분
+		QTreeWidgetItem* row_seriesName = new QTreeWidgetItem(row_studyName); // "ap"
+		row_seriesName->setText(0, seriesName);
+		row_seriesName->setIcon(0, QIcon(QPixmap("Resources/folder.png")));
+
+
+		int nSlices = pCiSeries->getImageCount();
+		for (int i = 0; i < nSlices; i++) {
+			QTreeWidgetItem* row_slice = new QTreeWidgetItem(row_seriesName);
+			row_slice->setIcon(0, QIcon(QPixmap("Resources/dcm.png")));
+			QString sliceName = pCiSeries->getImage(i)->getImageName().c_str();
+			row_slice->setText(0, sliceName);
+			row_slice->setText(1, QString::number(seriesIdx));
+			row_slice->setText(2, QString::number(i));
+			ui.treeWidget_FileDirectory->setCurrentItem(row_slice); // 실제 아이템 추가 부분
+		}
+	}
+
+	else {
+		// 중복되는 환자명이 있을 경우 ("100") 
+		QTreeWidgetItem* row_patientName = list.at(0);
+		bool isDup = false;
+		
+		for (int i = 0; i < row_patientName->childCount(); i++) {
+			QTreeWidgetItem* row_studyName = row_patientName->child(i);
+			if (row_studyName->text(0).compare(studyName) == 0) {
+				// 중복되는 study명이 있을 경우 ("CT"), series명 검사
+				isDup = true;
+				for (int j = 0; j < row_studyName->childCount(); j++) {
+					QTreeWidgetItem* row_seriesName = row_studyName->child(j);
+					if (row_seriesName->text(0).compare(seriesName) == 0) {
+						// 중복되는 series명이 있을 경우 ("ap"), do nothing => series마다 함수 들어오므로 그럴 경우 x
+						return;
+					}
+				}
+
+				// 중복되는 study명은 있고 중복되는 series명은 없는 경우 => series, slice 새로 추가
+				QTreeWidgetItem* row_seriesName = new QTreeWidgetItem(row_studyName); // "ap"
+				row_seriesName->setText(0, seriesName);
+				row_seriesName->setIcon(0, QIcon(QPixmap("Resources/folder.png")));
+
+				int nSlices = pCiSeries->getImageCount();
+				for (int i = 0; i < nSlices; i++) {
+					QTreeWidgetItem* row_slice = new QTreeWidgetItem(row_seriesName);
+					row_slice->setIcon(0, QIcon(QPixmap("Resources/dcm.png")));
+					QString sliceName = pCiSeries->getImage(i)->getImageName().c_str();
+					row_slice->setText(0, sliceName);
+					row_slice->setText(1, QString::number(seriesIdx));
+					row_slice->setText(2, QString::number(i));
+					ui.treeWidget_FileDirectory->setCurrentItem(row_slice); // 실제 아이템 추가 부분
+				}
+
+			}
+		}
+		
+		if (isDup == false) {
+			// 중복되는 환자명은 있고 중복되는 study명은 없는 경우 => study, series, slice 새로 추가
+			QTreeWidgetItem* row_studyName = new QTreeWidgetItem(row_patientName); // "CT"
+			row_studyName->setText(0, studyName);
+			row_studyName->setIcon(0, QIcon(QPixmap("Resources/folder.png")));
+
+			QTreeWidgetItem* row_seriesName = new QTreeWidgetItem(row_studyName); // "ap"
+			row_seriesName->setText(0, seriesName);
+			row_seriesName->setIcon(0, QIcon(QPixmap("Resources/folder.png")));
+
+			int nSlices = pCiSeries->getImageCount();
+			for (int i = 0; i < nSlices; i++) {
+				QTreeWidgetItem* row_slice = new QTreeWidgetItem(row_seriesName);
+				row_slice->setIcon(0, QIcon(QPixmap("Resources/dcm.png")));
+				QString sliceName = pCiSeries->getImage(i)->getImageName().c_str();
+				row_slice->setText(0, sliceName);
+				row_slice->setText(1, QString::number(seriesIdx));
+				row_slice->setText(2, QString::number(i));
+				ui.treeWidget_FileDirectory->setCurrentItem(row_slice); // 실제 아이템 추가 부분
+			}
+		}
 	}
 
 }
