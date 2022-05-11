@@ -240,6 +240,7 @@ void CPlatform::setSignalSlot()
 	// platform
 	connect(ui.pushButton_run, SIGNAL(clicked()), this, SLOT(run()));
 	connect(ui.horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(scrollChangeImage(int)));
+	connect(ui.treeWidget_FileDirectory, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(showImage(QTreeWidgetItem*, int)));
 
 	// filter - group box
 	QList<QRadioButton *> filterBox = ui.groupBox_Filters->findChildren<QRadioButton *>();
@@ -701,13 +702,13 @@ void CPlatform::slotDataScanFinish() {
 	for (int i = 0; i < nSeriesCnt; i++) {
 		addFileDirectoryItem(i);
 	}
-	//setProgressBarValue(1, 1); // tree 생성 끝나면 나머지 20% 채우고 꺼버리기
+	setProgressBarValue(1, 1); // tree 생성 끝나면 나머지 20% 채우고 꺼버리기
 }
 void CPlatform::slotDataProgress(int nCurrentIdx, int nMaximumIdx) {
-	setProgressBarValue(nCurrentIdx, nMaximumIdx);
+	setProgressBarValue(nCurrentIdx, nMaximumIdx*1.2); // tree 생성 전까지 20% 남기고 채우기
 }
 
-// open, load, Image //
+// open, load, Image (tree widget) //
 void CPlatform::readImage(QStringList list)
 {
 	m_ciData.clear();
@@ -761,7 +762,7 @@ void CPlatform::addFileDirectoryItem(int seriesIdx) {
 	QList<QTreeWidgetItem*> list = ui.treeWidget_FileDirectory->findItems(patientName, Qt::MatchExactly | Qt::MatchRecursive, 0);
 
 	if (list.size() == 0) {
-		// 이전에 중복되는 환자가 없었을 경우 ("100") => patient, study, series, slice 새로 추가
+		// 이전에 중복되는 환자가 없었을 경우 ("100") => patient, study, series, image 새로 추가
 		QTreeWidgetItem* row_patientName = new QTreeWidgetItem(ui.treeWidget_FileDirectory); // "100"
 		row_patientName->setText(0, patientName);
 		row_patientName->setIcon(0, QIcon(QPixmap("Resources/folder.png")));
@@ -775,15 +776,15 @@ void CPlatform::addFileDirectoryItem(int seriesIdx) {
 		row_seriesName->setIcon(0, QIcon(QPixmap("Resources/folder.png")));
 
 
-		int nSlices = pCiSeries->getImageCount();
-		for (int i = 0; i < nSlices; i++) {
-			QTreeWidgetItem* row_slice = new QTreeWidgetItem(row_seriesName);
-			row_slice->setIcon(0, QIcon(QPixmap("Resources/dcm.png")));
-			QString sliceName = pCiSeries->getImage(i)->getImageName().c_str();
-			row_slice->setText(0, sliceName);
-			row_slice->setText(1, QString::number(seriesIdx));
-			row_slice->setText(2, QString::number(i));
-			ui.treeWidget_FileDirectory->setCurrentItem(row_slice); // 실제 아이템 추가 부분
+		int nImages = pCiSeries->getImageCount();
+		for (int i = 0; i < nImages; i++) {
+			QTreeWidgetItem* row_image = new QTreeWidgetItem(row_seriesName);
+			row_image->setIcon(0, QIcon(QPixmap("Resources/dcm.png")));
+			QString imageName = pCiSeries->getImage(i)->getImageName().c_str();
+			row_image->setText(0, imageName);
+			row_image->setText(1, QString::number(seriesIdx));
+			row_image->setText(2, QString::number(i));
+			ui.treeWidget_FileDirectory->setCurrentItem(row_image); // 실제 아이템 추가 부분
 		}
 	}
 
@@ -805,27 +806,27 @@ void CPlatform::addFileDirectoryItem(int seriesIdx) {
 					}
 				}
 
-				// 중복되는 study명은 있고 중복되는 series명은 없는 경우 => series, slice 새로 추가
+				// 중복되는 study명은 있고 중복되는 series명은 없는 경우 => series, image 새로 추가
 				QTreeWidgetItem* row_seriesName = new QTreeWidgetItem(row_studyName); // "ap"
 				row_seriesName->setText(0, seriesName);
 				row_seriesName->setIcon(0, QIcon(QPixmap("Resources/folder.png")));
 
-				int nSlices = pCiSeries->getImageCount();
-				for (int i = 0; i < nSlices; i++) {
-					QTreeWidgetItem* row_slice = new QTreeWidgetItem(row_seriesName);
-					row_slice->setIcon(0, QIcon(QPixmap("Resources/dcm.png")));
-					QString sliceName = pCiSeries->getImage(i)->getImageName().c_str();
-					row_slice->setText(0, sliceName);
-					row_slice->setText(1, QString::number(seriesIdx));
-					row_slice->setText(2, QString::number(i));
-					ui.treeWidget_FileDirectory->setCurrentItem(row_slice); // 실제 아이템 추가 부분
+				int nImages = pCiSeries->getImageCount();
+				for (int i = 0; i < nImages; i++) {
+					QTreeWidgetItem* row_image = new QTreeWidgetItem(row_seriesName);
+					row_image->setIcon(0, QIcon(QPixmap("Resources/dcm.png")));
+					QString imageName = pCiSeries->getImage(i)->getImageName().c_str();
+					row_image->setText(0, imageName);
+					row_image->setText(1, QString::number(seriesIdx));
+					row_image->setText(2, QString::number(i));
+					ui.treeWidget_FileDirectory->setCurrentItem(row_image); // 실제 아이템 추가 부분
 				}
 
 			}
 		}
 		
 		if (isDup == false) {
-			// 중복되는 환자명은 있고 중복되는 study명은 없는 경우 => study, series, slice 새로 추가
+			// 중복되는 환자명은 있고 중복되는 study명은 없는 경우 => study, series, image 새로 추가
 			QTreeWidgetItem* row_studyName = new QTreeWidgetItem(row_patientName); // "CT"
 			row_studyName->setText(0, studyName);
 			row_studyName->setIcon(0, QIcon(QPixmap("Resources/folder.png")));
@@ -834,30 +835,28 @@ void CPlatform::addFileDirectoryItem(int seriesIdx) {
 			row_seriesName->setText(0, seriesName);
 			row_seriesName->setIcon(0, QIcon(QPixmap("Resources/folder.png")));
 
-			int nSlices = pCiSeries->getImageCount();
-			for (int i = 0; i < nSlices; i++) {
-				QTreeWidgetItem* row_slice = new QTreeWidgetItem(row_seriesName);
-				row_slice->setIcon(0, QIcon(QPixmap("Resources/dcm.png")));
-				QString sliceName = pCiSeries->getImage(i)->getImageName().c_str();
-				row_slice->setText(0, sliceName);
-				row_slice->setText(1, QString::number(seriesIdx));
-				row_slice->setText(2, QString::number(i));
-				ui.treeWidget_FileDirectory->setCurrentItem(row_slice); // 실제 아이템 추가 부분
+			int nImages = pCiSeries->getImageCount();
+			for (int i = 0; i < nImages; i++) {
+				QTreeWidgetItem* row_image = new QTreeWidgetItem(row_seriesName);
+				row_image->setIcon(0, QIcon(QPixmap("Resources/dcm.png")));
+				QString imageName = pCiSeries->getImage(i)->getImageName().c_str();
+				row_image->setText(0, imageName);
+				row_image->setText(1, QString::number(seriesIdx));
+				row_image->setText(2, QString::number(i));
+				ui.treeWidget_FileDirectory->setCurrentItem(row_image); // 실제 아이템 추가 부분
 			}
 		}
 	}
 
 }
-void CPlatform::showImage(int nFrameIdx)
+void CPlatform::showImage(int nSliceIdx)
 {
-	m_nActivatedFrameIdx = nFrameIdx;
-	short* psImage = m_ciData.getImage(nFrameIdx);
-	unsigned char* pucMask = m_ciData.getMask(nFrameIdx);
-	int nWidth = m_ciData.getWidth(nFrameIdx);
-	int nHeight = m_ciData.getHeight(nFrameIdx);
+	m_nActivatedFrameIdx = nSliceIdx;
+	int nWidth = m_ciData.getWidth(nSliceIdx);
+	int nHeight = m_ciData.getHeight(nSliceIdx);
 	
 
-	// 처음 Data를 로드하는 경우
+	// 처음 Data를 로드하는 경우 (***slotDataScanFinish()에서 showImage(0) 일때만 if문 들어감***)
 	// CImage* m_ciImage => image pointer
 	if(m_ciImage == NULL) {
 		m_ciImage = new CImageView;
@@ -895,10 +894,19 @@ void CPlatform::showImage(int nFrameIdx)
 }
 void CPlatform::showImage(QTreeWidgetItem* item, int column)
 {
-	if(item->text(1) != 0) {
-		int nFrameIdx = item->text(1).toInt();
-		showImage(nFrameIdx);
+	/*
+	if(item->text(1) != 0 && item->text(2) != 0) {
+		int nSeriesIdx = item->text(1).toInt();
+		int nImageIdx = item->text(2).toInt();
+		int nSliceIdx = m_ciData.convertToSliceIdx(nSeriesIdx, nImageIdx); 
+		showImage(nSliceIdx);
 	}
+	*/
+	int nSeriesIdx = item->text(1).toInt();
+	int nImageIdx = item->text(2).toInt();
+	int nSliceIdx = m_ciData.convertToSliceIdx(nSeriesIdx, nImageIdx);
+	m_ciData.getImage(nSliceIdx); // item 더블클릭 x2회 이상 해야하는 문제 clear
+	showImage(nSliceIdx);
 }
 
 // scroll //

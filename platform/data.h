@@ -1,6 +1,6 @@
 #pragma once
 
-// v 1.411 (20220509)
+// v 1.44 (20220510)
 
 // config
 #define DEBUG 0							// 0: false, 1: true (VLD)
@@ -51,8 +51,8 @@
 
 //
 #if DEBUG
-#define DEBUG_LOG(x) std::cout << x
-#define DEBUG_LOG_DETAIL(function, line, x) std::cout << function << "[" << line << "]" << std::endl << x
+#define DEBUG_LOG(x) std::cerr << x
+#define DEBUG_LOG_DETAIL(function, line, x) std::cerr << function << "[" << line << "]" << std::endl << x
 #include <vld.h>
 #else
 #define DEBUG_LOG(x)
@@ -188,6 +188,8 @@ public:
 
 	// 아래 함수는 개발 편의성을 위해서 제공
 	// nSliceIdx: image를 Series와 관계없이 순서대로 나열했을 때, image의 순서
+	int convertToSliceIdx(int nSeriesIdx, int nImageIdx);
+
 	CImage<short>* getCImage(int nSliceIdx);
 	CImage<short>* getCImage(int nSeriesIdx, int nImageIdx);
 	short* getImage(int nSliceIdx);
@@ -223,8 +225,8 @@ public:
 
 	std::string getMaskPath(int nSliceIdx);
 	std::string getMaskPath(int nSeriesIdx, int nImageIdx);
-	std::string getMaskImage(int nSliceIdx);
-	std::string getMaskImage(int nSeriesIdx, int nImageIdx);
+	std::string getMaskImageName(int nSliceIdx);
+	std::string getMaskImageName(int nSeriesIdx, int nImageIdx);
 	std::string getMaskExtension(int nSliceIdx);
 	std::string getMaskExtension(int nSeriesIdx, int nImageIdx);
 

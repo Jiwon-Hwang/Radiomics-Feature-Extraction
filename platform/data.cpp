@@ -1881,23 +1881,40 @@ void CData::checkIsEmptyLog(std::string sFinalLogPath) {
 }
 
 ////////////////////////////////////////////////////////////////////
+int CData::convertToSliceIdx(int nSeriesIdx, int nImageIdx) {
+	int nSliceIdx = 0;
+
+	for(int i=0, ni=nSeriesIdx; i<ni; i++) {
+		int nImageCnt = getSeries(i)->getImageCount();
+
+		nSliceIdx += nImageCnt;
+	}
+	nSliceIdx += nImageIdx;
+
+	return nSliceIdx;
+}
+
 CImage<short>* CData::getCImage(int nSliceIdx) {
 	CImage<short>* pTargetImage = NULL;
 	int nTargetSeriesIdx = -1;
 	int nTargetImageIdx = -1;
-	
+
 	int nIdx = 0;
-	for(int i=0, ni=getSeriesCount(); i<ni; i++) {
+	for (int i = 0, ni = getSeriesCount(); i<ni; i++) { 
 		int nImageCnt = getSeries(i)->getImageCount();
 
-		if(nSliceIdx >= nIdx) {
-			nTargetSeriesIdx = i;
-			nTargetImageIdx = nSliceIdx-nIdx;
+		if (nImageCnt == 0) {
+			continue;
+		}
+	
+		if (nIdx <= nSliceIdx && nSliceIdx <= nIdx + nImageCnt - 1) {
+			nTargetSeriesIdx = i; 
+			nTargetImageIdx = nSliceIdx - nIdx; 
 			pTargetImage = getSeries(nTargetSeriesIdx)->getImage(nTargetImageIdx);
 			break;
 		}
 
-		nIdx = nIdx + nImageCnt-1;
+		nIdx = nIdx + nImageCnt; 
 	}
 
 	return pTargetImage;
@@ -2324,14 +2341,14 @@ std::string CData::getMaskPath(int nSeriesIdx, int nImageIdx) {
 	}
 	return "";
 }
-std::string CData::getMaskImage(int nSliceIdx) {
+std::string CData::getMaskImageName(int nSliceIdx) {
 	CImage<short>* pTargetImage = getCImage(nSliceIdx);
 	if(pTargetImage) {
 		return pTargetImage->getMaskName();
 	}
 	return "";
 }
-std::string CData::getMaskImage(int nSeriesIdx, int nImageIdx) {
+std::string CData::getMaskImageName(int nSeriesIdx, int nImageIdx) {
 	CImage<short>* pTargetImage = getCImage(nSeriesIdx, nImageIdx);
 	if(pTargetImage) {
 		return pTargetImage->getMaskName();

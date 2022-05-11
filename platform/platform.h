@@ -173,9 +173,9 @@ public slots:
 	void slotDataScanFinish();
 	void slotDataProgress(int nCurrentIdx, int nMaximumIdx);
 
-	// load + fileDirectory //
+	// load + fileDirectory (tree widget) //
 	void addFileDirectoryItem(int seriesIdx);	// tree widget
-	void showImage(int nFrameIdx);
+	void showImage(int nSliceIdx);
 	void showImage(QTreeWidgetItem* item, int column);
 
 	// scroll //
