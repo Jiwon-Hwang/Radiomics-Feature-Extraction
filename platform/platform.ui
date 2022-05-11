@@ -62,7 +62,7 @@
             </property>
             <column>
              <property name="text">
-              <string notr="true">1</string>
+              <string>DICOM</string>
              </property>
             </column>
            </widget>

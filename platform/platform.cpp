@@ -13,10 +13,6 @@ CPlatform::CPlatform(QWidget *parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);	// ui setting 
-	/*test
-	m_ciData.readImage("C:/Users/jiwon/Desktop/[jiwon]/dilab/Lab Projects/5. Radiomics/211201_pancreas_sample data", true, true);
-	std::cout << m_ciData << std::endl;
-	*/
 	setMouseTracking(true);
 	setAcceptDrops(true);
 
@@ -657,7 +653,7 @@ void CPlatform::dropEvent(QDropEvent * event)
 		list.push_back(url.toLocalFile());
 	}
 
-	readImage(list);
+	readImage(list); // *** image, mask 따로 load 시 죽는 error***
 }
 
 // keyboard event //
@@ -690,6 +686,7 @@ void CPlatform::setThread() {
 void CPlatform::slotDataScanFinish() {
 
 	// 첫번째 Series, 첫번째 image
+	m_ciData.getImage(0);
 	showImage(0);
 
 	int nStartFrameIdx = 0;
@@ -711,9 +708,8 @@ void CPlatform::slotDataProgress(int nCurrentIdx, int nMaximumIdx) {
 // open, load, Image (tree widget) //
 void CPlatform::readImage(QStringList list)
 {
-	m_ciData.clear();
+	m_ciData.clear(); // *** image, mask 따로 load 시 죽는 error***
 
-	// ***QThread로 병렬 처리하기!(2가지 thread로)*** //
 	QStringList fileList;
 	for (int i = 0, ni = list.size(); i<ni; i++) {
 		QFileInfo f(list[i]);
@@ -865,6 +861,22 @@ void CPlatform::showImage(int nSliceIdx)
 		m_ciImage->setMinimumWidth(200);
 		m_ciImage->setMinimumHeight(200);
 		m_ciImage->setImageScreenSize(562, 562); // ***여기서 redraw 함수 호출!*** => overlay!
+
+		// 넣고 다시
+		int nImageLayoutWidth = ui.gridLayout_4->geometry().width(); // 587
+		int nImageLayoutHeight = ui.gridLayout_4->geometry().height(); // 562
+
+
+		if (nImageLayoutWidth > nImageLayoutHeight) {
+			nWidth = nImageLayoutHeight;
+			nHeight = nImageLayoutHeight * ((float)m_ciImage->m_nImageHeight / (float)m_ciImage->m_nImageWidth);
+		}
+		else {
+			nWidth = nImageLayoutWidth;
+			nHeight = nImageLayoutWidth * ((float)m_ciImage->m_nImageHeight / (float)m_ciImage->m_nImageWidth);
+		}
+
+		m_ciImage->setImageScreenSize(nWidth, nHeight); // 창 크기 변경함에 따라 image 크기도 변하도록 다시 세팅
 
 		ui.gridLayout_4->addWidget(m_ciImage, 0, 0); // gridLayout_4 객체에 위젯 공간 추가 (0, 0 위치에) => 여기서 image show(display) 하는 건 X
 	

@@ -103,9 +103,6 @@ public:
         horizontalLayout_9->setSpacing(6);
         horizontalLayout_9->setObjectName(QStringLiteral("horizontalLayout_9"));
         treeWidget_FileDirectory = new QTreeWidget(centralWidget);
-        QTreeWidgetItem *__qtreewidgetitem = new QTreeWidgetItem();
-        __qtreewidgetitem->setText(0, QStringLiteral("1"));
-        treeWidget_FileDirectory->setHeaderItem(__qtreewidgetitem);
         treeWidget_FileDirectory->setObjectName(QStringLiteral("treeWidget_FileDirectory"));
         sizePolicy.setHeightForWidth(treeWidget_FileDirectory->sizePolicy().hasHeightForWidth());
         treeWidget_FileDirectory->setSizePolicy(sizePolicy);
@@ -263,6 +260,8 @@ public:
     void retranslateUi(QMainWindow *platformClass)
     {
         platformClass->setWindowTitle(QApplication::translate("platformClass", "Radiomics Feature Extraction", Q_NULLPTR));
+        QTreeWidgetItem *___qtreewidgetitem = treeWidget_FileDirectory->headerItem();
+        ___qtreewidgetitem->setText(0, QApplication::translate("platformClass", "DICOM", Q_NULLPTR));
         groupBox->setTitle(QString());
         groupBox_Filters->setTitle(QApplication::translate("platformClass", "Filter", Q_NULLPTR));
         radioButton_None->setText(QApplication::translate("platformClass", "None", Q_NULLPTR));
