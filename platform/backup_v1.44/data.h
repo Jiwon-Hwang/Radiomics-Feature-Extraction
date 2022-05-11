@@ -1,6 +1,6 @@
 #pragma once
 
-// v 1.46 (20220511)
+// v 1.44 (20220510)
 
 // config
 #define DEBUG 0							// 0: false, 1: true (VLD)
@@ -75,7 +75,6 @@ public:
 #endif
 
 public:
-	enum READIMAGE_CLEAR_OPTION {KEEP_PREV_DATAS, CLEAR_PREV_DATAS_CONDITIONAL, CLEAR_PREV_DATAS_FORCE};
 	enum SAVE_TYPE {SAVE_IMAGE_ONLY, SAVE_MASK_ONLY, SAVE_OVERLAY};
 	enum SAVE_OPTION {SAVE_DEFAULT, SAVE_IMAGE_WINDOW, SAVE_MASK_BINARY};
 	enum LOAD_STATUS {
@@ -120,12 +119,12 @@ public:
 	virtual ~CData();
 	void setQThread(QThread* pThread);
 signals:
-	void signalReadImage(std::vector<std::string> sPaths, bool bReadRecursive, bool bScanOnly, int nClearOption, std::function<void(int, int)>* pCallback);
+	void signalReadImage(std::vector<std::string> sPaths, bool bReadRecursive, bool bLazyLoading, std::function<void(int, int)>* pCallback);
 	void signalDataScanFinish();
 	void signalDataProgress(int, int);
 public slots:
 	void slotReadImage(void);
-	void slotReadImage(std::vector<std::string> sPaths, bool bReadRecursive, bool bScanOnly, int nClearOption, std::function<void(int, int)>* pCallback);
+	void slotReadImage(std::vector<std::string> sPaths, bool bReadRecursive, bool bLazyLoading, std::function<void(int, int)>* pCallback);
 
 #else
 public:
@@ -142,15 +141,13 @@ public:
 	friend std::ostream& operator<< (std::ostream& stream, const CData& obj);
 
 	// readImage
-	void readImage(std::string sPath, bool bReadRecursive=true, bool bScanOnly=true, int nClearOption=KEEP_PREV_DATAS, std::function<void(int, int)>* pCallback=NULL);
-	void readImage(std::vector<std::string> sPaths, bool bReadRecursive=true, bool bScanOnly=true, int nClearOption=KEEP_PREV_DATAS, std::function<void(int, int)>* pCallback=NULL);
+	void readImage(std::string sPath, bool bReadRecursive=true, bool bLazyLoading=true, std::function<void(int, int)>* pCallback=NULL);
+	void readImage(std::vector<std::string> sPaths, bool bReadRecursive=true, bool bLazyLoading=true, std::function<void(int, int)>* pCallback=NULL);
 
 private:
 	void analyzeImage(PreLoadContainer* plc, int &nFileCount, int nTotal, std::function<void(int, int)>* pCallback=NULL);
 
 	// load
-public:
-	int loadImages(int nSliceIdx);
 private:
 	template <typename T>
 	int loadImage(std::string sImagePath, CSeries* &pCiSeries, std::vector<CImage<T>*> &pCiImages, bool bReadHeaderOnly=false);

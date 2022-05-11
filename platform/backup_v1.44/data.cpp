@@ -11,16 +11,14 @@ void CData::setQThread(QThread* pThread) {
 	m_pThread = pThread;
 }
 void CData::slotReadImage(void) {
-	readImage(readFileList, true, true, CLEAR_PREV_DATAS_CONDITIONAL, NULL);
+	readImage(readFileList, true, true, NULL);
 	readFileList.clear();
 
-	if(m_pThread) {
-		m_pThread->exit();
-	}
+	m_pThread->exit();
 }
-void CData::slotReadImage(std::vector<std::string> sPaths, bool bReadRecursive, bool bScanOnly, int nClearOption, std::function<void(int, int)>* pCallback) {
+void CData::slotReadImage(std::vector<std::string> sPaths, bool bReadRecursive, bool bLazyLoading, std::function<void(int, int)>* pCallback) {
 	//m_pThread->start();
-	readImage(sPaths, bReadRecursive, bScanOnly, nClearOption, pCallback);
+	readImage(sPaths, bReadRecursive, bLazyLoading, pCallback);
 	//m_pThread->exit();
 }
 #else
@@ -103,7 +101,7 @@ std::ostream& operator<<(std::ostream& stream, const CData& obj) {
 	return stream;
 }
 
-void CData::readImage(std::string sPath, bool bReadRecursive, bool bScanOnly, int nClearOption, std::function<void(int, int)>* pCallback) {	
+void CData::readImage(std::string sPath, bool bReadRecursive, bool bLazyLoading, std::function<void(int, int)>* pCallback) {	
 	std::vector<std::string> sFilePaths;
 
 	if(isFile(sPath)) {
@@ -117,9 +115,9 @@ void CData::readImage(std::string sPath, bool bReadRecursive, bool bScanOnly, in
 		}
 	}
 
-	readImage(sFilePaths, bReadRecursive, bScanOnly, nClearOption, pCallback);
+	readImage(sFilePaths, bReadRecursive, bLazyLoading, pCallback);
 }
-void CData::readImage(std::vector<std::string> sPaths, bool bReadRecursive, bool bScanOnly, int nClearOption, std::function<void(int, int)>* pCallback) {
+void CData::readImage(std::vector<std::string> sPaths, bool bReadRecursive, bool bLazyLoading, std::function<void(int, int)>* pCallback) {
 	std::vector<std::string> sFilePaths;
 
 	for(std::vector<std::string>::iterator it=sPaths.begin(); it!=sPaths.end(); it++) {
@@ -161,36 +159,6 @@ void CData::readImage(std::vector<std::string> sPaths, bool bReadRecursive, bool
 			m_preLoad[i]->isLoad = isExcludeFile(m_preLoad[i]->sFilePath)? EXCEPT_FILE: false;
 			m_preLoad[i]->isMask = isMask_namingRule(m_preLoad[i]->sFilePath);
 		}
-
-		// 3. clear prev images
-		switch(nClearOption) {
-			case CLEAR_PREV_DATAS_FORCE: {
-				clear();
-				break;
-			}
-			case CLEAR_PREV_DATAS_CONDITIONAL: {
-				int nImageCnt = 0, nMaskCnt = 0;
-				for(int i=0, ni=m_preLoad.size(); i<ni; i++) {
-					if(m_preLoad[i]->isLoad != EXCEPT_FILE) {
-						if(m_preLoad[i]->isMask == false) {
-							nImageCnt++;
-						}
-						else {
-							nMaskCnt++;
-						}
-					}
-				}
-				if( !(nImageCnt == 0 && nMaskCnt > 0) ) {
-					clear();
-				}
-				break;
-			}							 
-			default: {
-				// do nothing
-			}
-		};
-
-		// 4. scan
 		#if THREAD
 			std::vector<std::future<void>> v_async;
 			// image
@@ -244,16 +212,13 @@ void CData::readImage(std::vector<std::string> sPaths, bool bReadRecursive, bool
 			emit signalDataScanFinish();
 		#endif
 		/////////////////////////////////////////////////////////////////////////////////
-		if(!bScanOnly) {
+		if(!bLazyLoading) {
 			for(int i=0, ni=getSeriesCount(); i<ni; i++) {
 				CSeries* pCiImage = getSeries(i);
 				loadImages_lazyLoading_thread(pCiImage, false);
 				loadImages_lazyLoading_thread(pCiImage, true);
 			}
 		}
-		#if PROGRESS_BAR
-			printf("\n");
-		#endif
 	}
 
 	if(m_sLog.is_open()) {
@@ -445,34 +410,6 @@ void CData::analyzeImage(PreLoadContainer* plc, int &nFileCount, int nTotal, std
 }
 
 ////////////////////////////////////////////////////////////////////
-int CData::loadImages(int nSliceIdx) {
-	int nReturn = -1;
-	int nTargetSeriesIdx = -1;
-
-	int nIdx = 0;
-	for (int i = 0, ni = getSeriesCount(); i<ni; i++) { 
-		int nImageCnt = getSeries(i)->getImageCount();
-
-		if (nImageCnt == 0) {
-			continue;
-		}
-	
-		if (nIdx <= nSliceIdx && nSliceIdx < nIdx + nImageCnt) {
-			nTargetSeriesIdx = i; 
-			CSeries* pCiSeries = getSeries(nTargetSeriesIdx);
-
-			if(nReturn = loadImages_lazyLoading_thread(pCiSeries, false)) {
-				nReturn = loadImages_lazyLoading_thread(pCiSeries, true);
-			}
-			break;
-		}
-
-		nIdx = nIdx + nImageCnt; 
-	}
-
-	return nReturn;
-}
-
 template <typename T>
 int CData::loadImage(std::string sImagePath, CSeries* &pCiSeries, std::vector<CImage<T>*> &pCiImages, bool bReadHeaderOnly) {
 
@@ -914,7 +851,6 @@ int CData::loadImage_lazyLoading_image_thread(CSeries* pCiSeries, int nImageIdx,
 	if(pCallback != NULL) {
 		(*pCallback)(nFileCount, nImageCount);
 	}
-
 	#if QT
 		emit signalDataProgress(nFileCount, nImageCount);
 	#endif
@@ -977,30 +913,8 @@ int CData::loadImages_lazyLoading_thread(CSeries* pCiSeries, bool isMask, std::f
 		return INPUT_PARAM_ERR;
 	}
 
-	// isLoaded
-	bool isLoadedAll = true;
-	for(int i=0, ni=pCiSeries->getImageCount(); i<ni; i++) {
-		CImage<short>* pCiImage = pCiSeries->getImage(i);
-
-		if(!isMask) {
-			if(pCiImage->getImage() == NULL) {
-				isLoadedAll = false;
-				break;
-			}
-		}
-		else {
-			if(pCiImage->getMask() == NULL) {
-				isLoadedAll = false;
-				break;
-			}
-		}
-	}
-	if(isLoadedAll) {
-		return SUCCESS;
-	}
-
 	if(!isMask) {
-		printf("[Series] -- %s_%s\n", pCiSeries->m_sPatientName.c_str(), pCiSeries->m_sSeriesName.c_str());
+		printf("[Series]\n");
 	}
 
 	loadStart();
@@ -1993,7 +1907,7 @@ CImage<short>* CData::getCImage(int nSliceIdx) {
 			continue;
 		}
 	
-		if (nIdx <= nSliceIdx && nSliceIdx < nIdx + nImageCnt) {
+		if (nIdx <= nSliceIdx && nSliceIdx <= nIdx + nImageCnt - 1) {
 			nTargetSeriesIdx = i; 
 			nTargetImageIdx = nSliceIdx - nIdx; 
 			pTargetImage = getSeries(nTargetSeriesIdx)->getImage(nTargetImageIdx);

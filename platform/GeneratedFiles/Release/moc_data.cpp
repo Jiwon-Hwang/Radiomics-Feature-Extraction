@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_CData_t {
-    QByteArrayData data[12];
-    char stringdata0[177];
+    QByteArrayData data[13];
+    char stringdata0[187];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -37,19 +37,20 @@ QT_MOC_LITERAL(2, 22, 0), // ""
 QT_MOC_LITERAL(3, 23, 24), // "std::vector<std::string>"
 QT_MOC_LITERAL(4, 48, 6), // "sPaths"
 QT_MOC_LITERAL(5, 55, 14), // "bReadRecursive"
-QT_MOC_LITERAL(6, 70, 12), // "bLazyLoading"
-QT_MOC_LITERAL(7, 83, 29), // "std::function<void(int,int)>*"
-QT_MOC_LITERAL(8, 113, 9), // "pCallback"
-QT_MOC_LITERAL(9, 123, 20), // "signalDataScanFinish"
-QT_MOC_LITERAL(10, 144, 18), // "signalDataProgress"
-QT_MOC_LITERAL(11, 163, 13) // "slotReadImage"
+QT_MOC_LITERAL(6, 70, 9), // "bScanOnly"
+QT_MOC_LITERAL(7, 80, 12), // "nClearOption"
+QT_MOC_LITERAL(8, 93, 29), // "std::function<void(int,int)>*"
+QT_MOC_LITERAL(9, 123, 9), // "pCallback"
+QT_MOC_LITERAL(10, 133, 20), // "signalDataScanFinish"
+QT_MOC_LITERAL(11, 154, 18), // "signalDataProgress"
+QT_MOC_LITERAL(12, 173, 13) // "slotReadImage"
 
     },
     "CData\0signalReadImage\0\0std::vector<std::string>\0"
-    "sPaths\0bReadRecursive\0bLazyLoading\0"
-    "std::function<void(int,int)>*\0pCallback\0"
-    "signalDataScanFinish\0signalDataProgress\0"
-    "slotReadImage"
+    "sPaths\0bReadRecursive\0bScanOnly\0"
+    "nClearOption\0std::function<void(int,int)>*\0"
+    "pCallback\0signalDataScanFinish\0"
+    "signalDataProgress\0slotReadImage"
 };
 #undef QT_MOC_LITERAL
 
@@ -67,22 +68,22 @@ static const uint qt_meta_data_CData[] = {
        3,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    4,   39,    2, 0x06 /* Public */,
-       9,    0,   48,    2, 0x06 /* Public */,
-      10,    2,   49,    2, 0x06 /* Public */,
+       1,    5,   39,    2, 0x06 /* Public */,
+      10,    0,   50,    2, 0x06 /* Public */,
+      11,    2,   51,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-      11,    0,   54,    2, 0x0a /* Public */,
-      11,    4,   55,    2, 0x0a /* Public */,
+      12,    0,   56,    2, 0x0a /* Public */,
+      12,    5,   57,    2, 0x0a /* Public */,
 
  // signals: parameters
-    QMetaType::Void, 0x80000000 | 3, QMetaType::Bool, QMetaType::Bool, 0x80000000 | 7,    4,    5,    6,    8,
+    QMetaType::Void, 0x80000000 | 3, QMetaType::Bool, QMetaType::Bool, QMetaType::Int, 0x80000000 | 8,    4,    5,    6,    7,    9,
     QMetaType::Void,
     QMetaType::Void, QMetaType::Int, QMetaType::Int,    2,    2,
 
  // slots: parameters
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 3, QMetaType::Bool, QMetaType::Bool, 0x80000000 | 7,    4,    5,    6,    8,
+    QMetaType::Void, 0x80000000 | 3, QMetaType::Bool, QMetaType::Bool, QMetaType::Int, 0x80000000 | 8,    4,    5,    6,    7,    9,
 
        0        // eod
 };
@@ -93,17 +94,17 @@ void CData::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void 
         CData *_t = static_cast<CData *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->signalReadImage((*reinterpret_cast< std::vector<std::string>(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2])),(*reinterpret_cast< bool(*)>(_a[3])),(*reinterpret_cast< std::function<void(int,int)>*(*)>(_a[4]))); break;
+        case 0: _t->signalReadImage((*reinterpret_cast< std::vector<std::string>(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2])),(*reinterpret_cast< bool(*)>(_a[3])),(*reinterpret_cast< int(*)>(_a[4])),(*reinterpret_cast< std::function<void(int,int)>*(*)>(_a[5]))); break;
         case 1: _t->signalDataScanFinish(); break;
         case 2: _t->signalDataProgress((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         case 3: _t->slotReadImage(); break;
-        case 4: _t->slotReadImage((*reinterpret_cast< std::vector<std::string>(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2])),(*reinterpret_cast< bool(*)>(_a[3])),(*reinterpret_cast< std::function<void(int,int)>*(*)>(_a[4]))); break;
+        case 4: _t->slotReadImage((*reinterpret_cast< std::vector<std::string>(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2])),(*reinterpret_cast< bool(*)>(_a[3])),(*reinterpret_cast< int(*)>(_a[4])),(*reinterpret_cast< std::function<void(int,int)>*(*)>(_a[5]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
         int *result = reinterpret_cast<int *>(_a[0]);
         {
-            typedef void (CData::*_t)(std::vector<std::string> , bool , bool , std::function<void(int,int)> * );
+            typedef void (CData::*_t)(std::vector<std::string> , bool , bool , int , std::function<void(int,int)> * );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&CData::signalReadImage)) {
                 *result = 0;
                 return;
@@ -163,9 +164,9 @@ int CData::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 }
 
 // SIGNAL 0
-void CData::signalReadImage(std::vector<std::string> _t1, bool _t2, bool _t3, std::function<void(int,int)> * _t4)
+void CData::signalReadImage(std::vector<std::string> _t1, bool _t2, bool _t3, int _t4, std::function<void(int,int)> * _t5)
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)), const_cast<void*>(reinterpret_cast<const void*>(&_t3)), const_cast<void*>(reinterpret_cast<const void*>(&_t4)) };
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)), const_cast<void*>(reinterpret_cast<const void*>(&_t3)), const_cast<void*>(reinterpret_cast<const void*>(&_t4)), const_cast<void*>(reinterpret_cast<const void*>(&_t5)) };
     QMetaObject::activate(this, &staticMetaObject, 0, _a);
 }
 

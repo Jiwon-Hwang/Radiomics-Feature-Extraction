@@ -674,7 +674,7 @@ void CPlatform::keyReleaseEvent(QKeyEvent* event)
 	}
 }
 
-// scan data list and emit signal //
+// scan data list and emit signal - set signal slot //
 void CPlatform::setThread() {
 	m_ciData.moveToThread(&m_thread);
 	m_ciData.setQThread(&m_thread);
@@ -685,8 +685,12 @@ void CPlatform::setThread() {
 }
 void CPlatform::slotDataScanFinish() {
 
+	setProgressBarValue(1, 1); // Q. 83% -> 0% 
+
 	// 첫번째 Series, 첫번째 image
-	m_ciData.getImage(0);
+	//m_ciData.getImage(0);
+	m_ciData.loadImages(0); 
+							
 	showImage(0);
 
 	int nStartFrameIdx = 0;
@@ -695,11 +699,13 @@ void CPlatform::slotDataScanFinish() {
 	ui.horizontalScrollBar->setMinimum(0);
 
 	// add items in tree widget (receiveTreeState())
+	ui.treeWidget_FileDirectory->clear(); // clear tree widget
 	int nSeriesCnt = m_ciData.getSeriesCount();
 	for (int i = 0; i < nSeriesCnt; i++) {
 		addFileDirectoryItem(i);
 	}
-	setProgressBarValue(1, 1); // tree 생성 끝나면 나머지 20% 채우고 꺼버리기
+	setProgressBarValue(1, 1); // tree 생성 끝나면 나머지 20% 채우고 꺼버리기 
+
 }
 void CPlatform::slotDataProgress(int nCurrentIdx, int nMaximumIdx) {
 	setProgressBarValue(nCurrentIdx, nMaximumIdx*1.2); // tree 생성 전까지 20% 남기고 채우기
@@ -708,8 +714,9 @@ void CPlatform::slotDataProgress(int nCurrentIdx, int nMaximumIdx) {
 // open, load, Image (tree widget) //
 void CPlatform::readImage(QStringList list)
 {
-	m_ciData.clear(); // *** image, mask 따로 load 시 죽는 error***
+	//m_ciData.clear(); // image, mask 따로 load 시 죽는 error
 
+	// QThread로 병렬 처리 (2가지 thread) //
 	QStringList fileList;
 	for (int i = 0, ni = list.size(); i<ni; i++) {
 		QFileInfo f(list[i]);
@@ -917,7 +924,8 @@ void CPlatform::showImage(QTreeWidgetItem* item, int column)
 	int nSeriesIdx = item->text(1).toInt();
 	int nImageIdx = item->text(2).toInt();
 	int nSliceIdx = m_ciData.convertToSliceIdx(nSeriesIdx, nImageIdx);
-	m_ciData.getImage(nSliceIdx); // item 더블클릭 x2회 이상 해야하는 문제 clear
+	//m_ciData.getImage(nSliceIdx); // item 더블클릭 x2회 이상 해야하는 문제 clear
+	m_ciData.loadImages(nSliceIdx);
 	showImage(nSliceIdx);
 }
 
