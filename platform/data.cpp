@@ -150,16 +150,16 @@ void CData::readImage(std::vector<std::string> sPaths, bool bReadRecursive, bool
 		printf("[Scanning files]\n");
 		loadStart();
 		
-		// 2. analyzeImage
-		m_preLoad.resize(sFilePaths.size());	// 파일 수 만큼 공간 확보
+		// 2. scanImage
+		m_scan.resize(sFilePaths.size());	// 파일 수 만큼 공간 확보
 		int nTotal = sFilePaths.size();
-		for(int i=0, ni=m_preLoad.size(); i<ni; i++) {
-			m_preLoad[i] = new PreLoadContainer;
-			m_preLoad[i]->sFilePath = replaceAll(sFilePaths[i], "/", "\\");
-			m_preLoad[i]->sFileName = getFileName(m_preLoad[i]->sFilePath);
-			m_preLoad[i]->sFileExtension = getFileExtension(m_preLoad[i]->sFilePath);
-			m_preLoad[i]->isLoad = isExcludeFile(m_preLoad[i]->sFilePath)? EXCEPT_FILE: false;
-			m_preLoad[i]->isMask = isMask_namingRule(m_preLoad[i]->sFilePath);
+		for(int i=0, ni=m_scan.size(); i<ni; i++) {
+			m_scan[i] = new ScanContainer;
+			m_scan[i]->sFilePath = replaceAll(sFilePaths[i], "/", "\\");
+			m_scan[i]->sFileName = getFileName(m_scan[i]->sFilePath);
+			m_scan[i]->sFileExtension = getFileExtension(m_scan[i]->sFilePath);
+			m_scan[i]->isLoad = isExcludeFile(m_scan[i]->sFilePath)? EXCEPT_FILE: false;
+			m_scan[i]->isMask = isMask_namingRule(m_scan[i]->sFilePath);
 		}
 
 		// 3. clear prev images
@@ -170,9 +170,9 @@ void CData::readImage(std::vector<std::string> sPaths, bool bReadRecursive, bool
 			}
 			case CLEAR_PREV_DATAS_CONDITIONAL: {
 				int nImageCnt = 0, nMaskCnt = 0;
-				for(int i=0, ni=m_preLoad.size(); i<ni; i++) {
-					if(m_preLoad[i]->isLoad != EXCEPT_FILE) {
-						if(m_preLoad[i]->isMask == false) {
+				for(int i=0, ni=m_scan.size(); i<ni; i++) {
+					if(m_scan[i]->isLoad != EXCEPT_FILE) {
+						if(m_scan[i]->isMask == false) {
 							nImageCnt++;
 						}
 						else {
@@ -194,9 +194,9 @@ void CData::readImage(std::vector<std::string> sPaths, bool bReadRecursive, bool
 		#if THREAD
 			std::vector<std::future<void>> v_async;
 			// image
-			for(int i=0, ni=m_preLoad.size(); i<ni; i++) {
-				if(m_preLoad[i]->isMask == false) {
-					v_async.emplace_back(std::async(std::launch::async, &CData::analyzeImage, this, m_preLoad[i], std::ref(nFileCount), nTotal, pCallback));
+			for(int i=0, ni=m_scan.size(); i<ni; i++) {
+				if(m_scan[i]->isMask == false) {
+					v_async.emplace_back(std::async(std::launch::async, &CData::scanImage, this, m_scan[i], std::ref(nFileCount), nTotal, pCallback));
 				}
 			}
 			for(int i=0, ni=v_async.size(); i<ni; i++) {
@@ -205,9 +205,9 @@ void CData::readImage(std::vector<std::string> sPaths, bool bReadRecursive, bool
 			v_async.clear();
 
 			// mask
-			for(int i=0, ni=m_preLoad.size(); i<ni; i++) {
-				if(m_preLoad[i]->isMask == true) {
-					v_async.emplace_back(std::async(std::launch::async, &CData::analyzeImage, this, m_preLoad[i], std::ref(nFileCount), nTotal, pCallback));
+			for(int i=0, ni=m_scan.size(); i<ni; i++) {
+				if(m_scan[i]->isMask == true) {
+					v_async.emplace_back(std::async(std::launch::async, &CData::scanImage, this, m_scan[i], std::ref(nFileCount), nTotal, pCallback));
 				}
 			}
 			for(int i=0, ni=v_async.size(); i<ni; i++) {
@@ -216,24 +216,24 @@ void CData::readImage(std::vector<std::string> sPaths, bool bReadRecursive, bool
 			v_async.clear();
 		#else
 			// image
-			for(int i=0, ni=m_preLoad.size(); i<ni; i++) {
-				if(m_preLoad[i]->isMask == false) {
-					analyzeImage(m_preLoad[i], nFileCount, nTotal, pCallback);
+			for(int i=0, ni=m_scan.size(); i<ni; i++) {
+				if(m_scan[i]->isMask == false) {
+					scanImage(m_scan[i], nFileCount, nTotal, pCallback);
 				}
 			}
 			// mask
-			for(int i=0, ni=m_preLoad.size(); i<ni; i++) {
-				if(m_preLoad[i]->isMask == true) {
-					analyzeImage(m_preLoad[i], nFileCount, nTotal, pCallback);
+			for(int i=0, ni=m_scan.size(); i<ni; i++) {
+				if(m_scan[i]->isMask == true) {
+					scanImage(m_scan[i], nFileCount, nTotal, pCallback);
 				}
 			}
 		#endif
 
 		// clear memory
-		for(int i=0, ni=m_preLoad.size(); i<ni; i++) {
-			SAFE_DELETE(m_preLoad[i]);
+		for(int i=0, ni=m_scan.size(); i<ni; i++) {
+			SAFE_DELETE(m_scan[i]);
 		}
-		m_preLoad.clear();
+		m_scan.clear();
 
 		#if PROGRESS_BAR
 			printf("\n");
@@ -261,26 +261,26 @@ void CData::readImage(std::vector<std::string> sPaths, bool bReadRecursive, bool
 	}
 }
 
-void CData::analyzeImage(PreLoadContainer* plc, int &nFileCount, int nTotal, std::function<void(int, int)>* pCallback) {
+void CData::scanImage(ScanContainer* psc, int &nFileCount, int nTotal, std::function<void(int, int)>* pCallback) {
 #if THREAD
 	static std::mutex mutex_fileCount;
 	static std::mutex mutex_addImage;
 #endif
 
 	// parameter check //
-	if(plc == NULL) {
+	if(psc == NULL) {
 		return;
 	}
 
-	if(plc->isLoad != EXCEPT_FILE) {
+	if(psc->isLoad != EXCEPT_FILE) {
 		// 1-1. 파일에서 읽은 Series 정보(이미지 정보)를 폴더명, 이미지명을 이용하여 임의로 수정
 		CSeries* pCiSeries = new CSeries;
 		
-		if(plc->sFileExtension == "nii" || plc->sFileExtension == "tiff") {
+		if(psc->sFileExtension == "nii" || psc->sFileExtension == "tiff") {
 			// 한 파일에 여러 이미지가 들어있을 수 있어서, 파일 열어서 확인 필요함
 			std::vector<CImage<short>*> pCiImages;
 
-			if(loadImage(plc->sFilePath, pCiSeries, pCiImages, true) == false) {
+			if(loadImage(psc->sFilePath, pCiSeries, pCiImages, true) == false) {
 				for(int i=0, ni=pCiImages.size(); i<ni; i++) {
 					SAFE_DELETE(pCiImages[i]);
 				}
@@ -294,12 +294,12 @@ void CData::analyzeImage(PreLoadContainer* plc, int &nFileCount, int nTotal, std
 		}
 		else {
 			CImage<short>* pCiImage = new CImage<short>;
-			std::string sRemovedTag = renameImage(plc->sFileName);
+			std::string sRemovedTag = renameImage(psc->sFileName);
 
-			pCiImage->setImagePath(plc->sFilePath);
-			pCiImage->setImageName(plc->sFileName);
+			pCiImage->setImagePath(psc->sFilePath);
+			pCiImage->setImageName(psc->sFileName);
 			pCiImage->setImageNameRemoveTag(sRemovedTag);
-			pCiImage->setImageExtension(plc->sFileExtension);
+			pCiImage->setImageExtension(psc->sFileExtension);
 			pCiImage->setImageFileStatus(LOAD_STATUS::UNREAD);
 			pCiImage->setIsMultipleImages(false);
 
@@ -319,7 +319,7 @@ void CData::analyzeImage(PreLoadContainer* plc, int &nFileCount, int nTotal, std
 		}
 
 		// 이미지, 마스크에 따라 다르게 처리
-		if(!plc->isMask) {
+		if(!psc->isMask) {
 			// 이미지인 경우, Series에 추가
 			if(pCiMatchedSeries == NULL) {
 				// Series가 중복되지 않는 경우 (= 새로운 Series인 경우 Series를 추가)
@@ -353,7 +353,7 @@ void CData::analyzeImage(PreLoadContainer* plc, int &nFileCount, int nTotal, std
 						}
 
 						SAFE_DELETE(pCiImage);
-						plc->isLoad = DUPLICATE_FILE;
+						psc->isLoad = DUPLICATE_FILE;
 					}
 					else {
 						pCiMatchedSeries->addImage(pCiImage->copy());

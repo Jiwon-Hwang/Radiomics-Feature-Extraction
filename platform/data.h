@@ -102,15 +102,15 @@ private:
 	std::vector<CSeries*> m_seriesList;
 #endif
 
-	// Preload용 (Image, Image 정보가 mapping 되어 있지 않은 상태)
-	struct PreLoadContainer {
+	// Scan용 (Image, Image 정보가 mapping 되어 있지 않은 상태)
+	struct ScanContainer {
 		int isLoad;
 		bool isMask;
 		std::string sFilePath;
 		std::string sFileName;
 		std::string sFileExtension;
 	};
-	std::vector<PreLoadContainer*> m_preLoad;
+	std::vector<ScanContainer*> m_scan;
 
 // function
 
@@ -146,7 +146,7 @@ public:
 	void readImage(std::vector<std::string> sPaths, bool bReadRecursive=true, bool bScanOnly=true, int nClearOption=KEEP_PREV_DATAS, std::function<void(int, int)>* pCallback=NULL);
 
 private:
-	void analyzeImage(PreLoadContainer* plc, int &nFileCount, int nTotal, std::function<void(int, int)>* pCallback=NULL);
+	void scanImage(ScanContainer* psc, int &nFileCount, int nTotal, std::function<void(int, int)>* pCallback=NULL);
 
 	// load
 public:

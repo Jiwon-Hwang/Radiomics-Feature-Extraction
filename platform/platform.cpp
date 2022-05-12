@@ -685,12 +685,8 @@ void CPlatform::setThread() {
 }
 void CPlatform::slotDataScanFinish() {
 
-	setProgressBarValue(1, 1); // Q. 83% -> 0% 
-
-	// 첫번째 Series, 첫번째 image
-	//m_ciData.getImage(0);
+	// 첫번째 Series load, 첫번째 Image show
 	m_ciData.loadImages(0); 
-							
 	showImage(0);
 
 	int nStartFrameIdx = 0;
@@ -704,11 +700,10 @@ void CPlatform::slotDataScanFinish() {
 	for (int i = 0; i < nSeriesCnt; i++) {
 		addFileDirectoryItem(i);
 	}
-	setProgressBarValue(1, 1); // tree 생성 끝나면 나머지 20% 채우고 꺼버리기 
 
 }
 void CPlatform::slotDataProgress(int nCurrentIdx, int nMaximumIdx) {
-	setProgressBarValue(nCurrentIdx, nMaximumIdx*1.2); // tree 생성 전까지 20% 남기고 채우기
+	setProgressBarValue(nCurrentIdx, nMaximumIdx);
 }
 
 // open, load, Image (tree widget) //
