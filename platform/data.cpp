@@ -246,9 +246,12 @@ void CData::readImage(std::vector<std::string> sPaths, bool bReadRecursive, bool
 		/////////////////////////////////////////////////////////////////////////////////
 		if(!bScanOnly) {
 			for(int i=0, ni=getSeriesCount(); i<ni; i++) {
-				CSeries* pCiImage = getSeries(i);
-				loadImages_lazyLoading_thread(pCiImage, false);
-				loadImages_lazyLoading_thread(pCiImage, true);
+				CSeries* pCiSeries = getSeries(i);
+				loadImages_lazyLoading_thread(pCiSeries, false);
+				loadImages_lazyLoading_thread(pCiSeries, true);
+
+				// sorting
+				std::sort(pCiSeries->m_images.begin(), pCiSeries->m_images.end(), sorting<short>);
 			}
 		}
 		#if PROGRESS_BAR
@@ -264,6 +267,7 @@ void CData::readImage(std::vector<std::string> sPaths, bool bReadRecursive, bool
 void CData::scanImage(ScanContainer* psc, int &nFileCount, int nTotal, std::function<void(int, int)>* pCallback) {
 #if THREAD
 	static std::mutex mutex_fileCount;
+	static std::mutex mutex_addSeries;
 	static std::mutex mutex_addImage;
 #endif
 
@@ -310,6 +314,9 @@ void CData::scanImage(ScanContainer* psc, int &nFileCount, int nTotal, std::func
 		modifySeries(pCiSeries);
 
 		// Series 중복 검사
+		#if THREAD
+			mutex_addSeries.lock();
+		#endif
 		CSeries* pCiMatchedSeries = NULL;
 		for(int s=0, ns=getSeriesCount(); s<ns; s++) {
 			if(isSameSeries(pCiSeries, getSeries(s))) {
@@ -317,15 +324,21 @@ void CData::scanImage(ScanContainer* psc, int &nFileCount, int nTotal, std::func
 				break;
 			}
 		}
-
-		// 이미지, 마스크에 따라 다르게 처리
+		// 이미지인 경우, Series에 추가
 		if(!psc->isMask) {
-			// 이미지인 경우, Series에 추가
 			if(pCiMatchedSeries == NULL) {
 				// Series가 중복되지 않는 경우 (= 새로운 Series인 경우 Series를 추가)
 				addSeries(pCiSeries);
 			}
-			else {
+		}
+		#if THREAD
+			mutex_addSeries.unlock();
+		#endif
+
+
+		// 이미지, 마스크에 따라 다르게 처리
+		if(!psc->isMask) {
+			if(pCiMatchedSeries != NULL) {
 				#if THREAD
 					mutex_addImage.lock();
 				#endif
@@ -345,7 +358,6 @@ void CData::scanImage(ScanContainer* psc, int &nFileCount, int nTotal, std::func
 							break;
 						}
 					}
-
 					if(isDup) {
 						// 중복되면 버림
 						if(m_sLog.is_open()) {
