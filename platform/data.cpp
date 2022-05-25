@@ -86,7 +86,6 @@ void CData::clearImages(int nSeriesIdx) {
 		for(int i=0, ni=pTargetSeries->getImageCount(); i<ni; i++) {
 			CImage<short>* pTargetImage = pTargetSeries->getImage(i);
 			pTargetImage->clearImage();
-			
 		}
 	}
 }
@@ -837,13 +836,14 @@ int CData::loadImage_lazyLoading(CImage<T>* &pCiImage, bool isMask) {
 			std::string sImagePath = pCiImage->getImagePath();
 			if(nReturn = loadImage(sImagePath, pCiSeries, pCiImages, false)) {
 				if(pCiImages.size() == 1) {
-					pCiImage->setImage(pCiImages[0]); 
+					pCiImage->setImage(pCiImages[0]);
+					SAFE_DELETE(pCiImages[0]);
 				}
 				else {
-					nReturn = loadImages_lazyLoading_thread(pCiSeries, isMask);
 					for(int i=0, ni=pCiImages.size(); i<ni; i++) {
 						SAFE_DELETE(pCiImages[i]);
 					}
+					nReturn = loadImages_lazyLoading_thread(pCiSeries, isMask);
 				}
 			}
 		}
@@ -859,12 +859,13 @@ int CData::loadImage_lazyLoading(CImage<T>* &pCiImage, bool isMask) {
 			if(nReturn = loadImage(sMaskPath, pCiSeries, pCiMasks, false)) {
 				if(pCiMasks.size() == 1) {
 					pCiImage->setMask(pCiMasks[0]);
+					SAFE_DELETE(pCiMasks[0]);
 				}
 				else {
-					nReturn = loadImages_lazyLoading_thread(pCiSeries, isMask);
 					for(int i=0, ni=pCiMasks.size(); i<ni; i++) {
 						SAFE_DELETE(pCiMasks[i]);
 					}
+					nReturn = loadImages_lazyLoading_thread(pCiSeries, isMask);
 				}
 			}
 		}
@@ -904,10 +905,10 @@ int CData::loadImage_lazyLoading_image_thread(CSeries* pCiSeries, int nImageIdx,
 					if(m_sLog.is_open()) {
 						m_sLog << "읽을 수 없는 파일 => " << sImagePath << "\n";
 					}
-					for(int i=0, ni=pCiImages.size(); i<ni; i++) {
-						SAFE_DELETE(pCiImages[i]);
-					}
 				}
+			}
+			for(int i=0, ni=pCiImages.size(); i<ni; i++) {
+				SAFE_DELETE(pCiImages[i]);
 			}
 		}
 		else {
@@ -969,10 +970,10 @@ int CData::loadImage_lazyLoading_mask_thread(CSeries* pCiSeries, int nImageIdx, 
 					if(m_sLog.is_open()) {
 						m_sLog << "mask 파일만 존재 ==> " << pCiMasks[0]->getImagePath() << "\n";
 					}
-					for(int i=0, ni=pCiMasks.size(); i<ni; i++) {
-						SAFE_DELETE(pCiMasks[i]);
-					}
 				}
+			}
+			for(int i=0, ni=pCiMasks.size(); i<ni; i++) {
+				SAFE_DELETE(pCiMasks[i]);
 			}
 		}
 		else {

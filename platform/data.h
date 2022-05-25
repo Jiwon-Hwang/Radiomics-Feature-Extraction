@@ -1,6 +1,6 @@
 #pragma once
 
-// v 1.47 (20220512)
+// v 1.48 (20220516)
 
 // config
 #define DEBUG 0							// 0: false, 1: true (VLD)

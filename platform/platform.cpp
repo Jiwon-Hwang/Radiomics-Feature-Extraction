@@ -689,6 +689,7 @@ void CPlatform::slotDataScanFinish() {
 	m_ciData.loadImages(0); 
 	showImage(0);
 
+	// 하단 스크롤바 설정
 	int nStartFrameIdx = 0;
 	int nEndFrameIdx = m_ciData.getSeries(0)->getImageCount() - 1;
 	ui.horizontalScrollBar->setMaximum(nEndFrameIdx - nStartFrameIdx);
@@ -908,6 +909,7 @@ void CPlatform::showImage(int nSliceIdx)
 }
 void CPlatform::showImage(QTreeWidgetItem* item, int column)
 {
+	// tree view 더블 클릭 시 show image (slot 함수)
 	/*
 	if(item->text(1) != 0 && item->text(2) != 0) {
 		int nSeriesIdx = item->text(1).toInt();
@@ -919,15 +921,21 @@ void CPlatform::showImage(QTreeWidgetItem* item, int column)
 	int nSeriesIdx = item->text(1).toInt();
 	int nImageIdx = item->text(2).toInt();
 	int nSliceIdx = m_ciData.convertToSliceIdx(nSeriesIdx, nImageIdx);
-	//m_ciData.getImage(nSliceIdx); // item 더블클릭 x2회 이상 해야하는 문제 clear
+
+	// 하단 스크롤바 설정 (해당 series에 포함된 slice들에 맞게 변경)
+	int nStartFrameIdx = nSliceIdx - nImageIdx; // 시리즈 시작 idx (전체 기준)
+	int nEndFrameIdx = nStartFrameIdx + m_ciData.getSeries(nSeriesIdx)->getImageCount() - 1; // 시리즈 끝 idx (전체 기준)
+	ui.horizontalScrollBar->setMaximum(nEndFrameIdx);
+	ui.horizontalScrollBar->setMinimum(nStartFrameIdx);
+
 	m_ciData.loadImages(nSliceIdx);
 	showImage(nSliceIdx);
+
 }
 
 // scroll //
 void CPlatform::scrollChangeImage(int nValue)
 {
-	//cout << "nValue : " << nValue << endl;
 	showImage(nValue);
 }
 
