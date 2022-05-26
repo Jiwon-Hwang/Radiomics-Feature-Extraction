@@ -16,6 +16,9 @@
     <height>16777215</height>
    </size>
   </property>
+  <property name="focusPolicy">
+   <enum>Qt::StrongFocus</enum>
+  </property>
   <property name="windowTitle">
    <string>Radiomics Feature Extraction</string>
   </property>
@@ -52,14 +55,56 @@
        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="0,4">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetDefaultConstraint</enum>
+          </property>
           <item>
            <widget class="QTreeWidget" name="treeWidget_FileDirectory">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>200</width>
+              <height>500</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>256</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="contextMenuPolicy">
+             <enum>Qt::CustomContextMenu</enum>
+            </property>
+            <property name="editTriggers">
+             <set>QAbstractItemView::NoEditTriggers</set>
+            </property>
+            <property name="dragDropMode">
+             <enum>QAbstractItemView::DropOnly</enum>
+            </property>
+            <property name="verticalScrollMode">
+             <enum>QAbstractItemView::ScrollPerItem</enum>
+            </property>
+            <property name="allColumnsShowFocus">
+             <bool>true</bool>
+            </property>
+            <property name="headerHidden">
+             <bool>false</bool>
+            </property>
+            <attribute name="headerVisible">
+             <bool>true</bool>
+            </attribute>
+            <attribute name="headerMinimumSectionSize">
+             <number>30</number>
+            </attribute>
             <column>
              <property name="text">
               <string>DICOM</string>
@@ -142,6 +187,12 @@
               </property>
               <item>
                <widget class="QRadioButton" name="radioButton_None">
+                <property name="focusPolicy">
+                 <enum>Qt::ClickFocus</enum>
+                </property>
+                <property name="contextMenuPolicy">
+                 <enum>Qt::NoContextMenu</enum>
+                </property>
                 <property name="text">
                  <string>None</string>
                 </property>
@@ -149,6 +200,12 @@
               </item>
               <item>
                <widget class="QRadioButton" name="radioButton_Gaussian">
+                <property name="focusPolicy">
+                 <enum>Qt::ClickFocus</enum>
+                </property>
+                <property name="contextMenuPolicy">
+                 <enum>Qt::NoContextMenu</enum>
+                </property>
                 <property name="text">
                  <string>Gaussian</string>
                 </property>
@@ -156,6 +213,9 @@
               </item>
               <item>
                <widget class="QRadioButton" name="radioButton_Laplacian">
+                <property name="focusPolicy">
+                 <enum>Qt::NoFocus</enum>
+                </property>
                 <property name="text">
                  <string>Laplacian</string>
                 </property>
@@ -184,6 +244,9 @@
               </property>
               <item>
                <widget class="QCheckBox" name="checkBox_Histogram">
+                <property name="focusPolicy">
+                 <enum>Qt::NoFocus</enum>
+                </property>
                 <property name="autoFillBackground">
                  <bool>false</bool>
                 </property>
@@ -202,6 +265,9 @@
                <widget class="QCheckBox" name="checkBox_Intensity">
                 <property name="enabled">
                  <bool>false</bool>
+                </property>
+                <property name="focusPolicy">
+                 <enum>Qt::NoFocus</enum>
                 </property>
                 <property name="text">
                  <string>Local Intensity </string>
@@ -222,6 +288,9 @@
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
+                <property name="focusPolicy">
+                 <enum>Qt::NoFocus</enum>
+                </property>
                 <property name="text">
                  <string>Morphological </string>
                 </property>
@@ -231,6 +300,9 @@
                <widget class="QCheckBox" name="checkBox_GLCM">
                 <property name="enabled">
                  <bool>true</bool>
+                </property>
+                <property name="focusPolicy">
+                 <enum>Qt::NoFocus</enum>
                 </property>
                 <property name="text">
                  <string>GLCM </string>
@@ -244,6 +316,9 @@
                <widget class="QCheckBox" name="checkBox_GLRLM">
                 <property name="enabled">
                  <bool>false</bool>
+                </property>
+                <property name="focusPolicy">
+                 <enum>Qt::NoFocus</enum>
                 </property>
                 <property name="text">
                  <string>GLRLM </string>
@@ -262,6 +337,9 @@
           <widget class="QPushButton" name="pushButton_run">
            <property name="enabled">
             <bool>false</bool>
+           </property>
+           <property name="focusPolicy">
+            <enum>Qt::NoFocus</enum>
            </property>
            <property name="text">
             <string>Run</string>

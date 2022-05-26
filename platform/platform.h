@@ -23,6 +23,7 @@
 #include <QDebug>
 #include <QDialog>
 #include <qthread.h>
+//#include <QKeyEvent>
 
 #define _CRT_SECURE_NO_WARNINGS
 #include <ctime>

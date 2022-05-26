@@ -71,6 +71,7 @@ public:
             platformClass->setObjectName(QStringLiteral("platformClass"));
         platformClass->resize(1097, 735);
         platformClass->setMaximumSize(QSize(16777215, 16777215));
+        platformClass->setFocusPolicy(Qt::StrongFocus);
         QIcon icon;
         icon.addFile(QStringLiteral("Resources/Deep Imaging Laboratory.bmp"), QSize(), QIcon::Normal, QIcon::Off);
         platformClass->setWindowIcon(icon);
@@ -102,10 +103,25 @@ public:
         horizontalLayout_9 = new QHBoxLayout();
         horizontalLayout_9->setSpacing(6);
         horizontalLayout_9->setObjectName(QStringLiteral("horizontalLayout_9"));
+        horizontalLayout_9->setSizeConstraint(QLayout::SetDefaultConstraint);
         treeWidget_FileDirectory = new QTreeWidget(centralWidget);
         treeWidget_FileDirectory->setObjectName(QStringLiteral("treeWidget_FileDirectory"));
-        sizePolicy.setHeightForWidth(treeWidget_FileDirectory->sizePolicy().hasHeightForWidth());
-        treeWidget_FileDirectory->setSizePolicy(sizePolicy);
+        QSizePolicy sizePolicy1(QSizePolicy::Fixed, QSizePolicy::Expanding);
+        sizePolicy1.setHorizontalStretch(0);
+        sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(treeWidget_FileDirectory->sizePolicy().hasHeightForWidth());
+        treeWidget_FileDirectory->setSizePolicy(sizePolicy1);
+        treeWidget_FileDirectory->setMinimumSize(QSize(200, 500));
+        treeWidget_FileDirectory->setMaximumSize(QSize(256, 16777215));
+        treeWidget_FileDirectory->setFocusPolicy(Qt::NoFocus);
+        treeWidget_FileDirectory->setContextMenuPolicy(Qt::CustomContextMenu);
+        treeWidget_FileDirectory->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        treeWidget_FileDirectory->setDragDropMode(QAbstractItemView::DropOnly);
+        treeWidget_FileDirectory->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
+        treeWidget_FileDirectory->setAllColumnsShowFocus(true);
+        treeWidget_FileDirectory->setHeaderHidden(false);
+        treeWidget_FileDirectory->header()->setVisible(true);
+        treeWidget_FileDirectory->header()->setMinimumSectionSize(30);
 
         horizontalLayout_9->addWidget(treeWidget_FileDirectory);
 
@@ -140,11 +156,11 @@ public:
 
         groupBox = new QGroupBox(centralWidget);
         groupBox->setObjectName(QStringLiteral("groupBox"));
-        QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        sizePolicy1.setHorizontalStretch(0);
-        sizePolicy1.setVerticalStretch(0);
-        sizePolicy1.setHeightForWidth(groupBox->sizePolicy().hasHeightForWidth());
-        groupBox->setSizePolicy(sizePolicy1);
+        QSizePolicy sizePolicy2(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        sizePolicy2.setHorizontalStretch(0);
+        sizePolicy2.setVerticalStretch(0);
+        sizePolicy2.setHeightForWidth(groupBox->sizePolicy().hasHeightForWidth());
+        groupBox->setSizePolicy(sizePolicy2);
         verticalLayout_5 = new QVBoxLayout(groupBox);
         verticalLayout_5->setSpacing(6);
         verticalLayout_5->setContentsMargins(11, 11, 11, 11);
@@ -163,16 +179,19 @@ public:
         verticalLayout->setContentsMargins(30, 40, 30, 40);
         radioButton_None = new QRadioButton(groupBox_Filters);
         radioButton_None->setObjectName(QStringLiteral("radioButton_None"));
+        radioButton_None->setFocusPolicy(Qt::ClickFocus);
 
         verticalLayout->addWidget(radioButton_None);
 
         radioButton_Gaussian = new QRadioButton(groupBox_Filters);
         radioButton_Gaussian->setObjectName(QStringLiteral("radioButton_Gaussian"));
+        radioButton_Gaussian->setFocusPolicy(Qt::ClickFocus);
 
         verticalLayout->addWidget(radioButton_Gaussian);
 
         radioButton_Laplacian = new QRadioButton(groupBox_Filters);
         radioButton_Laplacian->setObjectName(QStringLiteral("radioButton_Laplacian"));
+        radioButton_Laplacian->setFocusPolicy(Qt::ClickFocus);
 
         verticalLayout->addWidget(radioButton_Laplacian);
 
@@ -188,6 +207,7 @@ public:
         verticalLayout_6->setContentsMargins(30, 40, 30, 20);
         checkBox_Histogram = new QCheckBox(groupBox_Families);
         checkBox_Histogram->setObjectName(QStringLiteral("checkBox_Histogram"));
+        checkBox_Histogram->setFocusPolicy(Qt::ClickFocus);
         checkBox_Histogram->setAutoFillBackground(false);
         checkBox_Histogram->setChecked(false);
         checkBox_Histogram->setTristate(false);
@@ -197,6 +217,7 @@ public:
         checkBox_Intensity = new QCheckBox(groupBox_Families);
         checkBox_Intensity->setObjectName(QStringLiteral("checkBox_Intensity"));
         checkBox_Intensity->setEnabled(false);
+        checkBox_Intensity->setFocusPolicy(Qt::NoFocus);
         checkBox_Intensity->setCheckable(true);
         checkBox_Intensity->setChecked(false);
         checkBox_Intensity->setTristate(false);
@@ -206,12 +227,14 @@ public:
         checkBox_Morph = new QCheckBox(groupBox_Families);
         checkBox_Morph->setObjectName(QStringLiteral("checkBox_Morph"));
         checkBox_Morph->setEnabled(false);
+        checkBox_Morph->setFocusPolicy(Qt::NoFocus);
 
         verticalLayout_6->addWidget(checkBox_Morph);
 
         checkBox_GLCM = new QCheckBox(groupBox_Families);
         checkBox_GLCM->setObjectName(QStringLiteral("checkBox_GLCM"));
         checkBox_GLCM->setEnabled(true);
+        checkBox_GLCM->setFocusPolicy(Qt::NoFocus);
         checkBox_GLCM->setChecked(false);
 
         verticalLayout_6->addWidget(checkBox_GLCM);
@@ -219,6 +242,7 @@ public:
         checkBox_GLRLM = new QCheckBox(groupBox_Families);
         checkBox_GLRLM->setObjectName(QStringLiteral("checkBox_GLRLM"));
         checkBox_GLRLM->setEnabled(false);
+        checkBox_GLRLM->setFocusPolicy(Qt::NoFocus);
         checkBox_GLRLM->setChecked(false);
 
         verticalLayout_6->addWidget(checkBox_GLRLM);
@@ -232,6 +256,7 @@ public:
         pushButton_run = new QPushButton(groupBox);
         pushButton_run->setObjectName(QStringLiteral("pushButton_run"));
         pushButton_run->setEnabled(false);
+        pushButton_run->setFocusPolicy(Qt::NoFocus);
 
         verticalLayout_5->addWidget(pushButton_run);
 

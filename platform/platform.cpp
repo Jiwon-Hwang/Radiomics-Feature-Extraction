@@ -58,6 +58,7 @@ BorderlessMainWindow::BorderlessMainWindow(QWidget *parent) : QMainWindow(parent
 
 	mMinimizeButton = new QPushButton(mTitlebarWidget);
 	mMinimizeButton->setObjectName("minimizeButton");
+	//mMinimizeButton->setFocusPolicy(Qt::NoFocus);
 	connect(mMinimizeButton, SIGNAL(clicked()), this, SLOT(slot_minimized()));
 
 	mRestoreButton = new QPushButton(mTitlebarWidget);
@@ -67,10 +68,12 @@ BorderlessMainWindow::BorderlessMainWindow(QWidget *parent) : QMainWindow(parent
 
 	mMaximizeButton = new QPushButton(mTitlebarWidget);
 	mMaximizeButton->setObjectName("maximizeButton");
+	//mMaximizeButton->setFocusPolicy(Qt::NoFocus);
 	connect(mMaximizeButton, SIGNAL(clicked()), this, SLOT(slot_maximized()));
 
 	mCloseButton = new QPushButton(mTitlebarWidget);
 	mCloseButton->setObjectName("closeButton");
+	//mCloseButton->setFocusPolicy(Qt::NoFocus);
 	connect(mCloseButton, SIGNAL(clicked()), this, SLOT(slot_closed()));
 
 	mWindowIcon = new QLabel(mTitlebarWidget);
@@ -659,9 +662,59 @@ void CPlatform::dropEvent(QDropEvent * event)
 // keyboard event //
 void CPlatform::keyPressEvent(QKeyEvent* event)
 {
+	cout << "keyPressEvent!!!" << endl;
 	switch(event->key()) {
-		case Qt::Key_Control:
-			
+
+		case Qt::Key_Up:
+		{
+			cout << "up!!!" << endl;
+			int index = m_nActivatedFrameIdx - 1;
+			QTreeWidgetItemIterator it2(ui.treeWidget_FileDirectory);
+			while (*it2) {
+				int nSeriesIdx = (*it2)->text(1).toInt();
+				int nImageIdx = (*it2)->text(2).toInt();
+				int nSliceIdx = m_ciData.convertToSliceIdx(nSeriesIdx, nImageIdx);
+				if (((*it2)->text(1) != NULL) && (index == nSliceIdx)) {
+					showImage(*it2, 0);
+
+					QTreeWidgetItemIterator it(ui.treeWidget_FileDirectory);
+					while (*it) {
+						(*it)->setSelected(false); // 화면에 보이는 아이템 값을 트리 위젯에서 색칠
+						++it;
+					}
+					(*it2)->setSelected(true);
+					ui.treeWidget_FileDirectory->scrollToItem(*it2); // 해당 아이템이 트리 위젯 화면에 들어오도록
+					break;
+				}
+				++it2;
+			}
+		}
+		break;
+
+		case Qt::Key_Down:
+		{
+			cout << "down!!!" << endl;
+			int index = m_nActivatedFrameIdx + 1;
+			QTreeWidgetItemIterator it2(ui.treeWidget_FileDirectory);
+			while (*it2) {
+				int nSeriesIdx = (*it2)->text(1).toInt();
+				int nImageIdx = (*it2)->text(2).toInt();
+				int nSliceIdx = m_ciData.convertToSliceIdx(nSeriesIdx, nImageIdx);
+				if (((*it2)->text(1) != NULL) && (index == nSliceIdx)) {
+					showImage(*it2, 0);
+
+					QTreeWidgetItemIterator it(ui.treeWidget_FileDirectory);
+					while (*it) {
+						(*it)->setSelected(false);
+						++it;
+					}
+					(*it2)->setSelected(true);
+					ui.treeWidget_FileDirectory->scrollToItem(*it2);
+					break;
+				}
+				++it2;
+			}
+		}
 		break;
 	}
 }
