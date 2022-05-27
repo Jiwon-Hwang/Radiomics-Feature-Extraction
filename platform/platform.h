@@ -93,6 +93,7 @@ public:
 	CImageView* m_ciImage;				// image
 	CData m_ciData;						// data
 	int m_nActivatedFrameIdx;			// 현재 화면에 가시화된 Frame 번호
+	bool m_bLMouseDown;					// mouse click (left)
 
 public:
 	QThread m_thread;
@@ -168,6 +169,7 @@ protected:
 	void dropEvent(QDropEvent * event);
 	void keyPressEvent(QKeyEvent* event);
 	void keyReleaseEvent(QKeyEvent* event);
+	void wheelEvent(QWheelEvent* event);
 
 public slots:
 	// data list scan signal //

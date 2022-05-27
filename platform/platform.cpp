@@ -58,7 +58,6 @@ BorderlessMainWindow::BorderlessMainWindow(QWidget *parent) : QMainWindow(parent
 
 	mMinimizeButton = new QPushButton(mTitlebarWidget);
 	mMinimizeButton->setObjectName("minimizeButton");
-	//mMinimizeButton->setFocusPolicy(Qt::NoFocus);
 	connect(mMinimizeButton, SIGNAL(clicked()), this, SLOT(slot_minimized()));
 
 	mRestoreButton = new QPushButton(mTitlebarWidget);
@@ -68,12 +67,10 @@ BorderlessMainWindow::BorderlessMainWindow(QWidget *parent) : QMainWindow(parent
 
 	mMaximizeButton = new QPushButton(mTitlebarWidget);
 	mMaximizeButton->setObjectName("maximizeButton");
-	//mMaximizeButton->setFocusPolicy(Qt::NoFocus);
 	connect(mMaximizeButton, SIGNAL(clicked()), this, SLOT(slot_maximized()));
 
 	mCloseButton = new QPushButton(mTitlebarWidget);
 	mCloseButton->setObjectName("closeButton");
-	//mCloseButton->setFocusPolicy(Qt::NoFocus);
 	connect(mCloseButton, SIGNAL(clicked()), this, SLOT(slot_closed()));
 
 	mWindowIcon = new QLabel(mTitlebarWidget);
@@ -83,7 +80,6 @@ BorderlessMainWindow::BorderlessMainWindow(QWidget *parent) : QMainWindow(parent
 
 	mWindowTitle = new QLabel(mTitlebarWidget);
 	mWindowTitle->setObjectName("windowTitle");
-	//mWindowTitle->setText(windowTitle());
 	QString str = QString::fromLocal8Bit("Radiomics Feature Extract");
 	mWindowTitle->setText(str);
 	mWindowTitle->setStyleSheet("padding-left: 3px; font-size: 14px; font-weight: bold; color: #ffffff");
@@ -194,6 +190,9 @@ void CPlatform::init()
 	m_nActivatedFrameIdx = -1;
 	m_ciImage = NULL;
 	
+	// mouse
+	m_bLMouseDown = false;
+
 }
 void CPlatform::clear()
 {
@@ -241,8 +240,8 @@ void CPlatform::setSignalSlot()
 	connect(ui.horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(scrollChangeImage(int)));
 	connect(ui.treeWidget_FileDirectory, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(showImage(QTreeWidgetItem*, int)));
 
-	// filter - group box
-	QList<QRadioButton *> filterBox = ui.groupBox_Filters->findChildren<QRadioButton *>();
+	// filter - tab widget
+	QList<QRadioButton *> filterBox = ui.tabWidget_Filters->findChildren<QRadioButton *>();
 	for (int i = 0; i < filterBox.size(); i++) {
 		connect(filterBox[i], SIGNAL(clicked()), this, SLOT(setFilterMode()));
 		connect(filterBox[i], SIGNAL(clicked()), this, SLOT(checkReadyToRun()));
@@ -324,7 +323,7 @@ void CPlatform::loadSettings() {
 		// filter 
 		settings.beginGroup("filter");
 		
-		QList<QRadioButton *> filterBox = ui.groupBox_Filters->findChildren<QRadioButton *>();
+		QList<QRadioButton *> filterBox = ui.tabWidget_Filters->findChildren<QRadioButton *>();
 		for (int i = 0; i < filterBox.size(); i++) {
 			filterBox[i]->setChecked(settings.value(filterBox[i]->objectName(), false /* default value */).toBool());
 		}
@@ -383,7 +382,7 @@ void CPlatform::saveSettings() {
 	// filter 
 	settings.beginGroup("filter");
 
-	QList<QRadioButton *> filterBox = ui.groupBox_Filters->findChildren<QRadioButton *>();
+	QList<QRadioButton *> filterBox = ui.tabWidget_Filters->findChildren<QRadioButton *>();
 	for (int i = 0; i < filterBox.size(); i++) {
 		settings.setValue(filterBox[i]->objectName(), QVariant(filterBox[i]->isChecked()));
 	}
@@ -500,7 +499,7 @@ void CPlatform::initIsActivatedFamily(int FAMILY_IDX) {
 }
 bool CPlatform::checkReadyToRun() {
 
-	QList<QRadioButton *> filterBox = ui.groupBox_Filters->findChildren<QRadioButton *>();
+	QList<QRadioButton *> filterBox = ui.tabWidget_Filters->findChildren<QRadioButton *>();
 	QList<QCheckBox *> familyBox = ui.groupBox_Families->findChildren<QCheckBox *>();
 
 	for (int i = 0; i < filterBox.size(); i++) 
@@ -662,12 +661,10 @@ void CPlatform::dropEvent(QDropEvent * event)
 // keyboard event //
 void CPlatform::keyPressEvent(QKeyEvent* event)
 {
-	cout << "keyPressEvent!!!" << endl;
 	switch(event->key()) {
 
 		case Qt::Key_Up:
 		{
-			cout << "up!!!" << endl;
 			int index = m_nActivatedFrameIdx - 1;
 			QTreeWidgetItemIterator it2(ui.treeWidget_FileDirectory);
 			while (*it2) {
@@ -693,7 +690,6 @@ void CPlatform::keyPressEvent(QKeyEvent* event)
 
 		case Qt::Key_Down:
 		{
-			cout << "down!!!" << endl;
 			int index = m_nActivatedFrameIdx + 1;
 			QTreeWidgetItemIterator it2(ui.treeWidget_FileDirectory);
 			while (*it2) {
@@ -726,6 +722,47 @@ void CPlatform::keyReleaseEvent(QKeyEvent* event)
 		break;
 	}
 }
+
+// mouse wheel event //
+void CPlatform::wheelEvent(QWheelEvent* event)
+{
+	if (m_bLMouseDown) {
+		return;
+	}
+
+	Q_UNUSED(event);
+	int index = m_nActivatedFrameIdx;
+
+	if (event->delta() > 0) {
+		index = index - 1;
+	}
+	else {
+		index = index + 1;
+	}
+
+	//selectedFrame(index);
+	
+	QTreeWidgetItemIterator it2(ui.treeWidget_FileDirectory);
+	while(*it2) {
+		int nSeriesIdx = (*it2)->text(1).toInt();
+		int nImageIdx = (*it2)->text(2).toInt();
+		int nSliceIdx = m_ciData.convertToSliceIdx(nSeriesIdx, nImageIdx);
+		if (((*it2)->text(1) != NULL) && (index == nSliceIdx)) {
+			showImage(*it2, 0);
+
+			QTreeWidgetItemIterator it(ui.treeWidget_FileDirectory);
+			while(*it) {
+				(*it)->setSelected(false);
+				++it;
+			}
+			(*it2)->setSelected(true);
+			ui.treeWidget_FileDirectory->scrollToItem(*it2);
+			break;
+		}
+		++it2;
+	}
+}
+
 
 // scan data list and emit signal - set signal slot //
 void CPlatform::setThread() {

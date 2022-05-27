@@ -18,6 +18,8 @@
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
@@ -26,6 +28,7 @@
 #include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QSplitter>
 #include <QtWidgets/QStatusBar>
+#include <QtWidgets/QTabWidget>
 #include <QtWidgets/QTreeWidget>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
@@ -49,18 +52,39 @@ public:
     QGroupBox *groupBox;
     QVBoxLayout *verticalLayout_5;
     QVBoxLayout *verticalLayout_4;
-    QGroupBox *groupBox_Filters;
+    QTabWidget *tabWidget_PreProcessing;
+    QWidget *tabWidget_Filters;
     QVBoxLayout *verticalLayout;
     QRadioButton *radioButton_None;
     QRadioButton *radioButton_Gaussian;
     QRadioButton *radioButton_Laplacian;
+    QWidget *tabWidget_Resampling;
+    QWidget *widget;
+    QVBoxLayout *verticalLayout_8;
+    QHBoxLayout *horizontalLayout;
+    QLabel *label;
+    QLineEdit *lineEdit;
+    QLabel *label_2;
+    QHBoxLayout *horizontalLayout_2;
+    QLabel *label_3;
+    QLineEdit *lineEdit_2;
+    QLabel *label_4;
+    QHBoxLayout *horizontalLayout_4;
+    QLabel *label_5;
+    QLineEdit *lineEdit_3;
+    QLabel *label_6;
     QGroupBox *groupBox_Families;
     QVBoxLayout *verticalLayout_6;
-    QCheckBox *checkBox_Histogram;
-    QCheckBox *checkBox_Intensity;
     QCheckBox *checkBox_Morph;
+    QCheckBox *checkBox_Intensity;
+    QCheckBox *checkBox_2;
+    QCheckBox *checkBox_Histogram;
     QCheckBox *checkBox_GLCM;
     QCheckBox *checkBox_GLRLM;
+    QCheckBox *checkBox_3;
+    QCheckBox *checkBox_5;
+    QCheckBox *checkBox_4;
+    QCheckBox *checkBox;
     QPushButton *pushButton_run;
     QMenuBar *menuBar;
     QStatusBar *statusBar;
@@ -69,7 +93,7 @@ public:
     {
         if (platformClass->objectName().isEmpty())
             platformClass->setObjectName(QStringLiteral("platformClass"));
-        platformClass->resize(1097, 735);
+        platformClass->resize(1200, 720);
         platformClass->setMaximumSize(QSize(16777215, 16777215));
         platformClass->setFocusPolicy(Qt::StrongFocus);
         QIcon icon;
@@ -93,7 +117,7 @@ public:
         gridLayout_3->setContentsMargins(11, 11, 11, 11);
         gridLayout_3->setObjectName(QStringLiteral("gridLayout_3"));
         horizontalLayout_3 = new QHBoxLayout();
-        horizontalLayout_3->setSpacing(6);
+        horizontalLayout_3->setSpacing(2);
         horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
         horizontalLayout_3->setSizeConstraint(QLayout::SetMaximumSize);
         horizontalLayout_3->setContentsMargins(5, -1, 5, -1);
@@ -101,7 +125,7 @@ public:
         verticalLayout_3->setSpacing(6);
         verticalLayout_3->setObjectName(QStringLiteral("verticalLayout_3"));
         horizontalLayout_9 = new QHBoxLayout();
-        horizontalLayout_9->setSpacing(6);
+        horizontalLayout_9->setSpacing(4);
         horizontalLayout_9->setObjectName(QStringLiteral("horizontalLayout_9"));
         horizontalLayout_9->setSizeConstraint(QLayout::SetDefaultConstraint);
         treeWidget_FileDirectory = new QTreeWidget(centralWidget);
@@ -147,7 +171,8 @@ public:
 
         horizontalLayout_9->addLayout(verticalLayout_2);
 
-        horizontalLayout_9->setStretch(1, 4);
+        horizontalLayout_9->setStretch(0, 1);
+        horizontalLayout_9->setStretch(1, 3);
 
         verticalLayout_3->addLayout(horizontalLayout_9);
 
@@ -161,58 +186,154 @@ public:
         sizePolicy2.setVerticalStretch(0);
         sizePolicy2.setHeightForWidth(groupBox->sizePolicy().hasHeightForWidth());
         groupBox->setSizePolicy(sizePolicy2);
+        groupBox->setFlat(true);
         verticalLayout_5 = new QVBoxLayout(groupBox);
-        verticalLayout_5->setSpacing(6);
+        verticalLayout_5->setSpacing(4);
         verticalLayout_5->setContentsMargins(11, 11, 11, 11);
         verticalLayout_5->setObjectName(QStringLiteral("verticalLayout_5"));
         verticalLayout_5->setSizeConstraint(QLayout::SetDefaultConstraint);
+        verticalLayout_5->setContentsMargins(4, 2, 4, 2);
         verticalLayout_4 = new QVBoxLayout();
-        verticalLayout_4->setSpacing(6);
+        verticalLayout_4->setSpacing(8);
         verticalLayout_4->setObjectName(QStringLiteral("verticalLayout_4"));
-        groupBox_Filters = new QGroupBox(groupBox);
-        groupBox_Filters->setObjectName(QStringLiteral("groupBox_Filters"));
-        groupBox_Filters->setFlat(false);
-        verticalLayout = new QVBoxLayout(groupBox_Filters);
-        verticalLayout->setSpacing(6);
+        tabWidget_PreProcessing = new QTabWidget(groupBox);
+        tabWidget_PreProcessing->setObjectName(QStringLiteral("tabWidget_PreProcessing"));
+        tabWidget_Filters = new QWidget();
+        tabWidget_Filters->setObjectName(QStringLiteral("tabWidget_Filters"));
+        verticalLayout = new QVBoxLayout(tabWidget_Filters);
+        verticalLayout->setSpacing(22);
         verticalLayout->setContentsMargins(11, 11, 11, 11);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
-        verticalLayout->setContentsMargins(30, 40, 30, 40);
-        radioButton_None = new QRadioButton(groupBox_Filters);
+        verticalLayout->setContentsMargins(28, 36, 20, 36);
+        radioButton_None = new QRadioButton(tabWidget_Filters);
         radioButton_None->setObjectName(QStringLiteral("radioButton_None"));
-        radioButton_None->setFocusPolicy(Qt::ClickFocus);
+        radioButton_None->setFocusPolicy(Qt::NoFocus);
+        radioButton_None->setContextMenuPolicy(Qt::NoContextMenu);
 
         verticalLayout->addWidget(radioButton_None);
 
-        radioButton_Gaussian = new QRadioButton(groupBox_Filters);
+        radioButton_Gaussian = new QRadioButton(tabWidget_Filters);
         radioButton_Gaussian->setObjectName(QStringLiteral("radioButton_Gaussian"));
-        radioButton_Gaussian->setFocusPolicy(Qt::ClickFocus);
+        radioButton_Gaussian->setFocusPolicy(Qt::NoFocus);
+        radioButton_Gaussian->setContextMenuPolicy(Qt::NoContextMenu);
 
         verticalLayout->addWidget(radioButton_Gaussian);
 
-        radioButton_Laplacian = new QRadioButton(groupBox_Filters);
+        radioButton_Laplacian = new QRadioButton(tabWidget_Filters);
         radioButton_Laplacian->setObjectName(QStringLiteral("radioButton_Laplacian"));
-        radioButton_Laplacian->setFocusPolicy(Qt::ClickFocus);
+        radioButton_Laplacian->setFocusPolicy(Qt::NoFocus);
 
         verticalLayout->addWidget(radioButton_Laplacian);
 
+        tabWidget_PreProcessing->addTab(tabWidget_Filters, QString());
+        tabWidget_Resampling = new QWidget();
+        tabWidget_Resampling->setObjectName(QStringLiteral("tabWidget_Resampling"));
+        widget = new QWidget(tabWidget_Resampling);
+        widget->setObjectName(QStringLiteral("widget"));
+        widget->setGeometry(QRect(40, 30, 111, 101));
+        verticalLayout_8 = new QVBoxLayout(widget);
+        verticalLayout_8->setSpacing(0);
+        verticalLayout_8->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_8->setObjectName(QStringLiteral("verticalLayout_8"));
+        verticalLayout_8->setContentsMargins(0, 0, 0, 0);
+        horizontalLayout = new QHBoxLayout();
+        horizontalLayout->setSpacing(10);
+        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
+        horizontalLayout->setSizeConstraint(QLayout::SetFixedSize);
+        label = new QLabel(widget);
+        label->setObjectName(QStringLiteral("label"));
 
-        verticalLayout_4->addWidget(groupBox_Filters);
+        horizontalLayout->addWidget(label);
+
+        lineEdit = new QLineEdit(widget);
+        lineEdit->setObjectName(QStringLiteral("lineEdit"));
+        QSizePolicy sizePolicy3(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        sizePolicy3.setHorizontalStretch(0);
+        sizePolicy3.setVerticalStretch(0);
+        sizePolicy3.setHeightForWidth(lineEdit->sizePolicy().hasHeightForWidth());
+        lineEdit->setSizePolicy(sizePolicy3);
+        lineEdit->setFocusPolicy(Qt::ClickFocus);
+        lineEdit->setAlignment(Qt::AlignCenter);
+
+        horizontalLayout->addWidget(lineEdit);
+
+        label_2 = new QLabel(widget);
+        label_2->setObjectName(QStringLiteral("label_2"));
+
+        horizontalLayout->addWidget(label_2);
+
+
+        verticalLayout_8->addLayout(horizontalLayout);
+
+        horizontalLayout_2 = new QHBoxLayout();
+        horizontalLayout_2->setSpacing(10);
+        horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
+        horizontalLayout_2->setSizeConstraint(QLayout::SetFixedSize);
+        label_3 = new QLabel(widget);
+        label_3->setObjectName(QStringLiteral("label_3"));
+
+        horizontalLayout_2->addWidget(label_3);
+
+        lineEdit_2 = new QLineEdit(widget);
+        lineEdit_2->setObjectName(QStringLiteral("lineEdit_2"));
+        sizePolicy3.setHeightForWidth(lineEdit_2->sizePolicy().hasHeightForWidth());
+        lineEdit_2->setSizePolicy(sizePolicy3);
+        lineEdit_2->setFocusPolicy(Qt::ClickFocus);
+        lineEdit_2->setAlignment(Qt::AlignCenter);
+
+        horizontalLayout_2->addWidget(lineEdit_2);
+
+        label_4 = new QLabel(widget);
+        label_4->setObjectName(QStringLiteral("label_4"));
+
+        horizontalLayout_2->addWidget(label_4);
+
+
+        verticalLayout_8->addLayout(horizontalLayout_2);
+
+        horizontalLayout_4 = new QHBoxLayout();
+        horizontalLayout_4->setSpacing(10);
+        horizontalLayout_4->setObjectName(QStringLiteral("horizontalLayout_4"));
+        horizontalLayout_4->setSizeConstraint(QLayout::SetFixedSize);
+        label_5 = new QLabel(widget);
+        label_5->setObjectName(QStringLiteral("label_5"));
+
+        horizontalLayout_4->addWidget(label_5);
+
+        lineEdit_3 = new QLineEdit(widget);
+        lineEdit_3->setObjectName(QStringLiteral("lineEdit_3"));
+        sizePolicy3.setHeightForWidth(lineEdit_3->sizePolicy().hasHeightForWidth());
+        lineEdit_3->setSizePolicy(sizePolicy3);
+        lineEdit_3->setFocusPolicy(Qt::ClickFocus);
+        lineEdit_3->setAlignment(Qt::AlignCenter);
+
+        horizontalLayout_4->addWidget(lineEdit_3);
+
+        label_6 = new QLabel(widget);
+        label_6->setObjectName(QStringLiteral("label_6"));
+
+        horizontalLayout_4->addWidget(label_6);
+
+
+        verticalLayout_8->addLayout(horizontalLayout_4);
+
+        tabWidget_PreProcessing->addTab(tabWidget_Resampling, QString());
+
+        verticalLayout_4->addWidget(tabWidget_PreProcessing);
 
         groupBox_Families = new QGroupBox(groupBox);
         groupBox_Families->setObjectName(QStringLiteral("groupBox_Families"));
         verticalLayout_6 = new QVBoxLayout(groupBox_Families);
-        verticalLayout_6->setSpacing(6);
+        verticalLayout_6->setSpacing(20);
         verticalLayout_6->setContentsMargins(11, 11, 11, 11);
         verticalLayout_6->setObjectName(QStringLiteral("verticalLayout_6"));
-        verticalLayout_6->setContentsMargins(30, 40, 30, 20);
-        checkBox_Histogram = new QCheckBox(groupBox_Families);
-        checkBox_Histogram->setObjectName(QStringLiteral("checkBox_Histogram"));
-        checkBox_Histogram->setFocusPolicy(Qt::ClickFocus);
-        checkBox_Histogram->setAutoFillBackground(false);
-        checkBox_Histogram->setChecked(false);
-        checkBox_Histogram->setTristate(false);
+        verticalLayout_6->setContentsMargins(30, 32, 20, 10);
+        checkBox_Morph = new QCheckBox(groupBox_Families);
+        checkBox_Morph->setObjectName(QStringLiteral("checkBox_Morph"));
+        checkBox_Morph->setEnabled(false);
+        checkBox_Morph->setFocusPolicy(Qt::NoFocus);
 
-        verticalLayout_6->addWidget(checkBox_Histogram);
+        verticalLayout_6->addWidget(checkBox_Morph);
 
         checkBox_Intensity = new QCheckBox(groupBox_Families);
         checkBox_Intensity->setObjectName(QStringLiteral("checkBox_Intensity"));
@@ -224,12 +345,22 @@ public:
 
         verticalLayout_6->addWidget(checkBox_Intensity);
 
-        checkBox_Morph = new QCheckBox(groupBox_Families);
-        checkBox_Morph->setObjectName(QStringLiteral("checkBox_Morph"));
-        checkBox_Morph->setEnabled(false);
-        checkBox_Morph->setFocusPolicy(Qt::NoFocus);
+        checkBox_2 = new QCheckBox(groupBox_Families);
+        checkBox_2->setObjectName(QStringLiteral("checkBox_2"));
+        checkBox_2->setEnabled(false);
+        checkBox_2->setFocusPolicy(Qt::NoFocus);
 
-        verticalLayout_6->addWidget(checkBox_Morph);
+        verticalLayout_6->addWidget(checkBox_2);
+
+        checkBox_Histogram = new QCheckBox(groupBox_Families);
+        checkBox_Histogram->setObjectName(QStringLiteral("checkBox_Histogram"));
+        checkBox_Histogram->setEnabled(true);
+        checkBox_Histogram->setFocusPolicy(Qt::NoFocus);
+        checkBox_Histogram->setAutoFillBackground(false);
+        checkBox_Histogram->setChecked(false);
+        checkBox_Histogram->setTristate(false);
+
+        verticalLayout_6->addWidget(checkBox_Histogram);
 
         checkBox_GLCM = new QCheckBox(groupBox_Families);
         checkBox_GLCM->setObjectName(QStringLiteral("checkBox_GLCM"));
@@ -247,15 +378,46 @@ public:
 
         verticalLayout_6->addWidget(checkBox_GLRLM);
 
+        checkBox_3 = new QCheckBox(groupBox_Families);
+        checkBox_3->setObjectName(QStringLiteral("checkBox_3"));
+        checkBox_3->setEnabled(false);
+        checkBox_3->setFocusPolicy(Qt::NoFocus);
+
+        verticalLayout_6->addWidget(checkBox_3);
+
+        checkBox_5 = new QCheckBox(groupBox_Families);
+        checkBox_5->setObjectName(QStringLiteral("checkBox_5"));
+        checkBox_5->setEnabled(false);
+        checkBox_5->setFocusPolicy(Qt::NoFocus);
+
+        verticalLayout_6->addWidget(checkBox_5);
+
+        checkBox_4 = new QCheckBox(groupBox_Families);
+        checkBox_4->setObjectName(QStringLiteral("checkBox_4"));
+        checkBox_4->setEnabled(false);
+        checkBox_4->setFocusPolicy(Qt::NoFocus);
+
+        verticalLayout_6->addWidget(checkBox_4);
+
+        checkBox = new QCheckBox(groupBox_Families);
+        checkBox->setObjectName(QStringLiteral("checkBox"));
+        checkBox->setEnabled(false);
+        checkBox->setFocusPolicy(Qt::NoFocus);
+
+        verticalLayout_6->addWidget(checkBox);
+
 
         verticalLayout_4->addWidget(groupBox_Families);
 
+        verticalLayout_4->setStretch(0, 1);
+        verticalLayout_4->setStretch(1, 3);
 
         verticalLayout_5->addLayout(verticalLayout_4);
 
         pushButton_run = new QPushButton(groupBox);
         pushButton_run->setObjectName(QStringLiteral("pushButton_run"));
         pushButton_run->setEnabled(false);
+        pushButton_run->setMinimumSize(QSize(0, 24));
         pushButton_run->setFocusPolicy(Qt::NoFocus);
 
         verticalLayout_5->addWidget(pushButton_run);
@@ -263,7 +425,7 @@ public:
 
         horizontalLayout_3->addWidget(groupBox);
 
-        horizontalLayout_3->setStretch(0, 3);
+        horizontalLayout_3->setStretch(0, 4);
         horizontalLayout_3->setStretch(1, 1);
 
         gridLayout_3->addLayout(horizontalLayout_3, 0, 0, 1, 1);
@@ -271,13 +433,16 @@ public:
         platformClass->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(platformClass);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1097, 21));
+        menuBar->setGeometry(QRect(0, 0, 1200, 21));
         platformClass->setMenuBar(menuBar);
         statusBar = new QStatusBar(platformClass);
         statusBar->setObjectName(QStringLiteral("statusBar"));
         platformClass->setStatusBar(statusBar);
 
         retranslateUi(platformClass);
+
+        tabWidget_PreProcessing->setCurrentIndex(1);
+
 
         QMetaObject::connectSlotsByName(platformClass);
     } // setupUi
@@ -288,16 +453,28 @@ public:
         QTreeWidgetItem *___qtreewidgetitem = treeWidget_FileDirectory->headerItem();
         ___qtreewidgetitem->setText(0, QApplication::translate("platformClass", "DICOM", Q_NULLPTR));
         groupBox->setTitle(QString());
-        groupBox_Filters->setTitle(QApplication::translate("platformClass", "Filter", Q_NULLPTR));
         radioButton_None->setText(QApplication::translate("platformClass", "None", Q_NULLPTR));
         radioButton_Gaussian->setText(QApplication::translate("platformClass", "Gaussian", Q_NULLPTR));
         radioButton_Laplacian->setText(QApplication::translate("platformClass", "Laplacian", Q_NULLPTR));
+        tabWidget_PreProcessing->setTabText(tabWidget_PreProcessing->indexOf(tabWidget_Filters), QApplication::translate("platformClass", "Filter", Q_NULLPTR));
+        label->setText(QApplication::translate("platformClass", "x :", Q_NULLPTR));
+        label_2->setText(QApplication::translate("platformClass", "mm", Q_NULLPTR));
+        label_3->setText(QApplication::translate("platformClass", "y :", Q_NULLPTR));
+        label_4->setText(QApplication::translate("platformClass", "mm", Q_NULLPTR));
+        label_5->setText(QApplication::translate("platformClass", "z :", Q_NULLPTR));
+        label_6->setText(QApplication::translate("platformClass", "mm", Q_NULLPTR));
+        tabWidget_PreProcessing->setTabText(tabWidget_PreProcessing->indexOf(tabWidget_Resampling), QApplication::translate("platformClass", "Resampling", Q_NULLPTR));
         groupBox_Families->setTitle(QApplication::translate("platformClass", "Radiomics Feature Family", Q_NULLPTR));
-        checkBox_Histogram->setText(QApplication::translate("platformClass", "Intensity Histogram", Q_NULLPTR));
-        checkBox_Intensity->setText(QApplication::translate("platformClass", "Local Intensity ", Q_NULLPTR));
         checkBox_Morph->setText(QApplication::translate("platformClass", "Morphological ", Q_NULLPTR));
+        checkBox_Intensity->setText(QApplication::translate("platformClass", "Local Intensity ", Q_NULLPTR));
+        checkBox_2->setText(QApplication::translate("platformClass", "Intensity Statistics", Q_NULLPTR));
+        checkBox_Histogram->setText(QApplication::translate("platformClass", "Intensity Histogram", Q_NULLPTR));
         checkBox_GLCM->setText(QApplication::translate("platformClass", "GLCM ", Q_NULLPTR));
         checkBox_GLRLM->setText(QApplication::translate("platformClass", "GLRLM ", Q_NULLPTR));
+        checkBox_3->setText(QApplication::translate("platformClass", "GLSZM ", Q_NULLPTR));
+        checkBox_5->setText(QApplication::translate("platformClass", "GLDZM", Q_NULLPTR));
+        checkBox_4->setText(QApplication::translate("platformClass", "NGTDM", Q_NULLPTR));
+        checkBox->setText(QApplication::translate("platformClass", "NGLDM", Q_NULLPTR));
         pushButton_run->setText(QApplication::translate("platformClass", "Run", Q_NULLPTR));
     } // retranslateUi
 
