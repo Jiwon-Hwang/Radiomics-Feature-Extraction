@@ -366,7 +366,7 @@ public:
          << QApplication::translate("popup_Histogram", "32", Q_NULLPTR)
          << QApplication::translate("popup_Histogram", "64", Q_NULLPTR)
         );
-        comboBox_nBins->setCurrentText(QApplication::translate("popup_Histogram", "8", Q_NULLPTR));
+        comboBox_nBins->setCurrentText(QApplication::translate("popup_Histogram", "32", Q_NULLPTR));
     } // retranslateUi
 
 };

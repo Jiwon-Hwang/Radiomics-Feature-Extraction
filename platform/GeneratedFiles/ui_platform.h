@@ -59,7 +59,7 @@ public:
     QRadioButton *radioButton_Gaussian;
     QRadioButton *radioButton_Laplacian;
     QWidget *tabWidget_Resampling;
-    QWidget *widget;
+    QWidget *layoutWidget;
     QVBoxLayout *verticalLayout_8;
     QHBoxLayout *horizontalLayout;
     QLabel *label;
@@ -139,6 +139,7 @@ public:
         treeWidget_FileDirectory->setMaximumSize(QSize(256, 16777215));
         treeWidget_FileDirectory->setFocusPolicy(Qt::NoFocus);
         treeWidget_FileDirectory->setContextMenuPolicy(Qt::CustomContextMenu);
+        treeWidget_FileDirectory->setAutoFillBackground(false);
         treeWidget_FileDirectory->setEditTriggers(QAbstractItemView::NoEditTriggers);
         treeWidget_FileDirectory->setDragDropMode(QAbstractItemView::DropOnly);
         treeWidget_FileDirectory->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
@@ -228,10 +229,10 @@ public:
         tabWidget_PreProcessing->addTab(tabWidget_Filters, QString());
         tabWidget_Resampling = new QWidget();
         tabWidget_Resampling->setObjectName(QStringLiteral("tabWidget_Resampling"));
-        widget = new QWidget(tabWidget_Resampling);
-        widget->setObjectName(QStringLiteral("widget"));
-        widget->setGeometry(QRect(40, 30, 111, 101));
-        verticalLayout_8 = new QVBoxLayout(widget);
+        layoutWidget = new QWidget(tabWidget_Resampling);
+        layoutWidget->setObjectName(QStringLiteral("layoutWidget"));
+        layoutWidget->setGeometry(QRect(30, 30, 131, 101));
+        verticalLayout_8 = new QVBoxLayout(layoutWidget);
         verticalLayout_8->setSpacing(0);
         verticalLayout_8->setContentsMargins(11, 11, 11, 11);
         verticalLayout_8->setObjectName(QStringLiteral("verticalLayout_8"));
@@ -240,12 +241,12 @@ public:
         horizontalLayout->setSpacing(10);
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
         horizontalLayout->setSizeConstraint(QLayout::SetFixedSize);
-        label = new QLabel(widget);
+        label = new QLabel(layoutWidget);
         label->setObjectName(QStringLiteral("label"));
 
         horizontalLayout->addWidget(label);
 
-        lineEdit = new QLineEdit(widget);
+        lineEdit = new QLineEdit(layoutWidget);
         lineEdit->setObjectName(QStringLiteral("lineEdit"));
         QSizePolicy sizePolicy3(QSizePolicy::Fixed, QSizePolicy::Fixed);
         sizePolicy3.setHorizontalStretch(0);
@@ -257,7 +258,7 @@ public:
 
         horizontalLayout->addWidget(lineEdit);
 
-        label_2 = new QLabel(widget);
+        label_2 = new QLabel(layoutWidget);
         label_2->setObjectName(QStringLiteral("label_2"));
 
         horizontalLayout->addWidget(label_2);
@@ -269,12 +270,12 @@ public:
         horizontalLayout_2->setSpacing(10);
         horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
         horizontalLayout_2->setSizeConstraint(QLayout::SetFixedSize);
-        label_3 = new QLabel(widget);
+        label_3 = new QLabel(layoutWidget);
         label_3->setObjectName(QStringLiteral("label_3"));
 
         horizontalLayout_2->addWidget(label_3);
 
-        lineEdit_2 = new QLineEdit(widget);
+        lineEdit_2 = new QLineEdit(layoutWidget);
         lineEdit_2->setObjectName(QStringLiteral("lineEdit_2"));
         sizePolicy3.setHeightForWidth(lineEdit_2->sizePolicy().hasHeightForWidth());
         lineEdit_2->setSizePolicy(sizePolicy3);
@@ -283,7 +284,7 @@ public:
 
         horizontalLayout_2->addWidget(lineEdit_2);
 
-        label_4 = new QLabel(widget);
+        label_4 = new QLabel(layoutWidget);
         label_4->setObjectName(QStringLiteral("label_4"));
 
         horizontalLayout_2->addWidget(label_4);
@@ -295,12 +296,12 @@ public:
         horizontalLayout_4->setSpacing(10);
         horizontalLayout_4->setObjectName(QStringLiteral("horizontalLayout_4"));
         horizontalLayout_4->setSizeConstraint(QLayout::SetFixedSize);
-        label_5 = new QLabel(widget);
+        label_5 = new QLabel(layoutWidget);
         label_5->setObjectName(QStringLiteral("label_5"));
 
         horizontalLayout_4->addWidget(label_5);
 
-        lineEdit_3 = new QLineEdit(widget);
+        lineEdit_3 = new QLineEdit(layoutWidget);
         lineEdit_3->setObjectName(QStringLiteral("lineEdit_3"));
         sizePolicy3.setHeightForWidth(lineEdit_3->sizePolicy().hasHeightForWidth());
         lineEdit_3->setSizePolicy(sizePolicy3);
@@ -309,7 +310,7 @@ public:
 
         horizontalLayout_4->addWidget(lineEdit_3);
 
-        label_6 = new QLabel(widget);
+        label_6 = new QLabel(layoutWidget);
         label_6->setObjectName(QStringLiteral("label_6"));
 
         horizontalLayout_4->addWidget(label_6);

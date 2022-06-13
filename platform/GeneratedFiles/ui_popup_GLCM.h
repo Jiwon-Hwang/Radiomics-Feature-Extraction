@@ -389,7 +389,7 @@ public:
          << QApplication::translate("popup_GLCM", "32", Q_NULLPTR)
          << QApplication::translate("popup_GLCM", "64", Q_NULLPTR)
         );
-        comboBox_nBins->setCurrentText(QApplication::translate("popup_GLCM", "8", Q_NULLPTR));
+        comboBox_nBins->setCurrentText(QApplication::translate("popup_GLCM", "32", Q_NULLPTR));
     } // retranslateUi
 
 };

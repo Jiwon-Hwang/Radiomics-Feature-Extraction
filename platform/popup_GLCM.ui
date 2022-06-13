@@ -587,7 +587,7 @@
        </sizepolicy>
       </property>
       <property name="currentText">
-       <string>8</string>
+       <string>32</string>
       </property>
       <property name="maxVisibleItems">
        <number>5</number>

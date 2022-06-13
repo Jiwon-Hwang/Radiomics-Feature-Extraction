@@ -90,6 +90,9 @@
             <property name="contextMenuPolicy">
              <enum>Qt::CustomContextMenu</enum>
             </property>
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
             <property name="editTriggers">
              <set>QAbstractItemView::NoEditTriggers</set>
             </property>
@@ -261,12 +264,12 @@
               <attribute name="title">
                <string>Resampling</string>
               </attribute>
-              <widget class="QWidget" name="">
+              <widget class="QWidget" name="layoutWidget">
                <property name="geometry">
                 <rect>
-                 <x>40</x>
+                 <x>30</x>
                  <y>30</y>
-                 <width>111</width>
+                 <width>131</width>
                  <height>101</height>
                 </rect>
                </property>

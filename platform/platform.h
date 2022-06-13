@@ -164,6 +164,7 @@ public:
 	void clearAll(int seriesIdx);
 
 protected:
+	// overriding
 	void resizeEvent(QResizeEvent* event);
 	void dragEnterEvent(QDragEnterEvent* event);
 	void dropEvent(QDropEvent * event);
