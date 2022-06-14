@@ -193,6 +193,11 @@ void CPlatform::init()
 	// mouse
 	m_bLMouseDown = false;
 
+	// QLineEdit 입력 제약조건 - int만 허용
+	QIntValidator *intValidator = new QIntValidator(0, 999999); //최소수,최대수
+	ui.lineEdit_x->setValidator(intValidator);
+	ui.lineEdit_y->setValidator(intValidator);
+
 }
 void CPlatform::clear()
 {
@@ -453,7 +458,8 @@ void CPlatform::saveSettings() {
 
 
 }
-void CPlatform::initIsActivatedFamily(int FAMILY_IDX) {
+void CPlatform::initIsActivatedFamily(int FAMILY_IDX)
+{
 
 	QSettings settings(configPath, QSettings::IniFormat);
 	settings.beginGroup("feature_family"); // 꼭 써줘야 함!

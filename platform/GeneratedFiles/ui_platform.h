@@ -59,20 +59,15 @@ public:
     QRadioButton *radioButton_Gaussian;
     QRadioButton *radioButton_Laplacian;
     QWidget *tabWidget_Resampling;
-    QWidget *layoutWidget;
-    QVBoxLayout *verticalLayout_8;
+    QVBoxLayout *verticalLayout_7;
     QHBoxLayout *horizontalLayout;
-    QLabel *label;
-    QLineEdit *lineEdit;
     QLabel *label_2;
+    QLineEdit *lineEdit_x;
+    QLabel *label;
     QHBoxLayout *horizontalLayout_2;
-    QLabel *label_3;
-    QLineEdit *lineEdit_2;
     QLabel *label_4;
-    QHBoxLayout *horizontalLayout_4;
-    QLabel *label_5;
-    QLineEdit *lineEdit_3;
-    QLabel *label_6;
+    QLineEdit *lineEdit_y;
+    QLabel *label_3;
     QGroupBox *groupBox_Families;
     QVBoxLayout *verticalLayout_6;
     QCheckBox *checkBox_Morph;
@@ -93,7 +88,7 @@ public:
     {
         if (platformClass->objectName().isEmpty())
             platformClass->setObjectName(QStringLiteral("platformClass"));
-        platformClass->resize(1200, 720);
+        platformClass->resize(1235, 720);
         platformClass->setMaximumSize(QSize(16777215, 16777215));
         platformClass->setFocusPolicy(Qt::StrongFocus);
         QIcon icon;
@@ -229,94 +224,83 @@ public:
         tabWidget_PreProcessing->addTab(tabWidget_Filters, QString());
         tabWidget_Resampling = new QWidget();
         tabWidget_Resampling->setObjectName(QStringLiteral("tabWidget_Resampling"));
-        layoutWidget = new QWidget(tabWidget_Resampling);
-        layoutWidget->setObjectName(QStringLiteral("layoutWidget"));
-        layoutWidget->setGeometry(QRect(30, 30, 131, 101));
-        verticalLayout_8 = new QVBoxLayout(layoutWidget);
-        verticalLayout_8->setSpacing(0);
-        verticalLayout_8->setContentsMargins(11, 11, 11, 11);
-        verticalLayout_8->setObjectName(QStringLiteral("verticalLayout_8"));
-        verticalLayout_8->setContentsMargins(0, 0, 0, 0);
+        tabWidget_Resampling->setLayoutDirection(Qt::RightToLeft);
+        verticalLayout_7 = new QVBoxLayout(tabWidget_Resampling);
+        verticalLayout_7->setSpacing(0);
+        verticalLayout_7->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_7->setObjectName(QStringLiteral("verticalLayout_7"));
+        verticalLayout_7->setContentsMargins(-1, 30, -1, 30);
         horizontalLayout = new QHBoxLayout();
-        horizontalLayout->setSpacing(10);
+        horizontalLayout->setSpacing(0);
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        horizontalLayout->setSizeConstraint(QLayout::SetFixedSize);
-        label = new QLabel(layoutWidget);
-        label->setObjectName(QStringLiteral("label"));
-
-        horizontalLayout->addWidget(label);
-
-        lineEdit = new QLineEdit(layoutWidget);
-        lineEdit->setObjectName(QStringLiteral("lineEdit"));
-        QSizePolicy sizePolicy3(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        sizePolicy3.setHorizontalStretch(0);
-        sizePolicy3.setVerticalStretch(0);
-        sizePolicy3.setHeightForWidth(lineEdit->sizePolicy().hasHeightForWidth());
-        lineEdit->setSizePolicy(sizePolicy3);
-        lineEdit->setFocusPolicy(Qt::ClickFocus);
-        lineEdit->setAlignment(Qt::AlignCenter);
-
-        horizontalLayout->addWidget(lineEdit);
-
-        label_2 = new QLabel(layoutWidget);
+        horizontalLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
+        horizontalLayout->setContentsMargins(10, 12, 10, 12);
+        label_2 = new QLabel(tabWidget_Resampling);
         label_2->setObjectName(QStringLiteral("label_2"));
+        label_2->setLayoutDirection(Qt::LeftToRight);
+        label_2->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
 
         horizontalLayout->addWidget(label_2);
 
+        lineEdit_x = new QLineEdit(tabWidget_Resampling);
+        lineEdit_x->setObjectName(QStringLiteral("lineEdit_x"));
+        sizePolicy2.setHeightForWidth(lineEdit_x->sizePolicy().hasHeightForWidth());
+        lineEdit_x->setSizePolicy(sizePolicy2);
+        lineEdit_x->setFocusPolicy(Qt::ClickFocus);
+        lineEdit_x->setLayoutDirection(Qt::LeftToRight);
+        lineEdit_x->setMaxLength(6);
+        lineEdit_x->setAlignment(Qt::AlignCenter);
+        lineEdit_x->setDragEnabled(true);
 
-        verticalLayout_8->addLayout(horizontalLayout);
+        horizontalLayout->addWidget(lineEdit_x);
+
+        label = new QLabel(tabWidget_Resampling);
+        label->setObjectName(QStringLiteral("label"));
+        label->setAlignment(Qt::AlignCenter);
+
+        horizontalLayout->addWidget(label);
+
+        horizontalLayout->setStretch(0, 1);
+        horizontalLayout->setStretch(1, 1);
+        horizontalLayout->setStretch(2, 1);
+
+        verticalLayout_7->addLayout(horizontalLayout);
 
         horizontalLayout_2 = new QHBoxLayout();
-        horizontalLayout_2->setSpacing(10);
+        horizontalLayout_2->setSpacing(0);
         horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
-        horizontalLayout_2->setSizeConstraint(QLayout::SetFixedSize);
-        label_3 = new QLabel(layoutWidget);
-        label_3->setObjectName(QStringLiteral("label_3"));
-
-        horizontalLayout_2->addWidget(label_3);
-
-        lineEdit_2 = new QLineEdit(layoutWidget);
-        lineEdit_2->setObjectName(QStringLiteral("lineEdit_2"));
-        sizePolicy3.setHeightForWidth(lineEdit_2->sizePolicy().hasHeightForWidth());
-        lineEdit_2->setSizePolicy(sizePolicy3);
-        lineEdit_2->setFocusPolicy(Qt::ClickFocus);
-        lineEdit_2->setAlignment(Qt::AlignCenter);
-
-        horizontalLayout_2->addWidget(lineEdit_2);
-
-        label_4 = new QLabel(layoutWidget);
+        horizontalLayout_2->setSizeConstraint(QLayout::SetDefaultConstraint);
+        horizontalLayout_2->setContentsMargins(10, 12, 10, 12);
+        label_4 = new QLabel(tabWidget_Resampling);
         label_4->setObjectName(QStringLiteral("label_4"));
+        label_4->setLayoutDirection(Qt::LeftToRight);
+        label_4->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
 
         horizontalLayout_2->addWidget(label_4);
 
+        lineEdit_y = new QLineEdit(tabWidget_Resampling);
+        lineEdit_y->setObjectName(QStringLiteral("lineEdit_y"));
+        sizePolicy2.setHeightForWidth(lineEdit_y->sizePolicy().hasHeightForWidth());
+        lineEdit_y->setSizePolicy(sizePolicy2);
+        lineEdit_y->setFocusPolicy(Qt::ClickFocus);
+        lineEdit_y->setLayoutDirection(Qt::LeftToRight);
+        lineEdit_y->setMaxLength(6);
+        lineEdit_y->setAlignment(Qt::AlignCenter);
+        lineEdit_y->setDragEnabled(true);
 
-        verticalLayout_8->addLayout(horizontalLayout_2);
+        horizontalLayout_2->addWidget(lineEdit_y);
 
-        horizontalLayout_4 = new QHBoxLayout();
-        horizontalLayout_4->setSpacing(10);
-        horizontalLayout_4->setObjectName(QStringLiteral("horizontalLayout_4"));
-        horizontalLayout_4->setSizeConstraint(QLayout::SetFixedSize);
-        label_5 = new QLabel(layoutWidget);
-        label_5->setObjectName(QStringLiteral("label_5"));
+        label_3 = new QLabel(tabWidget_Resampling);
+        label_3->setObjectName(QStringLiteral("label_3"));
+        label_3->setAlignment(Qt::AlignCenter);
 
-        horizontalLayout_4->addWidget(label_5);
+        horizontalLayout_2->addWidget(label_3);
 
-        lineEdit_3 = new QLineEdit(layoutWidget);
-        lineEdit_3->setObjectName(QStringLiteral("lineEdit_3"));
-        sizePolicy3.setHeightForWidth(lineEdit_3->sizePolicy().hasHeightForWidth());
-        lineEdit_3->setSizePolicy(sizePolicy3);
-        lineEdit_3->setFocusPolicy(Qt::ClickFocus);
-        lineEdit_3->setAlignment(Qt::AlignCenter);
+        horizontalLayout_2->setStretch(0, 1);
+        horizontalLayout_2->setStretch(1, 1);
+        horizontalLayout_2->setStretch(2, 1);
 
-        horizontalLayout_4->addWidget(lineEdit_3);
-
-        label_6 = new QLabel(layoutWidget);
-        label_6->setObjectName(QStringLiteral("label_6"));
-
-        horizontalLayout_4->addWidget(label_6);
-
-
-        verticalLayout_8->addLayout(horizontalLayout_4);
+        verticalLayout_7->addLayout(horizontalLayout_2);
 
         tabWidget_PreProcessing->addTab(tabWidget_Resampling, QString());
 
@@ -434,7 +418,7 @@ public:
         platformClass->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(platformClass);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1200, 21));
+        menuBar->setGeometry(QRect(0, 0, 1235, 21));
         platformClass->setMenuBar(menuBar);
         statusBar = new QStatusBar(platformClass);
         statusBar->setObjectName(QStringLiteral("statusBar"));
@@ -458,12 +442,10 @@ public:
         radioButton_Gaussian->setText(QApplication::translate("platformClass", "Gaussian", Q_NULLPTR));
         radioButton_Laplacian->setText(QApplication::translate("platformClass", "Laplacian", Q_NULLPTR));
         tabWidget_PreProcessing->setTabText(tabWidget_PreProcessing->indexOf(tabWidget_Filters), QApplication::translate("platformClass", "Filter", Q_NULLPTR));
-        label->setText(QApplication::translate("platformClass", "x :", Q_NULLPTR));
-        label_2->setText(QApplication::translate("platformClass", "mm", Q_NULLPTR));
-        label_3->setText(QApplication::translate("platformClass", "y :", Q_NULLPTR));
-        label_4->setText(QApplication::translate("platformClass", "mm", Q_NULLPTR));
-        label_5->setText(QApplication::translate("platformClass", "z :", Q_NULLPTR));
-        label_6->setText(QApplication::translate("platformClass", "mm", Q_NULLPTR));
+        label_2->setText(QApplication::translate("platformClass", "  mm", Q_NULLPTR));
+        label->setText(QApplication::translate("platformClass", "    x :", Q_NULLPTR));
+        label_4->setText(QApplication::translate("platformClass", "  mm", Q_NULLPTR));
+        label_3->setText(QApplication::translate("platformClass", "    y :", Q_NULLPTR));
         tabWidget_PreProcessing->setTabText(tabWidget_PreProcessing->indexOf(tabWidget_Resampling), QApplication::translate("platformClass", "Resampling", Q_NULLPTR));
         groupBox_Families->setTitle(QApplication::translate("platformClass", "Radiomics Feature Family", Q_NULLPTR));
         checkBox_Morph->setText(QApplication::translate("platformClass", "Morphological ", Q_NULLPTR));
