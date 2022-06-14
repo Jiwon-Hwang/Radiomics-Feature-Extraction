@@ -298,7 +298,7 @@
                   <number>12</number>
                  </property>
                  <item>
-                  <widget class="QLabel" name="label_2">
+                  <widget class="QLabel" name="label_x_mm">
                    <property name="layoutDirection">
                     <enum>Qt::LeftToRight</enum>
                    </property>
@@ -336,7 +336,7 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLabel" name="label">
+                  <widget class="QLabel" name="label_x">
                    <property name="text">
                     <string>    x :</string>
                    </property>
@@ -368,7 +368,7 @@
                   <number>12</number>
                  </property>
                  <item>
-                  <widget class="QLabel" name="label_4">
+                  <widget class="QLabel" name="label_y_mm">
                    <property name="layoutDirection">
                     <enum>Qt::LeftToRight</enum>
                    </property>
@@ -406,7 +406,7 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLabel" name="label_3">
+                  <widget class="QLabel" name="label_y">
                    <property name="text">
                     <string>    y :</string>
                    </property>

@@ -61,13 +61,13 @@ public:
     QWidget *tabWidget_Resampling;
     QVBoxLayout *verticalLayout_7;
     QHBoxLayout *horizontalLayout;
-    QLabel *label_2;
+    QLabel *label_x_mm;
     QLineEdit *lineEdit_x;
-    QLabel *label;
+    QLabel *label_x;
     QHBoxLayout *horizontalLayout_2;
-    QLabel *label_4;
+    QLabel *label_y_mm;
     QLineEdit *lineEdit_y;
-    QLabel *label_3;
+    QLabel *label_y;
     QGroupBox *groupBox_Families;
     QVBoxLayout *verticalLayout_6;
     QCheckBox *checkBox_Morph;
@@ -235,12 +235,12 @@ public:
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
         horizontalLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
         horizontalLayout->setContentsMargins(10, 12, 10, 12);
-        label_2 = new QLabel(tabWidget_Resampling);
-        label_2->setObjectName(QStringLiteral("label_2"));
-        label_2->setLayoutDirection(Qt::LeftToRight);
-        label_2->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
+        label_x_mm = new QLabel(tabWidget_Resampling);
+        label_x_mm->setObjectName(QStringLiteral("label_x_mm"));
+        label_x_mm->setLayoutDirection(Qt::LeftToRight);
+        label_x_mm->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
 
-        horizontalLayout->addWidget(label_2);
+        horizontalLayout->addWidget(label_x_mm);
 
         lineEdit_x = new QLineEdit(tabWidget_Resampling);
         lineEdit_x->setObjectName(QStringLiteral("lineEdit_x"));
@@ -254,11 +254,11 @@ public:
 
         horizontalLayout->addWidget(lineEdit_x);
 
-        label = new QLabel(tabWidget_Resampling);
-        label->setObjectName(QStringLiteral("label"));
-        label->setAlignment(Qt::AlignCenter);
+        label_x = new QLabel(tabWidget_Resampling);
+        label_x->setObjectName(QStringLiteral("label_x"));
+        label_x->setAlignment(Qt::AlignCenter);
 
-        horizontalLayout->addWidget(label);
+        horizontalLayout->addWidget(label_x);
 
         horizontalLayout->setStretch(0, 1);
         horizontalLayout->setStretch(1, 1);
@@ -271,12 +271,12 @@ public:
         horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
         horizontalLayout_2->setSizeConstraint(QLayout::SetDefaultConstraint);
         horizontalLayout_2->setContentsMargins(10, 12, 10, 12);
-        label_4 = new QLabel(tabWidget_Resampling);
-        label_4->setObjectName(QStringLiteral("label_4"));
-        label_4->setLayoutDirection(Qt::LeftToRight);
-        label_4->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
+        label_y_mm = new QLabel(tabWidget_Resampling);
+        label_y_mm->setObjectName(QStringLiteral("label_y_mm"));
+        label_y_mm->setLayoutDirection(Qt::LeftToRight);
+        label_y_mm->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
 
-        horizontalLayout_2->addWidget(label_4);
+        horizontalLayout_2->addWidget(label_y_mm);
 
         lineEdit_y = new QLineEdit(tabWidget_Resampling);
         lineEdit_y->setObjectName(QStringLiteral("lineEdit_y"));
@@ -290,11 +290,11 @@ public:
 
         horizontalLayout_2->addWidget(lineEdit_y);
 
-        label_3 = new QLabel(tabWidget_Resampling);
-        label_3->setObjectName(QStringLiteral("label_3"));
-        label_3->setAlignment(Qt::AlignCenter);
+        label_y = new QLabel(tabWidget_Resampling);
+        label_y->setObjectName(QStringLiteral("label_y"));
+        label_y->setAlignment(Qt::AlignCenter);
 
-        horizontalLayout_2->addWidget(label_3);
+        horizontalLayout_2->addWidget(label_y);
 
         horizontalLayout_2->setStretch(0, 1);
         horizontalLayout_2->setStretch(1, 1);
@@ -442,10 +442,10 @@ public:
         radioButton_Gaussian->setText(QApplication::translate("platformClass", "Gaussian", Q_NULLPTR));
         radioButton_Laplacian->setText(QApplication::translate("platformClass", "Laplacian", Q_NULLPTR));
         tabWidget_PreProcessing->setTabText(tabWidget_PreProcessing->indexOf(tabWidget_Filters), QApplication::translate("platformClass", "Filter", Q_NULLPTR));
-        label_2->setText(QApplication::translate("platformClass", "  mm", Q_NULLPTR));
-        label->setText(QApplication::translate("platformClass", "    x :", Q_NULLPTR));
-        label_4->setText(QApplication::translate("platformClass", "  mm", Q_NULLPTR));
-        label_3->setText(QApplication::translate("platformClass", "    y :", Q_NULLPTR));
+        label_x_mm->setText(QApplication::translate("platformClass", "  mm", Q_NULLPTR));
+        label_x->setText(QApplication::translate("platformClass", "    x :", Q_NULLPTR));
+        label_y_mm->setText(QApplication::translate("platformClass", "  mm", Q_NULLPTR));
+        label_y->setText(QApplication::translate("platformClass", "    y :", Q_NULLPTR));
         tabWidget_PreProcessing->setTabText(tabWidget_PreProcessing->indexOf(tabWidget_Resampling), QApplication::translate("platformClass", "Resampling", Q_NULLPTR));
         groupBox_Families->setTitle(QApplication::translate("platformClass", "Radiomics Feature Family", Q_NULLPTR));
         checkBox_Morph->setText(QApplication::translate("platformClass", "Morphological ", Q_NULLPTR));

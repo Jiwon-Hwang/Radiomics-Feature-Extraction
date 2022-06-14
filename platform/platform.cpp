@@ -193,7 +193,7 @@ void CPlatform::init()
 	// mouse
 	m_bLMouseDown = false;
 
-	// QLineEdit 입력 제약조건 - int만 허용
+	// QLineEdit 입력 제약조건 - "int"만 허용
 	QIntValidator *intValidator = new QIntValidator(0, 999999); //최소수,최대수
 	ui.lineEdit_x->setValidator(intValidator);
 	ui.lineEdit_y->setValidator(intValidator);
@@ -245,14 +245,18 @@ void CPlatform::setSignalSlot()
 	connect(ui.horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(scrollChangeImage(int)));
 	connect(ui.treeWidget_FileDirectory, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(showImage(QTreeWidgetItem*, int)));
 
-	// filter - tab widget
+	// filter (tab widget)
 	QList<QRadioButton *> filterBox = ui.tabWidget_Filters->findChildren<QRadioButton *>();
 	for (int i = 0; i < filterBox.size(); i++) {
 		connect(filterBox[i], SIGNAL(clicked()), this, SLOT(setFilterMode()));
 		connect(filterBox[i], SIGNAL(clicked()), this, SLOT(checkReadyToRun()));
 	}
 
-	// radiomics feature family - group box
+	// resampling (tab widget)
+	connect(ui.lineEdit_x, SIGNAL(cursorPositionChanged(int, int)), this, SLOT(checkReadyToRun()));
+	connect(ui.lineEdit_y, SIGNAL(cursorPositionChanged(int, int)), this, SLOT(checkReadyToRun()));
+
+	// radiomics feature family (group box)
 	QList<QCheckBox *> familyBox = ui.groupBox_Families->findChildren<QCheckBox *>();
 	for (int i = 0; i < familyBox.size(); i++) {
 		connect(familyBox[i], SIGNAL(clicked()), this, SLOT(setCheckedFamilyState()));
@@ -335,7 +339,16 @@ void CPlatform::loadSettings() {
 		
 		settings.endGroup();
 
+
+		// resampling
+		settings.beginGroup("resampling");
+
+		ui.lineEdit_x->setText(settings.value(ui.lineEdit_x->objectName()).toString());
+		ui.lineEdit_y->setText(settings.value(ui.lineEdit_y->objectName()).toString());
+
+		settings.endGroup();
 		
+				
 		// radiomics feature family 
 		settings.beginGroup("feature_family");
 		
@@ -384,13 +397,22 @@ void CPlatform::saveSettings() {
 
 	QSettings settings(configPath, QSettings::IniFormat);
 
-	// filter 
+	// filter (tab widget)
 	settings.beginGroup("filter");
 
 	QList<QRadioButton *> filterBox = ui.tabWidget_Filters->findChildren<QRadioButton *>();
 	for (int i = 0; i < filterBox.size(); i++) {
 		settings.setValue(filterBox[i]->objectName(), QVariant(filterBox[i]->isChecked()));
 	}
+
+	settings.endGroup();
+
+
+	// resampling (tab widget)
+	settings.beginGroup("resampling");
+
+	settings.setValue(ui.lineEdit_x->objectName(), ui.lineEdit_x->text());
+	settings.setValue(ui.lineEdit_y->objectName(), ui.lineEdit_y->text());
 
 	settings.endGroup();
 	
@@ -504,27 +526,31 @@ void CPlatform::initIsActivatedFamily(int FAMILY_IDX)
 
 }
 bool CPlatform::checkReadyToRun() {
+	
+	if (ui.lineEdit_x->text().toInt() != 0 && ui.lineEdit_y->text().toInt() != 0) {
 
-	QList<QRadioButton *> filterBox = ui.tabWidget_Filters->findChildren<QRadioButton *>();
-	QList<QCheckBox *> familyBox = ui.groupBox_Families->findChildren<QCheckBox *>();
+		QList<QRadioButton *> filterBox = ui.tabWidget_Filters->findChildren<QRadioButton *>();
+		QList<QCheckBox *> familyBox = ui.groupBox_Families->findChildren<QCheckBox *>();
 
-	for (int i = 0; i < filterBox.size(); i++) 
-	{
-		if (filterBox[i]->isChecked()) 
+		for (int i = 0; i < filterBox.size(); i++)
 		{
-			for (int j = 0; j < familyBox.size(); j++) 
+			if (filterBox[i]->isChecked())
 			{
-				if (familyBox[j]->isChecked()) 
+				for (int j = 0; j < familyBox.size(); j++)
 				{
-					ui.pushButton_run->setEnabled(true); // enable run button
-					return true;
+					if (familyBox[j]->isChecked())
+					{
+						ui.pushButton_run->setEnabled(true); // enable run button
+						return true;
+					}
 				}
+				ui.pushButton_run->setEnabled(false); // disable run button
+				break;
 			}
-			ui.pushButton_run->setEnabled(false); // disable run button
-			break;
 		}
 	}
 
+	ui.pushButton_run->setEnabled(false); // disable run button
 	return false;
 }
 void CPlatform::selectAll(bool checked) {
@@ -1553,9 +1579,17 @@ void CPlatform::run()
 				
 				// filtering //
 				Mat img_filtered;
-				filtering(ppsImages[j], img_filtered, nWidth, nHeight, FILTER_MODE); 
+				filtering(ppsImages[j], img_filtered, nWidth, nHeight, FILTER_MODE);
 				SAFE_DELETE_ARRAY(ppsImages[j]); // psImage 포인터가 가리키고 있던 메모리 데이터들 해제 => 이후엔 Mat 데이터를 가리키므로, 또 해제해주지 않아야 함!
 				ppsImages[j] = (short*)img_filtered.data; // 주소 변경
+						
+				// Resampling (Interpolation)
+				//resampling();
+
+
+				// Outlier Filteration (Re-segmentation)
+				//resegmentation();
+				
 
 				// feature extraction //
 				featureExtraction(ppsImages[j], ppucMasks[j], nHeight, nWidth); // final2DVec에 각 슬라이스들 값 누적
