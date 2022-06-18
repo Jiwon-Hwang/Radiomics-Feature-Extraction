@@ -15,6 +15,7 @@ CPlatform::CPlatform(QWidget *parent)
 	ui.setupUi(this);	// ui setting 
 	setMouseTracking(true);
 	setAcceptDrops(true);
+	setStyles();
 
 	init();
 	createPopup();
@@ -184,6 +185,16 @@ void BorderlessMainWindow::resizeEvent(QResizeEvent* event)
 	}
 }
 
+// set qt gui styles //
+void CPlatform::setStyles() {
+
+	// QLineEdit 입력 제약조건 - "int"만 허용
+	QIntValidator *intValidator = new QIntValidator(0, 999999); //최소수, 최대수
+	ui.lineEdit_x->setValidator(intValidator);
+	ui.lineEdit_y->setValidator(intValidator);
+
+}
+
 // 초기화 //
 void CPlatform::init()
 {
@@ -192,11 +203,6 @@ void CPlatform::init()
 	
 	// mouse
 	m_bLMouseDown = false;
-
-	// QLineEdit 입력 제약조건 - "int"만 허용
-	QIntValidator *intValidator = new QIntValidator(0, 999999); //최소수,최대수
-	ui.lineEdit_x->setValidator(intValidator);
-	ui.lineEdit_y->setValidator(intValidator);
 
 }
 void CPlatform::clear()
@@ -1111,6 +1117,61 @@ void filtering(short* psImage, Mat &img_filtered, int nWidth, int nHeight, int F
 	}
 }
 
+// pre-processing //
+void CPlatform::resampling() {
+	/*
+	//resample image if required
+	//get the bounding box of the image voi
+	//RegionType boundingBoxRegion = getBoundingBoxMask(mask);
+	ImageType::Pointer maskFiltered = mask;
+	ImageType::Pointer imageFiltered = image;
+	int nrVoxelsInMask = getNrVoxels(maskFiltered, config.threshold);
+
+
+	const typename ImageType::SpacingType& inputSpacing = image->GetSpacing();
+	storePreInterpolationFeatures(image, mask, config);
+	if (nrVoxelsInMask < 5) {
+		fillCSVwithNANs(config);
+	}
+	else {
+		//now down or upsample the image
+		if (config.useSamplingCubic == 1 || config.useDownSampling != 0 || config.useUpSampling != 0) {
+			const typename ImageType::RegionType& imageRegion = image->GetLargestPossibleRegion();
+			const typename ImageType::SizeType& imageRegionSize = imageRegion.GetSize();
+			double outputSpacing[3];
+			vector<int> newImageSize = getImageSizeInterpolated(image, imageRegionSize, outputSpacing, config);
+			itk::Size<3> outputSize = { { double(newImageSize[0]), double(newImageSize[1]), double(newImageSize[2]) } };
+			Image<float, 3> imageMask(1, 1, 1);
+			imageFiltered = imageMask.getResampledImage(imageFiltered, outputSpacing, outputSize, config.interpolationMethod, config.rebinning_centering);
+			maskFiltered = imageMask.getResampledImage(maskFiltered, outputSpacing, outputSize, "Linear", config.rebinning_centering);
+		}
+		//convert mask values to 1 (necessary after interpolation)
+		maskFiltered = thresholdMask(maskFiltered, config.threshold);
+		//get the region of the mask
+		RegionType boundingBoxRegion = getBoundingBoxMask(maskFiltered);
+		itk::Size<3> regionSize = boundingBoxRegion.GetSize();
+		//shrink image and mask to the mask region
+		imageFiltered = getImageMasked(imageFiltered, boundingBoxRegion);
+		maskFiltered = getImageMasked(maskFiltered, boundingBoxRegion);
+
+		//for ontology table
+		const typename ImageType::SpacingType& spacingVoxelDim = imageFiltered->GetSpacing();
+		float voxelSize[3];
+		for (int i = 0; i < 3; i++) {
+			voxelSize[i] = (float)spacingVoxelDim[i];
+		}
+		Image<float, 3> imageVoxelDim(10, 10, 10);
+		imageVoxelDim.createOntologyVoxelDimensionTable(config, voxelSize);
+		mask = nullptr;
+		image = nullptr;
+		calculateFeatures(imageFiltered, maskFiltered, config);
+
+	}
+	*/
+}
+void CPlatform::resegmentation() {
+
+}
 
 // feature extraction //
 void CPlatform::setCheckedFamilyState() { // check box 클릭될 때마다(시그널) 호출되는 SLOT 함수

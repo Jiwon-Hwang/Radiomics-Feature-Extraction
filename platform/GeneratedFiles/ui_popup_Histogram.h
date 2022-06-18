@@ -65,6 +65,11 @@ public:
         if (popup_Histogram->objectName().isEmpty())
             popup_Histogram->setObjectName(QStringLiteral("popup_Histogram"));
         popup_Histogram->resize(400, 740);
+        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(popup_Histogram->sizePolicy().hasHeightForWidth());
+        popup_Histogram->setSizePolicy(sizePolicy);
         buttonBox = new QDialogButtonBox(popup_Histogram);
         buttonBox->setObjectName(QStringLiteral("buttonBox"));
         buttonBox->setGeometry(QRect(230, 680, 151, 32));
@@ -310,11 +315,11 @@ public:
 
         comboBox_nBins = new QComboBox(gridLayoutWidget);
         comboBox_nBins->setObjectName(QStringLiteral("comboBox_nBins"));
-        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-        sizePolicy.setHorizontalStretch(0);
-        sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(comboBox_nBins->sizePolicy().hasHeightForWidth());
-        comboBox_nBins->setSizePolicy(sizePolicy);
+        QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Fixed);
+        sizePolicy1.setHorizontalStretch(0);
+        sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(comboBox_nBins->sizePolicy().hasHeightForWidth());
+        comboBox_nBins->setSizePolicy(sizePolicy1);
         comboBox_nBins->setMaxVisibleItems(5);
         comboBox_nBins->setMaxCount(64);
         comboBox_nBins->setSizeAdjustPolicy(QComboBox::AdjustToContentsOnFirstShow);
@@ -366,7 +371,7 @@ public:
          << QApplication::translate("popup_Histogram", "32", Q_NULLPTR)
          << QApplication::translate("popup_Histogram", "64", Q_NULLPTR)
         );
-        comboBox_nBins->setCurrentText(QApplication::translate("popup_Histogram", "32", Q_NULLPTR));
+        comboBox_nBins->setCurrentText(QApplication::translate("popup_Histogram", "8", Q_NULLPTR));
     } // retranslateUi
 
 };

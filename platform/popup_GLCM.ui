@@ -10,6 +10,12 @@
     <height>740</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
    <string>Set Measurements</string>
   </property>
@@ -587,7 +593,7 @@
        </sizepolicy>
       </property>
       <property name="currentText">
-       <string>32</string>
+       <string>8</string>
       </property>
       <property name="maxVisibleItems">
        <number>5</number>

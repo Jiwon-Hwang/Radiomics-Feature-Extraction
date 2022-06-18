@@ -67,6 +67,11 @@ public:
         if (popup_GLCM->objectName().isEmpty())
             popup_GLCM->setObjectName(QStringLiteral("popup_GLCM"));
         popup_GLCM->resize(400, 740);
+        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(popup_GLCM->sizePolicy().hasHeightForWidth());
+        popup_GLCM->setSizePolicy(sizePolicy);
         buttonBox = new QDialogButtonBox(popup_GLCM);
         buttonBox->setObjectName(QStringLiteral("buttonBox"));
         buttonBox->setGeometry(QRect(230, 680, 151, 32));
@@ -331,11 +336,11 @@ public:
 
         comboBox_nBins = new QComboBox(gridLayoutWidget);
         comboBox_nBins->setObjectName(QStringLiteral("comboBox_nBins"));
-        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-        sizePolicy.setHorizontalStretch(0);
-        sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(comboBox_nBins->sizePolicy().hasHeightForWidth());
-        comboBox_nBins->setSizePolicy(sizePolicy);
+        QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Fixed);
+        sizePolicy1.setHorizontalStretch(0);
+        sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(comboBox_nBins->sizePolicy().hasHeightForWidth());
+        comboBox_nBins->setSizePolicy(sizePolicy1);
         comboBox_nBins->setMaxVisibleItems(5);
         comboBox_nBins->setMaxCount(64);
         comboBox_nBins->setSizeAdjustPolicy(QComboBox::AdjustToContentsOnFirstShow);
@@ -389,7 +394,7 @@ public:
          << QApplication::translate("popup_GLCM", "32", Q_NULLPTR)
          << QApplication::translate("popup_GLCM", "64", Q_NULLPTR)
         );
-        comboBox_nBins->setCurrentText(QApplication::translate("popup_GLCM", "32", Q_NULLPTR));
+        comboBox_nBins->setCurrentText(QApplication::translate("popup_GLCM", "8", Q_NULLPTR));
     } // retranslateUi
 
 };

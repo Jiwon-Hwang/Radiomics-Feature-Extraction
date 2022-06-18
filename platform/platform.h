@@ -138,6 +138,8 @@ public:
 	QAction* newFileAction;
 	QProgressBar* progressBar;
 
+	void setStyles();
+
 	void createPopup();
 	void createProgressBar();
 	void setSignalSlot();
@@ -147,6 +149,10 @@ public:
 	void loadSettings();
 	void saveSettings();
 	void initIsActivatedFamily(int idx);
+
+	// pre-processing //
+	void resampling();
+	void resegmentation();
 
 	// feature extraction //
 	void featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
