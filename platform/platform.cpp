@@ -12,10 +12,10 @@ const static string outputFolder = string("Result/");
 CPlatform::CPlatform(QWidget *parent)
 	: QMainWindow(parent)
 {
-	ui.setupUi(this);	// ui setting 
+	ui.setupUi(this);	// ui setting (by QT)
 	setMouseTracking(true);
 	setAcceptDrops(true);
-	setStyles();
+	setStyles(); // ui setting (custom)
 
 	init();
 	createPopup();
@@ -1071,11 +1071,13 @@ void CPlatform::scrollChangeImage(int nValue)
 // Algorithms ------------------------------------------------------------------------------------------------------------------------------
 
 // ROI slice check //
-bool isEmptyMask(unsigned char* pucMask, int nWidth, int nHeight) {
+bool isEmptyMask(unsigned char* pucMask, int nWidth, int nHeight, float &nPixelsInMask) {
 
 	Mat mask(nWidth, nHeight, CV_8UC1, pucMask);
 
-	return countNonZero(mask) < 1 ? true : false;
+	nPixelsInMask = countNonZero(mask);
+
+	return nPixelsInMask < 1 ? true : false;
 }
 
 
@@ -1117,36 +1119,54 @@ void filtering(short* psImage, Mat &img_filtered, int nWidth, int nHeight, int F
 	}
 }
 
+
 // pre-processing //
-void CPlatform::resampling() {
-	/*
-	//resample image if required
-	//get the bounding box of the image voi
-	//RegionType boundingBoxRegion = getBoundingBoxMask(mask);
-	ImageType::Pointer maskFiltered = mask;
-	ImageType::Pointer imageFiltered = image;
-	int nrVoxelsInMask = getNrVoxels(maskFiltered, config.threshold);
+vector<int> getImageSizeInterpolated(vector<int> oriImageSize, float pixelSpacingXY, vector<int> outputSpacing) {
+	
+#ifdef _WIN32
+	vector<int> newImageSize = { 0, 0 }; // nWidth, nHeight
+#else
+	vector<int> newImageSize(2, 0);
+#endif // _WIN32
 
+	//calculate now the new image size
+	newImageSize[0] = ceil((float)oriImageSize[0] * pixelSpacingXY / float(outputSpacing[0]));
+	newImageSize[1] = ceil((float)oriImageSize[1] * pixelSpacingXY / float(outputSpacing[1]));
 
-	const typename ImageType::SpacingType& inputSpacing = image->GetSpacing();
-	storePreInterpolationFeatures(image, mask, config);
-	if (nrVoxelsInMask < 5) {
-		fillCSVwithNANs(config);
+	return newImageSize;
+
+}
+void CPlatform::resampling(short* psImage, unsigned char* pucMask, int &nWidth, int &nHeight, int nPixelsInMask, float pixelSpacingXY, Mat &image_resampled, Mat &mask_resampled) {
+
+	Mat image(nWidth, nHeight, CV_16SC1, psImage);
+	Mat mask(nWidth, nHeight, CV_8UC1, pucMask);
+
+	if (nPixelsInMask < 5) {
+		//fillCSVwithNANs();
 	}
 	else {
-		//now down or upsample the image
-		if (config.useSamplingCubic == 1 || config.useDownSampling != 0 || config.useUpSampling != 0) {
-			const typename ImageType::RegionType& imageRegion = image->GetLargestPossibleRegion();
-			const typename ImageType::SizeType& imageRegionSize = imageRegion.GetSize();
-			double outputSpacing[3];
-			vector<int> newImageSize = getImageSizeInterpolated(image, imageRegionSize, outputSpacing, config);
-			itk::Size<3> outputSize = { { double(newImageSize[0]), double(newImageSize[1]), double(newImageSize[2]) } };
-			Image<float, 3> imageMask(1, 1, 1);
-			imageFiltered = imageMask.getResampledImage(imageFiltered, outputSpacing, outputSize, config.interpolationMethod, config.rebinning_centering);
-			maskFiltered = imageMask.getResampledImage(maskFiltered, outputSpacing, outputSize, "Linear", config.rebinning_centering);
+		// down or upsample the image
+		vector<int> oriImageSize = { nWidth, nHeight };
+		vector<int> outputSpacing = { ui.lineEdit_x->text().toInt(), ui.lineEdit_y->text().toInt() }; // width, height
+		vector<int> newImageSize = getImageSizeInterpolated(oriImageSize, pixelSpacingXY, outputSpacing); // width, height
+		nWidth = newImageSize[0];
+		nHeight = newImageSize[1];
+
+		if (float(outputSpacing[0]) * float(outputSpacing[1]) < pixelSpacingXY * pixelSpacingXY) {
+			// up-sampling
+			cv::resize(image, image_resampled, Size(newImageSize[0], newImageSize[1]), INTER_NEAREST); 
+			cv::resize(mask, mask_resampled, Size(newImageSize[0], newImageSize[1]), INTER_NEAREST);
 		}
-		//convert mask values to 1 (necessary after interpolation)
-		maskFiltered = thresholdMask(maskFiltered, config.threshold);
+		else {
+			// down-sampling
+			cv::resize(image, image_resampled, Size(newImageSize[0], newImageSize[1]), INTER_AREA); 
+			cv::resize(mask, mask_resampled, Size(newImageSize[0], newImageSize[1]), INTER_NEAREST);
+		}
+		
+		//convert mask values to 0, 1 (necessary after interpolation)
+		cv::threshold(mask_resampled, mask_resampled, 0.5, 1, THRESH_BINARY);
+		
+		/*
 		//get the region of the mask
 		RegionType boundingBoxRegion = getBoundingBoxMask(maskFiltered);
 		itk::Size<3> regionSize = boundingBoxRegion.GetSize();
@@ -1164,14 +1184,15 @@ void CPlatform::resampling() {
 		imageVoxelDim.createOntologyVoxelDimensionTable(config, voxelSize);
 		mask = nullptr;
 		image = nullptr;
-		calculateFeatures(imageFiltered, maskFiltered, config);
-
+		//calculateFeatures(imageFiltered, maskFiltered, config);
+		*/
 	}
-	*/
+	
 }
 void CPlatform::resegmentation() {
 
 }
+
 
 // feature extraction //
 void CPlatform::setCheckedFamilyState() { // check box 클릭될 때마다(시그널) 호출되는 SLOT 함수
@@ -1635,23 +1656,28 @@ void CPlatform::run()
 
 		// slice by slice //
 		for (int j = 0; j < nImageCnt; j++) {
+
 			// ROI slice check //
-			if (!isEmptyMask(ppucMasks[j], nWidth, nHeight)) {
+			float nPixelsInMask = 0;
+			if (!isEmptyMask(ppucMasks[j], nWidth, nHeight, nPixelsInMask)) {
 				
 				// filtering //
 				Mat img_filtered;
 				filtering(ppsImages[j], img_filtered, nWidth, nHeight, FILTER_MODE);
-				SAFE_DELETE_ARRAY(ppsImages[j]); // psImage 포인터가 가리키고 있던 메모리 데이터들 해제 => 이후엔 Mat 데이터를 가리키므로, 또 해제해주지 않아야 함!
+				SAFE_DELETE_ARRAY(ppsImages[j]); // psImage 포인터가 가리키고 있던 메모리 데이터들 해제 => ***이후엔 Mat 데이터를 가리키므로, 또 해제해주지 않아야 함!***
 				ppsImages[j] = (short*)img_filtered.data; // 주소 변경
 						
-				// Resampling (Interpolation)
-				//resampling();
+				// Resampling (Interpolation) //
+				Mat img_resampled, mask_resampled;
+				float pixelSpacingXY = m_ciData.getPixelSpacing(i, j);
+				resampling(ppsImages[j], ppucMasks[j], nWidth, nHeight, nPixelsInMask, pixelSpacingXY, img_resampled, mask_resampled); // new nWidth, nHeight 
+				SAFE_DELETE_ARRAY(ppucMasks[j]);
+				ppsImages[j] = (short*)img_resampled.data;
+				ppucMasks[j] = (unsigned char*)mask_resampled.data;
 
-
-				// Outlier Filteration (Re-segmentation)
+				// Outlier Filteration (Re-segmentation) //
 				//resegmentation();
 				
-
 				// feature extraction //
 				featureExtraction(ppsImages[j], ppucMasks[j], nHeight, nWidth); // final2DVec에 각 슬라이스들 값 누적
 			}
@@ -1667,7 +1693,7 @@ void CPlatform::run()
 		clearAll(i);
 
 		// 메모리 소멸 //
-		SAFE_DELETE_VOLUME(ppucMasks, nMaskCnt);
+		//SAFE_DELETE_VOLUME(ppucMasks, nMaskCnt);
 
 		// progress bar //
 		setProgressBarValue(i, nSeriesCnt);
