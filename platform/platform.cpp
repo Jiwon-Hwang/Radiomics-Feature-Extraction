@@ -1121,7 +1121,7 @@ void filtering(short* psImage, Mat &img_filtered, int nWidth, int nHeight, int F
 
 
 // pre-processing //
-vector<int> getImageSizeInterpolated(vector<int> oriImageSize, float pixelSpacingXY, vector<int> outputSpacing) {
+vector<int> getImageSizeInterpolated(vector<int> oriImageSize, float pixelSpacingX, float pixelSpacingY, vector<int> outputSpacing) {
 	
 #ifdef _WIN32
 	vector<int> newImageSize = { 0, 0 }; // nWidth, nHeight
@@ -1130,13 +1130,13 @@ vector<int> getImageSizeInterpolated(vector<int> oriImageSize, float pixelSpacin
 #endif // _WIN32
 
 	//calculate now the new image size
-	newImageSize[0] = ceil((float)oriImageSize[0] * pixelSpacingXY / float(outputSpacing[0]));
-	newImageSize[1] = ceil((float)oriImageSize[1] * pixelSpacingXY / float(outputSpacing[1]));
+	newImageSize[0] = ceil((float)oriImageSize[0] * pixelSpacingX / float(outputSpacing[0]));
+	newImageSize[1] = ceil((float)oriImageSize[1] * pixelSpacingY / float(outputSpacing[1]));
 
 	return newImageSize;
 
 }
-void CPlatform::resampling(short* psImage, unsigned char* pucMask, int &nWidth, int &nHeight, int nPixelsInMask, float pixelSpacingXY, Mat &image_resampled, Mat &mask_resampled) {
+void CPlatform::resampling(short* psImage, unsigned char* pucMask, int &nWidth, int &nHeight, int nPixelsInMask, float pixelSpacingX, float pixelSpacingY, Mat &image_resampled, Mat &mask_resampled) {
 
 	Mat image(nWidth, nHeight, CV_16SC1, psImage);
 	Mat mask(nWidth, nHeight, CV_8UC1, pucMask);
@@ -1148,24 +1148,27 @@ void CPlatform::resampling(short* psImage, unsigned char* pucMask, int &nWidth, 
 		// down or upsample the image
 		vector<int> oriImageSize = { nWidth, nHeight };
 		vector<int> outputSpacing = { ui.lineEdit_x->text().toInt(), ui.lineEdit_y->text().toInt() }; // width, height
-		vector<int> newImageSize = getImageSizeInterpolated(oriImageSize, pixelSpacingXY, outputSpacing); // width, height
+		vector<int> newImageSize = getImageSizeInterpolated(oriImageSize, pixelSpacingX, pixelSpacingY, outputSpacing); // width, height
 		nWidth = newImageSize[0];
 		nHeight = newImageSize[1];
 
-		if (float(outputSpacing[0]) * float(outputSpacing[1]) < pixelSpacingXY * pixelSpacingXY) {
+		if (float(outputSpacing[0]) * float(outputSpacing[1]) < pixelSpacingX * pixelSpacingY) {
 			// up-sampling
 			cv::resize(image, image_resampled, Size(newImageSize[0], newImageSize[1]), INTER_NEAREST); 
-			cv::resize(mask, mask_resampled, Size(newImageSize[0], newImageSize[1]), INTER_NEAREST);
+			cv::resize(mask, mask_resampled, Size(newImageSize[0], newImageSize[1]), INTER_LINEAR);
 		}
 		else {
 			// down-sampling
 			cv::resize(image, image_resampled, Size(newImageSize[0], newImageSize[1]), INTER_AREA); 
-			cv::resize(mask, mask_resampled, Size(newImageSize[0], newImageSize[1]), INTER_NEAREST);
+			cv::resize(mask, mask_resampled, Size(newImageSize[0], newImageSize[1]), INTER_LINEAR);
 		}
 		
-		//convert mask values to 0, 1 (necessary after interpolation)
+		// convert mask(Mat) values to 0, 1 (necessary after interpolation)
+		// 1. 정규화(normalize) : 0~255 or etc -> 0~1로
+		cv::normalize(mask_resampled, mask_resampled, 0, 1, NORM_MINMAX, CV_8UC1);
+		// 2. 이진화(threshold) : 0~1 -> 0, 1로
 		cv::threshold(mask_resampled, mask_resampled, 0.5, 1, THRESH_BINARY);
-		
+
 		/*
 		//get the region of the mask
 		RegionType boundingBoxRegion = getBoundingBoxMask(maskFiltered);
@@ -1544,7 +1547,33 @@ void CPlatform::clearAll(int seriesIdx) {
 }
 
 
-// normalize and 16 bit image show //
+// normalization and 16 bit image show //
+void normalizeMask(unsigned char* mask, int nWidth, int nHeight, unsigned char nSetMin, unsigned char nSetMax)
+{
+	unsigned char nMin = UCHAR_MAX;
+	unsigned char nMax = 0;
+
+	for (int i = 0; i<nWidth; i++) {
+		for (int j = 0; j<nHeight; j++) {
+			if (mask[j*nWidth + i] > nMax) {
+				nMax = mask[j*nWidth + i];
+			}
+
+			if (mask[j*nWidth + i] < nMin) {
+				nMin = mask[j*nWidth + i];
+			}
+		}
+	}
+
+	//normalization
+	if (nMax - nMin != 0) {
+		for (int i = 0; i<nWidth; i++) {
+			for (int j = 0; j<nHeight; j++) {
+				mask[j*nWidth + i] = (mask[j*nWidth + i] - nMin) * (nSetMax - nSetMin) / (nMax - nMin) + nSetMin;
+			}
+		}
+	}
+}
 void RescaleIntensityFilter(short* sIN_OUT_img, int nWidth, int nHeight, int nSetMax, int nSetMin)
 {
 	int nMin = INT_MAX;
@@ -1669,12 +1698,13 @@ void CPlatform::run()
 						
 				// Resampling (Interpolation) //
 				Mat img_resampled, mask_resampled;
-				float pixelSpacingXY = m_ciData.getPixelSpacing(i, j);
-				resampling(ppsImages[j], ppucMasks[j], nWidth, nHeight, nPixelsInMask, pixelSpacingXY, img_resampled, mask_resampled); // new nWidth, nHeight 
+				float pixelSpacingX, pixelSpacingY;
+				m_ciData.getPixelSpacing(i, j, pixelSpacingX, pixelSpacingY);
+				resampling(ppsImages[j], ppucMasks[j], nWidth, nHeight, nPixelsInMask, pixelSpacingX, pixelSpacingY, img_resampled, mask_resampled); // new nWidth, nHeight 
 				SAFE_DELETE_ARRAY(ppucMasks[j]);
 				ppsImages[j] = (short*)img_resampled.data;
 				ppucMasks[j] = (unsigned char*)mask_resampled.data;
-
+				
 				// Outlier Filteration (Re-segmentation) //
 				//resegmentation();
 				
