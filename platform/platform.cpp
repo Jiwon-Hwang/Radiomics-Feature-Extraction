@@ -1192,7 +1192,50 @@ void CPlatform::resampling(short* psImage, unsigned char* pucMask, int &nWidth, 
 	}
 	
 }
-void CPlatform::resegmentation() {
+void resegmentation(short* psImage, unsigned char* pucMask, int nWidth, int nHeight, Mat &mask_resegmented) {
+	
+	// outlier filtering (+-3sd) //
+	short min_resegmented;
+	short max_resegmented;
+
+	// get vector of ori pixels in ROI mask
+	vector<short> vectorOfPixels; 
+	for (int row = 0; row < nHeight; row++) {
+		for (int col = 0; col < nWidth; col++) {
+			int index = row * nWidth + col;
+			unsigned char maskValue = pucMask[index];
+			short imageValue = psImage[index];
+
+			if (maskValue >(unsigned char)0) {
+				vectorOfPixels.push_back(imageValue);
+			}
+		}
+	}
+
+	// calculate mean and std
+	short mean = accumulate(vectorOfPixels.begin(), vectorOfPixels.end(), 0.0) / vectorOfPixels.size();
+	transform(vectorOfPixels.begin(), vectorOfPixels.end(), vectorOfPixels.begin(), bind2nd(minus<float>(), mean));
+	short var = inner_product(vectorOfPixels.begin(), vectorOfPixels.end(), vectorOfPixels.begin(), 0.0) / vectorOfPixels.size();
+	short std = sqrt(var);
+
+	// calcalate outlier filtered min, max
+	min_resegmented = mean - 3 * std;
+	max_resegmented = mean + 3 * std;
+
+	// get resegmented mask
+	Mat mask(nWidth, nHeight, CV_8UC1, pucMask);    // 얕은 복사 (같은 메모리 참조)
+	mask_resegmented = mask.clone();				// 깊은 복사 (다른 메모리 참조) => return
+	for (int row = 0; row < nHeight; row++) {
+		for (int col = 0; col < nWidth; col++) {
+			int index = row * nWidth + col;
+			unsigned char maskValue = pucMask[index];
+			short imageValue = psImage[index];
+
+			if (maskValue > (unsigned char)0) {
+				mask_resegmented.data[index] = min_resegmented <= imageValue && imageValue <= max_resegmented ? maskValue : (unsigned char)0;
+			}
+		}
+	}
 
 }
 
@@ -1695,7 +1738,7 @@ void CPlatform::run()
 				filtering(ppsImages[j], img_filtered, nWidth, nHeight, FILTER_MODE);
 				SAFE_DELETE_ARRAY(ppsImages[j]); // psImage 포인터가 가리키고 있던 메모리 데이터들 해제 => ***이후엔 Mat 데이터를 가리키므로, 또 해제해주지 않아야 함!***
 				ppsImages[j] = (short*)img_filtered.data; // 주소 변경
-						
+				
 				// Resampling (Interpolation) //
 				Mat img_resampled, mask_resampled;
 				float pixelSpacingX, pixelSpacingY;
@@ -1705,11 +1748,15 @@ void CPlatform::run()
 				ppsImages[j] = (short*)img_resampled.data;
 				ppucMasks[j] = (unsigned char*)mask_resampled.data;
 				
-				// Outlier Filteration (Re-segmentation) //
-				//resegmentation();
+				// Resegmentation (Outlier Filteration) //
+				Mat mask_resegmented;
+				resegmentation(ppsImages[j], ppucMasks[j], nWidth, nHeight, mask_resegmented);
+				ppucMasks[j] = (unsigned char*)mask_resegmented.data;
 				
 				// feature extraction //
-				featureExtraction(ppsImages[j], ppucMasks[j], nHeight, nWidth); // final2DVec에 각 슬라이스들 값 누적
+				if (!isEmptyMask(ppucMasks[j], nWidth, nHeight, nPixelsInMask)) {   // resegmentation 후의 mask 재확인
+					featureExtraction(ppsImages[j], ppucMasks[j], nHeight, nWidth); // final2DVec에 각 슬라이스들 값 누적
+				}
 			}
 		}
 

@@ -152,7 +152,6 @@ public:
 
 	// pre-processing //
 	void resampling(short* psImage, unsigned char* pucMask, int &nWidth, int &nHeight, int nPixelsInMask, float pixelSpacingX, float pixelSpacingY, cv::Mat &image_resampled, cv::Mat &mask_resampled);
-	void resegmentation();
 
 	// feature extraction //
 	void featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
