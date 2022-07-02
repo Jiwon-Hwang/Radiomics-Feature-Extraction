@@ -1,0 +1,13 @@
+resegmentation(outlier filteration) clear
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch master
+# Changes to be committed:
+#	modified:   Win32/Debug/platform.exe
+#	modified:   Win32/Release/platform.exe
+#	modified:   platform/Config/config.ini
+#	deleted:    platform/Result/20220511 215002.csv
+#	modified:   platform/platform.cpp
+#	modified:   platform/platform.h
+#
