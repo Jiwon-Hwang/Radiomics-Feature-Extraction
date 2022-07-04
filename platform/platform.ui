@@ -478,9 +478,9 @@
                </widget>
               </item>
               <item>
-               <widget class="QCheckBox" name="checkBox_2">
+               <widget class="QCheckBox" name="checkBox_Statistics">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="focusPolicy">
                  <enum>Qt::NoFocus</enum>

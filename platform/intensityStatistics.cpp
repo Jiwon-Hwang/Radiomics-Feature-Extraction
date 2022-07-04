@@ -20,23 +20,14 @@ void IntensityStatistics::clearVariable() {
 	percentile90 = NAN;
 	maximumValue = NAN;
 	interquartileRange = NAN;
-	mode = NAN;
 	rangeValue = NAN;
 	meanAbsDev = NAN;
 	robustMeanAbsDev = NAN;
 	medianAbsDev = NAN;
 	coeffOfVar = NAN;
 	quartileCoeff = NAN;
-	entropy = NAN;
-	uniformity = NAN;
-	maxHistGradient = NAN;
-	maxHistGradGreyValue = NAN;
-	minHistGradient = NAN;
-	minHistGradGreyValue = NAN;
-	//percentile25 = NAN;
-	//percentile75 = NAN;
-	//vector<float> maxHistVecGradient;
-	//vector<float> minHistVecGradient;
+	energy = NAN;
+	rootMeanSquare = NAN;
 
 }
 void IntensityStatistics::clearVector() {
@@ -274,33 +265,6 @@ void IntensityStatistics::calcInterquartileRange() {
 	interquartileRange = getPercentile(0.75) - getPercentile(0.25);
 
 }
-void IntensityStatistics::calcMode() {
-
-	deque<long> histCounts(1, 1);
-	deque<float> histValues(1, vectorOfDiscretizedPixels[0]);
-
-	for (int i = 1; i < nPixels; i++) {
-		if (vectorOfDiscretizedPixels[i] != histValues.back()) {
-			histValues.push_back(vectorOfDiscretizedPixels[i]);
-			histCounts.push_back(1);
-		}
-		else {
-			histCounts.back()++;
-		}
-	}
-
-	long maxIndex = 0;
-	long maxCount = histCounts.at(0);
-	for (int i = 1; i < (long)histCounts.size(); i++) {
-		if (maxCount < histCounts.at(i)) {
-			maxCount = histCounts.at(i);
-			maxIndex = i;
-		}
-	}
-
-	mode = histValues.at(maxIndex);
-
-}
 void IntensityStatistics::calcRange() {
 
 	if (isnan(maximumValue)) {
@@ -330,14 +294,15 @@ void IntensityStatistics::calcMeanAbsoluteDev() {
 	meanAbsDev /= nPixels;
 
 }
-void getSmallerElements(vector<float> &vec, float max) {
+// LNK2005 error ¹æÁö ¸â¹öÇÔ¼ö·Î µî·Ï
+void IntensityStatistics::getSmallerElements(vector<float> &vec, float max) {
 
 	vector<float>::iterator lessThan;
 	lessThan = remove_if(vec.begin(), vec.end(), bind2nd(less<float>(), max));
 	vec.erase(lessThan, vec.end());
 
 }
-void getGreaterElements(vector<float> &vec, float min) {
+void IntensityStatistics::getGreaterElements(vector<float> &vec, float min) {
 	
 	vector<float>::iterator greaterThan;
 	greaterThan = remove_if(vec.begin(), vec.end(), bind2nd(greater<float>(), min));
@@ -405,83 +370,6 @@ void IntensityStatistics::calcQuartileCoeff() {
 	quartileCoeff = (float)(percentile75 - percentile25) / (float)(percentile75 + percentile25); // float, int ³ª´°¼À ÁÖÀÇ
 
 }
-void IntensityStatistics::calcEntropy() {
-	
-	entropy = 0;
-
-	for (int i = 0; i < probabilities.size(); i++) {
-		if (probabilities[i] > 0) {
-			entropy -= probabilities[i] * log2(probabilities[i]);
-		}
-	}
-
-}
-void IntensityStatistics::calcUniformity() {
-
-	uniformity = 0;
-	for (int i = 0; i < probabilities.size(); i++) {
-		uniformity += pow(probabilities[i], 2);
-	}
-
-}
-void IntensityStatistics::calcMaxHistGradient() {
-
-	vector<float> maxHistVecGradient(histGradient.begin(), histGradient.end());
-	if (maxHistVecGradient.size() == 0) maxHistVecGradient.push_back(0);
-
-	if (maxHistVecGradient.size() == 1 && maxHistVecGradient[0] == 0) {
-		maxHistGradient = 0;
-		cout << "The histogram gradients could not be calculated, check intensity values in VOI" << endl;
-	}
-	else {
-		maxHistGradient = *max_element(maxHistVecGradient.begin(), maxHistVecGradient.end());
-	}
-
-}
-void IntensityStatistics::calcMaxHistGradGreyValue() {
-
-	vector<float> maxHistVecGradient(histGradient.begin(), histGradient.end());
-	if (maxHistVecGradient.size() == 0) maxHistVecGradient.push_back(0);
-
-	if (maxHistVecGradient.size() == 1 && maxHistVecGradient[0] == 0) {
-		maxHistGradGreyValue = 0;
-		cout << "The histogram gradients could not be calculated, check intensity values in VOI" << endl;
-	}
-	else {
-		maxHistGradGreyValue = max_element(maxHistVecGradient.begin(), maxHistVecGradient.end()) - maxHistVecGradient.begin();
-		maxHistGradGreyValue = diffGreyLevels[maxHistGradGreyValue + 1];
-	}
-
-}
-void IntensityStatistics::calcMinHistGradient() {
-
-	vector<float> minHistVecGradient(histGradient.begin(), histGradient.end());
-	if (minHistVecGradient.size() == 0) minHistVecGradient.push_back(0);
-
-	if (minHistVecGradient.size() == 1 && minHistVecGradient[0] == 0) {
-		minHistGradient = 0;
-		cout << "The histogram gradients could not be calculated, check intensity values in VOI" << endl;
-	}
-	else {
-		minHistGradient = *min_element(minHistVecGradient.begin(), minHistVecGradient.end());
-	}
-
-}
-void IntensityStatistics::calcMinHistGradGreyValue() {
-
-	vector<float> minHistVecGradient(histGradient.begin(), histGradient.end());
-	if (minHistVecGradient.size() == 0) minHistVecGradient.push_back(0);
-
-	if (minHistVecGradient.size() == 1 && minHistVecGradient[0] == 0) {
-		minHistGradGreyValue = 0;
-		cout << "The histogram gradients could not be calculated, check intensity values in VOI" << endl;
-	}
-	else {
-		minHistGradGreyValue = min_element(minHistVecGradient.begin(), minHistVecGradient.end()) - minHistVecGradient.begin();
-		minHistGradGreyValue = diffGreyLevels[minHistGradGreyValue + 1];
-	}
-
-}
 
 void IntensityStatistics::calcFeature(int FEATURE_IDX, vector<float> &tempValues1DVec) {
 	
@@ -537,11 +425,6 @@ void IntensityStatistics::calcFeature(int FEATURE_IDX, vector<float> &tempValues
 			tempValues1DVec.push_back(interquartileRange);
 			break;
 
-		case MODE:
-			calcMode();
-			tempValues1DVec.push_back(mode);
-			break;
-
 		case RANGE:
 			calcRange();
 			tempValues1DVec.push_back(rangeValue);
@@ -572,38 +455,15 @@ void IntensityStatistics::calcFeature(int FEATURE_IDX, vector<float> &tempValues
 			tempValues1DVec.push_back(quartileCoeff);
 			break;
 
-		case ENTROPY:
-			calcEntropy();
-			tempValues1DVec.push_back(entropy);
+		case ENERGY:
+			
 			break;
 
-		case UNIFORMITY:
-			calcUniformity();
-			tempValues1DVec.push_back(uniformity);
-			break;
-
-		case MAXHISTGRADIENT:
-			calcMaxHistGradient();
-			tempValues1DVec.push_back(maxHistGradient);
-			break;
-
-		case MAXHISTGRADGREY:
-			calcMaxHistGradGreyValue();
-			tempValues1DVec.push_back(maxHistGradGreyValue);
-			break;
-
-		case MINHISTGRADIENT:
-			calcMinHistGradient();
-			tempValues1DVec.push_back(minHistGradient);
-			break;
-
-		case MINHISTGRADGREY:
-			calcMinHistGradGreyValue();
-			tempValues1DVec.push_back(minHistGradGreyValue);
+		case ROOTMEANSQUARE:
+			
 			break;
 			
 		default:
-			//cout << "error : Unknown Intensity Histogram Feature!" << endl;
 			break;
 	}
 }
@@ -661,19 +521,14 @@ void IntensityStatistics::defineFeatureNames(vector<string> &features) {
 	features[PERCENTILE90] = "90th percentile";
 	features[MAXIMUM] = "maximum";
 	features[INTERQUARTILERANGE] = "Interquartile range";
-	features[MODE] = "mode";
 	features[RANGE] = "range";
 	features[MEANABSDEV] = "Mean absolute deviation";
 	features[ROBUSTMEANABSDEV] = "Robust mean absolute deviation";
 	features[MEDIANABSDEV] = "Median absolut deviation";
 	features[COEFFOFVAR] = "Coefficient of variation";
 	features[QUARTILECOEFF] = "Quartile coefficient";
-	features[ENTROPY] = "Entropy";
-	features[UNIFORMITY] = "Uniformity";
-	features[MAXHISTGRADIENT] = "Maximum histogram gradient";
-	features[MAXHISTGRADGREY] = "Maximum histogram gradient grey level";
-	features[MINHISTGRADIENT] = "Minimum histogram gradient";
-	features[MINHISTGRADGREY] = "Minimum histogram gradient grey level";
+	features[ENERGY] = "Energy";
+	features[ROOTMEANSQUARE] = "Root mean square";
 
 }
 void IntensityStatistics::extractFeatureValues(vector<float> &intensityHistogramValues) {
@@ -688,19 +543,14 @@ void IntensityStatistics::extractFeatureValues(vector<float> &intensityHistogram
 	intensityHistogramValues[PERCENTILE90] = percentile90;
 	intensityHistogramValues[MAXIMUM] = maximumValue;
 	intensityHistogramValues[INTERQUARTILERANGE] = interquartileRange;
-	intensityHistogramValues[MODE] = mode;
 	intensityHistogramValues[RANGE] = rangeValue;
 	intensityHistogramValues[MEANABSDEV] = meanAbsDev;
 	intensityHistogramValues[ROBUSTMEANABSDEV] = robustMeanAbsDev;
 	intensityHistogramValues[MEDIANABSDEV] = medianAbsDev;
 	intensityHistogramValues[COEFFOFVAR] = coeffOfVar;
 	intensityHistogramValues[QUARTILECOEFF] = quartileCoeff;
-	intensityHistogramValues[ENTROPY] = entropy;
-	intensityHistogramValues[UNIFORMITY] = uniformity;
-	intensityHistogramValues[MAXHISTGRADIENT] = maxHistGradient;
-	intensityHistogramValues[MAXHISTGRADGREY] = maxHistGradGreyValue;
-	intensityHistogramValues[MINHISTGRADIENT] = minHistGradient;
-	intensityHistogramValues[MINHISTGRADGREY] = minHistGradGreyValue;
+	intensityHistogramValues[ENERGY] = energy;
+	intensityHistogramValues[ROOTMEANSQUARE] = rootMeanSquare;
 
 }
 

@@ -1,43 +1,38 @@
-#include "popup_Histogram.h"
+#include "popup_Statistics.h"
 
 
-popup_Histogram::popup_Histogram(QWidget *parent) :
+popup_Statistics::popup_Statistics(QWidget *parent) :
 	QDialog(parent),
-	ui(new Ui::popup_Histogram)
+	ui(new Ui::popup_Statistics)
 {
 	ui->setupUi(this);
 
 	filterGroup = new QButtonGroup;
 	filterGroup->setExclusive(false); // default : true
-	filterGroup->addButton(ui->checkBox_Mean, IntensityHistogram::MEAN);
-	filterGroup->addButton(ui->checkBox_Variance, IntensityHistogram::VARIANCE);
-	filterGroup->addButton(ui->checkBox_Skewness, IntensityHistogram::SKEWNESS);
-	filterGroup->addButton(ui->checkBox_Kurtosis, IntensityHistogram::KURTOSIS);
-	filterGroup->addButton(ui->checkBox_Median, IntensityHistogram::MEDIAN);
-	filterGroup->addButton(ui->checkBox_Minimum, IntensityHistogram::MINIMUM);
-	filterGroup->addButton(ui->checkBox_10thPercentile, IntensityHistogram::PERCENTILE10);
-	filterGroup->addButton(ui->checkBox_90thPercentile, IntensityHistogram::PERCENTILE90);
-	filterGroup->addButton(ui->checkBox_Maximum, IntensityHistogram::MAXIMUM);
-	filterGroup->addButton(ui->checkBox_InterquartileRange, IntensityHistogram::INTERQUARTILERANGE);
-	filterGroup->addButton(ui->checkBox_Mode, IntensityHistogram::MODE);
-	filterGroup->addButton(ui->checkBox_Range, IntensityHistogram::RANGE);
-	filterGroup->addButton(ui->checkBox_MeanAbsDev, IntensityHistogram::MEANABSDEV);
-	filterGroup->addButton(ui->checkBox_RobustMeanAbsDev, IntensityHistogram::ROBUSTMEANABSDEV);
-	filterGroup->addButton(ui->checkBox_MedianAbsDev, IntensityHistogram::MEDIANABSDEV);
-	filterGroup->addButton(ui->checkBox_CoeffOfVar, IntensityHistogram::COEFFOFVAR);
-	filterGroup->addButton(ui->checkBox_QuartileCoeff, IntensityHistogram::QUARTILECOEFF);
-	filterGroup->addButton(ui->checkBox_Entropy, IntensityHistogram::ENTROPY);
-	filterGroup->addButton(ui->checkBox_Uniformity, IntensityHistogram::UNIFORMITY);
-	filterGroup->addButton(ui->checkBox_MaxHisGradient, IntensityHistogram::MAXHISTGRADIENT);
-	filterGroup->addButton(ui->checkBox_MaxHistGradGrey, IntensityHistogram::MAXHISTGRADGREY);
-	filterGroup->addButton(ui->checkBox_MinHistGradient, IntensityHistogram::MINHISTGRADIENT);
-	filterGroup->addButton(ui->checkBox_MinHistGradGrey, IntensityHistogram::MINHISTGRADGREY);
+	filterGroup->addButton(ui->checkBox_Mean, IntensityStatistics::MEAN);
+	filterGroup->addButton(ui->checkBox_Variance, IntensityStatistics::VARIANCE);
+	filterGroup->addButton(ui->checkBox_Skewness, IntensityStatistics::SKEWNESS);
+	filterGroup->addButton(ui->checkBox_Kurtosis, IntensityStatistics::KURTOSIS);
+	filterGroup->addButton(ui->checkBox_Median, IntensityStatistics::MEDIAN);
+	filterGroup->addButton(ui->checkBox_Minimum, IntensityStatistics::MINIMUM);
+	filterGroup->addButton(ui->checkBox_10thPercentile, IntensityStatistics::PERCENTILE10);
+	filterGroup->addButton(ui->checkBox_90thPercentile, IntensityStatistics::PERCENTILE90);
+	filterGroup->addButton(ui->checkBox_Maximum, IntensityStatistics::MAXIMUM);
+	filterGroup->addButton(ui->checkBox_InterquartileRange, IntensityStatistics::INTERQUARTILERANGE);
+	filterGroup->addButton(ui->checkBox_Range, IntensityStatistics::RANGE);
+	filterGroup->addButton(ui->checkBox_MeanAbsDev, IntensityStatistics::MEANABSDEV);
+	filterGroup->addButton(ui->checkBox_RobustMeanAbsDev, IntensityStatistics::ROBUSTMEANABSDEV);
+	filterGroup->addButton(ui->checkBox_MedianAbsDev, IntensityStatistics::MEDIANABSDEV);
+	filterGroup->addButton(ui->checkBox_CoeffOfVar, IntensityStatistics::COEFFOFVAR);
+	filterGroup->addButton(ui->checkBox_QuartileCoeff, IntensityStatistics::QUARTILECOEFF);
+	filterGroup->addButton(ui->checkBox_Energy, IntensityStatistics::ENERGY);
+	filterGroup->addButton(ui->checkBox_RootMeanSquare, IntensityStatistics::ROOTMEANSQUARE);
 
-	filterGroup->addButton(ui->checkBox_All, IntensityHistogram::FEATURE_COUNT); 
+	filterGroup->addButton(ui->checkBox_All, IntensityStatistics::FEATURE_COUNT); 
 
 }
 
-popup_Histogram::~popup_Histogram()
+popup_Statistics::~popup_Statistics()
 {
 	delete ui;
 }

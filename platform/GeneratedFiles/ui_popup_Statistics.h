@@ -28,7 +28,7 @@ public:
     QDialogButtonBox *buttonBox;
     QGroupBox *groupBox_Features;
     QGridLayout *gridLayout;
-    QCheckBox *checkBox_RootMean;
+    QCheckBox *checkBox_RootMeanSquare;
     QCheckBox *checkBox_Kurtosis;
     QCheckBox *checkBox_10thPercentile;
     QCheckBox *checkBox_Median;
@@ -71,14 +71,14 @@ public:
         gridLayout = new QGridLayout(groupBox_Features);
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
         gridLayout->setContentsMargins(12, 10, 12, 10);
-        checkBox_RootMean = new QCheckBox(groupBox_Features);
-        checkBox_RootMean->setObjectName(QStringLiteral("checkBox_RootMean"));
-        checkBox_RootMean->setEnabled(true);
-        checkBox_RootMean->setAutoFillBackground(false);
-        checkBox_RootMean->setChecked(false);
-        checkBox_RootMean->setTristate(false);
+        checkBox_RootMeanSquare = new QCheckBox(groupBox_Features);
+        checkBox_RootMeanSquare->setObjectName(QStringLiteral("checkBox_RootMeanSquare"));
+        checkBox_RootMeanSquare->setEnabled(true);
+        checkBox_RootMeanSquare->setAutoFillBackground(false);
+        checkBox_RootMeanSquare->setChecked(false);
+        checkBox_RootMeanSquare->setTristate(false);
 
-        gridLayout->addWidget(checkBox_RootMean, 11, 1, 1, 1);
+        gridLayout->addWidget(checkBox_RootMeanSquare, 11, 1, 1, 1);
 
         checkBox_Kurtosis = new QCheckBox(groupBox_Features);
         checkBox_Kurtosis->setObjectName(QStringLiteral("checkBox_Kurtosis"));
@@ -253,7 +253,7 @@ public:
     {
         popup_Statistics->setWindowTitle(QApplication::translate("popup_Statistics", "Set Measurements", Q_NULLPTR));
         groupBox_Features->setTitle(QApplication::translate("popup_Statistics", "Features", Q_NULLPTR));
-        checkBox_RootMean->setText(QApplication::translate("popup_Statistics", "Root Mean Squre", Q_NULLPTR));
+        checkBox_RootMeanSquare->setText(QApplication::translate("popup_Statistics", "Root Mean Square", Q_NULLPTR));
         checkBox_Kurtosis->setText(QApplication::translate("popup_Statistics", "Kurtosis", Q_NULLPTR));
         checkBox_10thPercentile->setText(QApplication::translate("popup_Statistics", "10th Percentile", Q_NULLPTR));
         checkBox_Median->setText(QApplication::translate("popup_Statistics", "Median", Q_NULLPTR));

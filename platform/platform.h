@@ -121,7 +121,7 @@ public:
 	*/
 
 	// pop-up objects
-	
+	popup_Statistics *ppopup_Statistics;
 	popup_Histogram *ppopup_Histogram;
 	popup_Histogram *ppopup_Intensity;
 	popup_Histogram *ppopup_Morph;

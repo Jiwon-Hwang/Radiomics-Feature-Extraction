@@ -273,9 +273,18 @@ void CPlatform::setSignalSlot()
 	}
 
 	// pop-up
+	// Intensity Statistics (popup)
+	connect(ppopup_Statistics->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool))); // 'All' btn 눌렀을 때 나머지 체크박스 선택/해제
+	QList<QCheckBox *> featureBox = ppopup_Statistics->ui->groupBox_Features->findChildren<QCheckBox *>(); // 나머지 체크박스들 눌렀을 때 'All' 선택/해제
+	for (int i = 0; i < featureBox.size(); i++) {
+		if (featureBox[i]->objectName() == "checkBox_All") continue;
+		connect(featureBox[i], SIGNAL(clicked()), this, SLOT(checkFeatureBoxState()));
+	}
+	featureBox.clear();
+
 	// Intensity Histogram (popup)
-	connect(ppopup_Histogram->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool))); // 'All' btn 눌렀을 때 나머지 체크박스 선택/해제
-	QList<QCheckBox *> featureBox = ppopup_Histogram->ui->groupBox_Features->findChildren<QCheckBox *>(); // 나머지 체크박스들 눌렀을 때 'All' 선택/해제
+	connect(ppopup_Histogram->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool))); 
+	featureBox = ppopup_Histogram->ui->groupBox_Features->findChildren<QCheckBox *>(); 
 	for (int i = 0; i < featureBox.size(); i++) {
 		if (featureBox[i]->objectName() == "checkBox_All") continue;
 		connect(featureBox[i], SIGNAL(clicked()), this, SLOT(checkFeatureBoxState()));
@@ -294,6 +303,10 @@ void CPlatform::setSignalSlot()
 }
 void CPlatform::showPopUp(QObject* sender) {
 	// for loop으로 대체 가능 (for auto, break)
+	if (sender == ui.checkBox_Statistics) {
+		ppopup_Statistics->show();
+	}
+
 	if (sender == ui.checkBox_Histogram) {
 		ppopup_Histogram->show();
 	}
@@ -371,6 +384,16 @@ void CPlatform::loadSettings() {
 
 		
 		// Intensity Histogram (popup) 
+		settings.beginGroup("popup_Statistics");
+
+		int nfeatures_Statistics = IntensityStatistics::FEATURE_COUNT;
+		for (int i = 0; i < nfeatures_Statistics + 1; i++) {
+			ppopup_Statistics->filterGroup->button(i)->setChecked(settings.value(ppopup_Statistics->filterGroup->button(i)->objectName(), false).toBool());
+		}
+
+		settings.endGroup();
+
+
 		settings.beginGroup("popup_Histogram");
 
 		//int nfeatures_Histogram = ppopup_Histogram->ui->groupBox_Features->findChildren<QCheckBox *>().size();
@@ -439,6 +462,23 @@ void CPlatform::saveSettings() {
 
 	// popup - save settings to config and to object's member variable
 
+	// Intensity Statistics (popup)
+	settings.beginGroup("popup_Statistics");
+
+	intenseStat.isCheckedFeature.assign(IntensityStatistics::FEATURE_COUNT, false);
+	intenseStat.nCheckedFeatures = 0;
+
+	int nfeatures_Statistics = IntensityStatistics::FEATURE_COUNT;
+	for (int i = 0; i < nfeatures_Statistics + 1; i++) {
+		settings.setValue(ppopup_Statistics->filterGroup->button(i)->objectName(), QVariant(ppopup_Statistics->filterGroup->button(i)->isChecked()));
+		if (i == nfeatures_Statistics) break;
+		intenseStat.isCheckedFeature[i] = ppopup_Statistics->filterGroup->button(i)->isChecked();
+		if (intenseStat.isCheckedFeature[i] == true) intenseStat.nCheckedFeatures++;
+	}
+
+	settings.endGroup();
+
+
 	// Intensity Histogram (popup)
 	settings.beginGroup("popup_Histogram");
 
@@ -497,6 +537,12 @@ void CPlatform::initIsActivatedFamily(int FAMILY_IDX)
 
 	switch (FAMILY_IDX) 
 	{
+		case E_INTENSESTAT:
+			if (settings.value(ui.checkBox_Statistics->objectName()).toBool() == true) {
+				intenseStat.isActivatedFamily = true;
+			}
+			break;
+
 		case E_INTENSEHISTO:
 			if (settings.value(ui.checkBox_Histogram->objectName()).toBool() == true) {
 				intenseHisto.isActivatedFamily = true;
@@ -1248,6 +1294,14 @@ void CPlatform::setCheckedFamilyState() { // check box 클릭될 때마다(시그널) 호�
 	// for loop으로 대체 가능 (for auto, break)
 	QObject* obj = sender();
 
+	if (obj == ui.checkBox_Statistics) {
+		intenseStat.isActivatedFamily = !intenseStat.isActivatedFamily;
+
+		if (intenseStat.isActivatedFamily == true) {
+			showPopUp(obj); // pop-up
+		}
+	}
+
 	if (obj == ui.checkBox_Histogram) {
 		intenseHisto.isActivatedFamily = !intenseHisto.isActivatedFamily;
 
@@ -1279,6 +1333,10 @@ void CPlatform::setCheckedFamilyState() { // check box 클릭될 때마다(시그널) 호�
 }
 void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth) {
 	// for loop으로 대체 가능 (for auto, break)
+	if (intenseStat.isActivatedFamily) {
+		intenseStat.featureExtraction(psImage, pucMask, nHeight, nWidth);
+	}
+
 	if (intenseHisto.isActivatedFamily) {
 		intenseHisto.featureExtraction(psImage, pucMask, nHeight, nWidth);
 	}
@@ -1303,6 +1361,10 @@ void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, int nH
 
 void CPlatform::averageAllSlices() {
 	// for loop으로 대체 가능 (for auto, break)
+	if (intenseStat.isActivatedFamily) {
+		intenseStat.averageAllValues();
+	}
+
 	if (intenseHisto.isActivatedFamily) {
 		intenseHisto.averageAllValues();
 	}
@@ -1447,6 +1509,11 @@ void CPlatform::presetCSVFile(string csvName) {
 	// write family name 
 	resultCSV << " " << "," << " " << "," << " " << ",";
 
+	if (intenseStat.isActivatedFamily) {
+		for (int i = 0; i < intenseStat.nCheckedFeatures; i++) {
+			resultCSV << "Statistics" << ",";
+		}
+	}
 	if (intenseHisto.isActivatedFamily) {
 		for (int i = 0; i < intenseHisto.nCheckedFeatures; i++) {
 			resultCSV << "Histogram" << ",";
@@ -1479,6 +1546,16 @@ void CPlatform::presetCSVFile(string csvName) {
 
 	// write feature name 
 	resultCSV << " " << "," << " " << "," << " " << ",";
+
+	if (intenseStat.isActivatedFamily) {
+		vector<string> featureNames(IntensityStatistics::FEATURE_COUNT, "");
+		intenseStat.defineFeatureNames(featureNames); 
+		for (int i = 0; i < featureNames.size(); i++) {
+			if (intenseStat.isCheckedFeature[i]) {
+				resultCSV << featureNames[i] << ",";
+			}
+		}
+	}
 
 	if (intenseHisto.isActivatedFamily) {
 		vector<string> featureNames(IntensityHistogram::FEATURE_COUNT, "");
@@ -1548,6 +1625,10 @@ void CPlatform::writeCSVCaseName(int seriesIdx, string csvName) {
 }
 void CPlatform::writeCSVFeatureValue(string csvName) {
 
+	if (intenseStat.isActivatedFamily) {
+		writeCSVCheckedValue(intenseStat.final1DVec, csvName);
+	}
+
 	if (intenseHisto.isActivatedFamily) {
 		writeCSVCheckedValue(intenseHisto.final1DVec, csvName);
 	}
@@ -1580,6 +1661,7 @@ void CPlatform::writeCSVFile(int seriesIdx, string csvName) {
 // clear all vector //
 void CPlatform::clearAll(int seriesIdx) {
 	// for loop으로 대체 가능 (for auto, break)
+	intenseStat.clearVector();
 	intenseHisto.clearVector();
 	glcm.clearVector();
 	/*

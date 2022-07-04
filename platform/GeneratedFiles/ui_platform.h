@@ -72,7 +72,7 @@ public:
     QVBoxLayout *verticalLayout_6;
     QCheckBox *checkBox_Morph;
     QCheckBox *checkBox_Intensity;
-    QCheckBox *checkBox_2;
+    QCheckBox *checkBox_Statistics;
     QCheckBox *checkBox_Histogram;
     QCheckBox *checkBox_GLCM;
     QCheckBox *checkBox_GLRLM;
@@ -330,12 +330,12 @@ public:
 
         verticalLayout_6->addWidget(checkBox_Intensity);
 
-        checkBox_2 = new QCheckBox(groupBox_Families);
-        checkBox_2->setObjectName(QStringLiteral("checkBox_2"));
-        checkBox_2->setEnabled(false);
-        checkBox_2->setFocusPolicy(Qt::NoFocus);
+        checkBox_Statistics = new QCheckBox(groupBox_Families);
+        checkBox_Statistics->setObjectName(QStringLiteral("checkBox_Statistics"));
+        checkBox_Statistics->setEnabled(true);
+        checkBox_Statistics->setFocusPolicy(Qt::NoFocus);
 
-        verticalLayout_6->addWidget(checkBox_2);
+        verticalLayout_6->addWidget(checkBox_Statistics);
 
         checkBox_Histogram = new QCheckBox(groupBox_Families);
         checkBox_Histogram->setObjectName(QStringLiteral("checkBox_Histogram"));
@@ -450,7 +450,7 @@ public:
         groupBox_Families->setTitle(QApplication::translate("platformClass", "Radiomics Feature Family", Q_NULLPTR));
         checkBox_Morph->setText(QApplication::translate("platformClass", "Morphological ", Q_NULLPTR));
         checkBox_Intensity->setText(QApplication::translate("platformClass", "Local Intensity ", Q_NULLPTR));
-        checkBox_2->setText(QApplication::translate("platformClass", "Intensity Statistics", Q_NULLPTR));
+        checkBox_Statistics->setText(QApplication::translate("platformClass", "Intensity Statistics", Q_NULLPTR));
         checkBox_Histogram->setText(QApplication::translate("platformClass", "Intensity Histogram", Q_NULLPTR));
         checkBox_GLCM->setText(QApplication::translate("platformClass", "GLCM ", Q_NULLPTR));
         checkBox_GLRLM->setText(QApplication::translate("platformClass", "GLRLM ", Q_NULLPTR));

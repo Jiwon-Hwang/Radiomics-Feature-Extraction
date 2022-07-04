@@ -23,19 +23,14 @@ class IntensityStatistics
 		PERCENTILE90,
 		MAXIMUM,
 		INTERQUARTILERANGE,
-		MODE,
 		RANGE,
 		MEANABSDEV,
 		ROBUSTMEANABSDEV,
 		MEDIANABSDEV,
 		COEFFOFVAR,
 		QUARTILECOEFF,
-		ENTROPY,
-		UNIFORMITY,
-		MAXHISTGRADIENT,
-		MAXHISTGRADGREY,
-		MINHISTGRADIENT,
-		MINHISTGRADGREY,
+		ENERGY,
+		ROOTMEANSQUARE,
 
 		FEATURE_COUNT
 
@@ -85,19 +80,14 @@ class IntensityStatistics
 		float percentile90 = NAN;
 		float maximumValue = NAN;
 		float interquartileRange = NAN;
-		float mode = NAN;
 		float rangeValue = NAN;
 		float meanAbsDev = NAN;
 		float robustMeanAbsDev = NAN;
 		float medianAbsDev = NAN;
 		float coeffOfVar = NAN;
 		float quartileCoeff = NAN;
-		float entropy = NAN;
-		float uniformity = NAN;
-		float maxHistGradient = NAN;
-		float maxHistGradGreyValue = NAN;
-		float minHistGradient = NAN;
-		float minHistGradGreyValue = NAN;
+		float energy = NAN;
+		float rootMeanSquare = NAN;
 
 		// calculate feature value //
 		void calcMean();
@@ -111,19 +101,16 @@ class IntensityStatistics
 		void calc90percentile();
 		void calcMaximum();
 		void calcInterquartileRange();
-		void calcMode();
 		void calcRange();
 		void calcMeanAbsoluteDev();
+		void getSmallerElements(std::vector<float> &vec, float max);
+		void getGreaterElements(std::vector<float> &vec, float min);
 		void calcRobustMeanAbsDev();
 		void calcMedianAbsoluteDev();
 		void calcCoeffOfVar();
 		void calcQuartileCoeff();
-		void calcEntropy();
-		void calcUniformity();
-		void calcMaxHistGradient();
-		void calcMaxHistGradGreyValue();
-		void calcMinHistGradient();
-		void calcMinHistGradGreyValue();
+		void calcEnergy();
+		void calcRootMeanSquare();
 
 		// feature extraction - slice by slice //
 		void calcFeature(int FEATURE_IDX, std::vector<float> &tempValues1DVec);
