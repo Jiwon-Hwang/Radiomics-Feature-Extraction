@@ -1,29 +1,29 @@
 #pragma once
-#ifndef POPUP_HISTOGRAM_H
-#define POPUP_HISTOGRAM_H
+#ifndef POPUP_STATISTICS_H
+#define POPUP_STATISTICS_H
 
 #include <QDialog>
-#include "ui_popup_Histogram.h"
-#include "intensityHistogram.h"
+#include "ui_popup_Statistics.h"
+#include "intensityStatistics.h"
 
 namespace Ui {
-	class popup_Histogram;
+	class popup_Statistics;
 }
 
-class popup_Histogram : public QDialog
+class popup_Statistics : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit popup_Histogram(QWidget *parent = nullptr);
-	~popup_Histogram();
+	explicit popup_Statistics(QWidget *parent = nullptr);
+	~popup_Statistics();
 
 	QButtonGroup *filterGroup;
 
-	Ui::popup_Histogram *ui;
+	Ui::popup_Statistics *ui;
 
 private:
 	
 };
 
-#endif // POPUP_HISTOGRAM_H
+#endif // POPUP_STATISTICS_H

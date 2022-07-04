@@ -224,6 +224,9 @@ void CPlatform::createPopup() {
 	ppopup_GLCM = new popup_GLCM;
 	ppopup_GLCM->setModal(true);
 
+	ppopup_Statistics = new popup_Statistics;
+	ppopup_Statistics->setModal(true);
+
 	/*
 	ppopup_Histogram = new popup_Histogram;
 	ppopup_Histogram->setModal(true);

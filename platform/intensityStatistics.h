@@ -8,7 +8,7 @@
 #include <deque>
 
 
-class IntensityHistogram 
+class IntensityStatistics 
 {
 	public:
 	enum FEATURE
@@ -42,8 +42,8 @@ class IntensityHistogram
 	};
 
 	public:	
-		IntensityHistogram();
-		~IntensityHistogram();
+		IntensityStatistics();
+		~IntensityStatistics();
 
 		void clearVariable();
 		void clearVector();

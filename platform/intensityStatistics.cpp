@@ -1,14 +1,14 @@
-#include "IntensityHistogram.h"
+#include "IntensityStatistics.h"
 
 using namespace std;
 
-IntensityHistogram::IntensityHistogram() {
+IntensityStatistics::IntensityStatistics() {
 
 }
-IntensityHistogram::~IntensityHistogram() {
+IntensityStatistics::~IntensityStatistics() {
 
 }
-void IntensityHistogram::clearVariable() {
+void IntensityStatistics::clearVariable() {
 
 	meanValue = NAN;
 	varianceValue = NAN;
@@ -39,7 +39,7 @@ void IntensityHistogram::clearVariable() {
 	//vector<float> minHistVecGradient;
 
 }
-void IntensityHistogram::clearVector() {
+void IntensityStatistics::clearVector() {
 
 	if (!final2DVec.empty()) {
 		final2DVec.clear();
@@ -51,7 +51,7 @@ void IntensityHistogram::clearVector() {
 
 }
 
-vector<short> IntensityHistogram::getVectorOfPixelsInROI(short* psImage, unsigned char* pucMask, int nHeight, int nWidth) {
+vector<short> IntensityStatistics::getVectorOfPixelsInROI(short* psImage, unsigned char* pucMask, int nHeight, int nWidth) {
 
 	vector<short> vectorOfOriPixels; // size : 3032
 	for (int row = 0; row < nHeight; row++) {
@@ -71,7 +71,7 @@ vector<short> IntensityHistogram::getVectorOfPixelsInROI(short* psImage, unsigne
 
 	return vectorOfOriPixels;
 }
-vector<unsigned short> IntensityHistogram::getVectorOfDiscretizedPixels_nBins() {
+vector<unsigned short> IntensityStatistics::getVectorOfDiscretizedPixels_nBins() {
 
 	float min = (float)*min_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end()); // min_element() : pointer return
 	float max = (float)*max_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end());
@@ -110,14 +110,14 @@ vector<unsigned short> IntensityHistogram::getVectorOfDiscretizedPixels_nBins() 
 
 	return vectorOfDiscretizedPixels;
 }
-vector<unsigned short> IntensityHistogram::getVectorOfDiffGreyLevels() {
+vector<unsigned short> IntensityStatistics::getVectorOfDiffGreyLevels() {
 
 	vector<unsigned short> diffGreyLevels(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end()); // 1~nbins 사이 값으로 양자화된 픽셀값들
 	diffGreyLevels.erase(unique(diffGreyLevels.begin(), diffGreyLevels.end()), diffGreyLevels.end()); // size : 168 => 32 bins로 나누면 한 구간 당 약 5개의 픽셀값들의 빈도수들 누적
 
 	return diffGreyLevels;
 }
-vector<double> IntensityHistogram::getHistogram() {
+vector<double> IntensityStatistics::getHistogram() {
 
 	vector<double> histVec;
 	unsigned int nCnt;
@@ -135,14 +135,14 @@ vector<double> IntensityHistogram::getHistogram() {
 
 	return histVec;
 }
-vector<double> IntensityHistogram::getProbabilities() {
+vector<double> IntensityStatistics::getProbabilities() {
 
 	vector<double> probabilities(hist.begin(), hist.end()); // 둘다 size : nBins
 	transform(probabilities.begin(), probabilities.end(), probabilities.begin(), bind2nd(divides<float>(), nPixels));
 
 	return probabilities;
 }
-vector<double> IntensityHistogram::getHistGradient() {
+vector<double> IntensityStatistics::getHistGradient() {
 
 	vector<double> histGradient;
 	double actualGradient;
@@ -165,12 +165,12 @@ vector<double> IntensityHistogram::getHistGradient() {
 	return histGradient;
 }
 
-void IntensityHistogram::calcMean() {
+void IntensityStatistics::calcMean() {
 
 	meanValue = accumulate(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), 0.0) / nPixels; // 0.0 : initial value of the sum
 
 }
-void IntensityHistogram::calcVariance() {
+void IntensityStatistics::calcVariance() {
 
 	unsigned int size = nPixels; // size_t : unsigned int
 
@@ -200,7 +200,7 @@ void IntensityHistogram::calcVariance() {
 	variance /= nPixels;
 	*/
 }
-void IntensityHistogram::calcSkewness() {
+void IntensityStatistics::calcSkewness() {
 
 	skewnessValue = 0;
 
@@ -218,7 +218,7 @@ void IntensityHistogram::calcSkewness() {
 	skewnessValue *= sqrt(float(nPixels)) / pow(varianceValue*float(nPixels), 1.5);
 
 }
-void IntensityHistogram::calcKurtosis() {
+void IntensityStatistics::calcKurtosis() {
 	
 	kurtosisValue = 0;
 
@@ -237,44 +237,44 @@ void IntensityHistogram::calcKurtosis() {
 	kurtosisValue -= 3;
 
 }
-void IntensityHistogram::calcMedian() {
+void IntensityStatistics::calcMedian() {
 
 	int medianIdx = nPixels / 2; // 몫
 	medianValue = vectorOfDiscretizedPixels[medianIdx];
 
 }
-void IntensityHistogram::calcMinimum() {
+void IntensityStatistics::calcMinimum() {
 
 	minimumValue = vectorOfDiscretizedPixels.front();
 
 }
-unsigned short IntensityHistogram::getPercentile(float probability){
+unsigned short IntensityStatistics::getPercentile(float probability){
 
 	int percentileIdx = int(probability * nPixels);
 
 	return vectorOfDiscretizedPixels[percentileIdx];
 }
-void IntensityHistogram::calc10percentile() {
+void IntensityStatistics::calc10percentile() {
 
 	percentile10 = getPercentile(0.1);
 
 }
-void IntensityHistogram::calc90percentile() {
+void IntensityStatistics::calc90percentile() {
 
 	percentile90 = getPercentile(0.9);
 
 }
-void IntensityHistogram::calcMaximum() {
+void IntensityStatistics::calcMaximum() {
 
 	maximumValue = vectorOfDiscretizedPixels.back();
 
 }
-void IntensityHistogram::calcInterquartileRange() {
+void IntensityStatistics::calcInterquartileRange() {
 
 	interquartileRange = getPercentile(0.75) - getPercentile(0.25);
 
 }
-void IntensityHistogram::calcMode() {
+void IntensityStatistics::calcMode() {
 
 	deque<long> histCounts(1, 1);
 	deque<float> histValues(1, vectorOfDiscretizedPixels[0]);
@@ -301,7 +301,7 @@ void IntensityHistogram::calcMode() {
 	mode = histValues.at(maxIndex);
 
 }
-void IntensityHistogram::calcRange() {
+void IntensityStatistics::calcRange() {
 
 	if (isnan(maximumValue)) {
 		calcMaximum();
@@ -314,7 +314,7 @@ void IntensityHistogram::calcRange() {
 	rangeValue = maximumValue - minimumValue;
 
 }
-void IntensityHistogram::calcMeanAbsoluteDev() {
+void IntensityStatistics::calcMeanAbsoluteDev() {
 
 	if (isnan(meanValue)) {
 		calcMean();
@@ -344,7 +344,7 @@ void getGreaterElements(vector<float> &vec, float min) {
 	vec.erase(greaterThan, vec.end());
 
 }
-void IntensityHistogram::calcRobustMeanAbsDev() {
+void IntensityStatistics::calcRobustMeanAbsDev() {
 	
 	if (isnan(percentile10)) {
 		calc10percentile();
@@ -369,7 +369,7 @@ void IntensityHistogram::calcRobustMeanAbsDev() {
 	robustMeanAbsDev /= tempVector.size();
 
 }
-void IntensityHistogram::calcMedianAbsoluteDev() {
+void IntensityStatistics::calcMedianAbsoluteDev() {
 
 	if (isnan(medianValue)) {
 		calcMedian();
@@ -385,7 +385,7 @@ void IntensityHistogram::calcMedianAbsoluteDev() {
 	medianAbsDev /= nPixels;
 
 }
-void IntensityHistogram::calcCoeffOfVar() {
+void IntensityStatistics::calcCoeffOfVar() {
 
 	if (isnan(varianceValue)) {
 		calcVariance();
@@ -398,14 +398,14 @@ void IntensityHistogram::calcCoeffOfVar() {
 	coeffOfVar = pow(varianceValue, 0.5) / meanValue;
 
 }
-void IntensityHistogram::calcQuartileCoeff() {
+void IntensityStatistics::calcQuartileCoeff() {
 
 	unsigned short percentile75 = getPercentile(0.75);
 	unsigned short percentile25 = getPercentile(0.25);
 	quartileCoeff = (float)(percentile75 - percentile25) / (float)(percentile75 + percentile25); // float, int 나눗셈 주의
 
 }
-void IntensityHistogram::calcEntropy() {
+void IntensityStatistics::calcEntropy() {
 	
 	entropy = 0;
 
@@ -416,7 +416,7 @@ void IntensityHistogram::calcEntropy() {
 	}
 
 }
-void IntensityHistogram::calcUniformity() {
+void IntensityStatistics::calcUniformity() {
 
 	uniformity = 0;
 	for (int i = 0; i < probabilities.size(); i++) {
@@ -424,7 +424,7 @@ void IntensityHistogram::calcUniformity() {
 	}
 
 }
-void IntensityHistogram::calcMaxHistGradient() {
+void IntensityStatistics::calcMaxHistGradient() {
 
 	vector<float> maxHistVecGradient(histGradient.begin(), histGradient.end());
 	if (maxHistVecGradient.size() == 0) maxHistVecGradient.push_back(0);
@@ -438,7 +438,7 @@ void IntensityHistogram::calcMaxHistGradient() {
 	}
 
 }
-void IntensityHistogram::calcMaxHistGradGreyValue() {
+void IntensityStatistics::calcMaxHistGradGreyValue() {
 
 	vector<float> maxHistVecGradient(histGradient.begin(), histGradient.end());
 	if (maxHistVecGradient.size() == 0) maxHistVecGradient.push_back(0);
@@ -453,7 +453,7 @@ void IntensityHistogram::calcMaxHistGradGreyValue() {
 	}
 
 }
-void IntensityHistogram::calcMinHistGradient() {
+void IntensityStatistics::calcMinHistGradient() {
 
 	vector<float> minHistVecGradient(histGradient.begin(), histGradient.end());
 	if (minHistVecGradient.size() == 0) minHistVecGradient.push_back(0);
@@ -467,7 +467,7 @@ void IntensityHistogram::calcMinHistGradient() {
 	}
 
 }
-void IntensityHistogram::calcMinHistGradGreyValue() {
+void IntensityStatistics::calcMinHistGradGreyValue() {
 
 	vector<float> minHistVecGradient(histGradient.begin(), histGradient.end());
 	if (minHistVecGradient.size() == 0) minHistVecGradient.push_back(0);
@@ -483,7 +483,7 @@ void IntensityHistogram::calcMinHistGradGreyValue() {
 
 }
 
-void IntensityHistogram::calcFeature(int FEATURE_IDX, vector<float> &tempValues1DVec) {
+void IntensityStatistics::calcFeature(int FEATURE_IDX, vector<float> &tempValues1DVec) {
 	
 	switch (FEATURE_IDX)
 	{
@@ -607,7 +607,7 @@ void IntensityHistogram::calcFeature(int FEATURE_IDX, vector<float> &tempValues1
 			break;
 	}
 }
-void IntensityHistogram::featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth) {
+void IntensityStatistics::featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth) {
 	
 	// claer all values
 	clearVariable(); // 슬라이스마다 초기화
@@ -633,7 +633,7 @@ void IntensityHistogram::featureExtraction(short* psImage, unsigned char* pucMas
 
 }
 
-void IntensityHistogram::averageAllValues() {
+void IntensityStatistics::averageAllValues() {
 	
 	// get final mean vector
 	for (int col = 0; col < final2DVec[0].size(); col++) {
@@ -649,7 +649,7 @@ void IntensityHistogram::averageAllValues() {
 
 }
 
-void IntensityHistogram::defineFeatureNames(vector<string> &features) {
+void IntensityStatistics::defineFeatureNames(vector<string> &features) {
 	// 총 23가지
 	features[MEAN] = "mean";
 	features[VARIANCE] = "variance";
@@ -676,7 +676,7 @@ void IntensityHistogram::defineFeatureNames(vector<string> &features) {
 	features[MINHISTGRADGREY] = "Minimum histogram gradient grey level";
 
 }
-void IntensityHistogram::extractFeatureValues(vector<float> &intensityHistogramValues) {
+void IntensityStatistics::extractFeatureValues(vector<float> &intensityHistogramValues) {
 	// platform.cpp의 writeCSVCheckedValue()에서 참조 가능. But, 속도 문제로 사용 x 
 	intensityHistogramValues[MEAN] = meanValue;
 	intensityHistogramValues[VARIANCE] = varianceValue;

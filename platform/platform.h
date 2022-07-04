@@ -43,6 +43,8 @@
 #include "popup_Histogram.h"
 #include "ui_popup_GLCM.h"
 #include "popup_GLCM.h"
+#include "ui_popup_Statistics.h"
+#include "popup_Statistics.h"
 /*
 #include "ui_popup_Intensity.h"
 #include "popup_Intensity.h"
@@ -65,6 +67,7 @@
 #include "data.h"
 #include "intensityHistogram.h"
 #include "glcm.h"
+#include "intensityStatistics.h"
 
 
 #define MAX_FILE_LENGTH 64
@@ -102,9 +105,10 @@ public:
 	void setThread();
 
 public:	
-	enum FAMILY { E_INTENSEHISTO, E_LOCALINTENSE, E_MORPHOLOGY, E_GLCM, E_GLRLM, FAMILY_COUNT };
+	enum FAMILY { E_INTENSESTAT, E_INTENSEHISTO, E_LOCALINTENSE, E_MORPHOLOGY, E_GLCM, E_GLRLM, FAMILY_COUNT };
 
 	// Feature Family objects
+	IntensityStatistics intenseStat;
 	IntensityHistogram intenseHisto;
 	IntensityHistogram localIntense;
 	IntensityHistogram morphology;
@@ -117,6 +121,7 @@ public:
 	*/
 
 	// pop-up objects
+	
 	popup_Histogram *ppopup_Histogram;
 	popup_Histogram *ppopup_Intensity;
 	popup_Histogram *ppopup_Morph;
