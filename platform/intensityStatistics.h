@@ -44,26 +44,14 @@ class IntensityStatistics
 		void clearVector();
 
 		// set state //
-		bool isActivatedFamily = false;			// by. platform main
-		std::vector<bool> isCheckedFeature;		// by. platform pop-up
+		bool isActivatedFamily = false;					// by. platform main
+		std::vector<bool> isCheckedFeature;				// by. platform pop-up
 		int nCheckedFeatures;					
 
 		// get histogram //
-		int nBins = 32;
 		int nPixels;
-		std::vector<short> vectorOfOriPixels;					// sorted
-		std::vector<unsigned short> vectorOfDiscretizedPixels;  // sorted
-		std::vector<unsigned short> diffGreyLevels;
-		std::vector<double> hist;
-		std::vector<double> probabilities;
-		std::vector<double> histGradient;
-
+		std::vector<short> vectorOfOriPixels;			// sorted
 		std::vector<short> getVectorOfPixelsInROI(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
-		std::vector<unsigned short> getVectorOfDiscretizedPixels_nBins();
-		std::vector<unsigned short> getVectorOfDiffGreyLevels();
-		std::vector<double> getHistogram();
-		std::vector<double> getProbabilities();
-		std::vector<double> getHistGradient();
 
 		// put extracted values in 2d vector //
 		std::vector<std::vector<float>> final2DVec;		// slice by slice
@@ -121,6 +109,6 @@ class IntensityStatistics
 
 		// define and extract calculated values //
 		void defineFeatureNames(std::vector<std::string> &features);
-		void extractFeatureValues(std::vector<float> &intensityHistogramValues);
+		void extractFeatureValues(std::vector<float> &intensityStatisticsValues);
 
 };

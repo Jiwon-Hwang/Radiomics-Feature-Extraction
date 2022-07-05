@@ -62,103 +62,10 @@ vector<short> IntensityStatistics::getVectorOfPixelsInROI(short* psImage, unsign
 
 	return vectorOfOriPixels;
 }
-vector<unsigned short> IntensityStatistics::getVectorOfDiscretizedPixels_nBins() {
-
-	float min = (float)*min_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end()); // min_element() : pointer return
-	float max = (float)*max_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end());
-	vector<float> tempFloatVec(vectorOfOriPixels.begin(), vectorOfOriPixels.end());
-
-	if (min == 0 && min == max) {
-		cout << "error in calculating discretization, VOI contains only 0" << endl;
-		exit(0);
-	}
-	else if (min > 0 && min == max) {
-		cout << "error in calculating discretization, VOI contains only one intensity value, minimum value is set to 0" << endl;
-		min = 0;
-	}
-
-	//subtract minimum value from every matrix element
-	transform(tempFloatVec.begin(), tempFloatVec.end(), tempFloatVec.begin(), bind2nd(minus<float>(), min)); // minus<T> : 이항 연산 함수 객체 (-) / bind2nd : 2번째 인수를 고정해 함수 객체로 변환 / transform : 일괄 연산
-
-	//get the range
-	float range = (max - min) / nBins; // range : 몫 (width of a bin) => ***float이 들어가면 / 는 몫이 아니라 진짜 "나누기" 연산!!!***
-
-	//divide every element of the matrix by the range
-	transform(tempFloatVec.begin(), tempFloatVec.end(), tempFloatVec.begin(), bind2nd(divides<float>(), range));
-
-	//replace 0 to 1 => ibsi 핑크색 마킹 부분! (min - min = 0이 되므로 최소인 1로 바꿔줘야 뒤에 ceil에서 min value of each bin : 1 유지)
-	replace(tempFloatVec.begin(), tempFloatVec.end(), 0, 1);
-
-	//do rounding
-	for (int i = 0; i < tempFloatVec.size(); i++) {
-		tempFloatVec[i] = ceil(tempFloatVec[i]);
-	}
-
-	//type casting
-	vector<unsigned short> vectorOfDiscretizedPixels(tempFloatVec.begin(), tempFloatVec.end()); // 양자화한 최종 결과 픽셀값들 담을 벡터
-
-	sort(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end());
-
-	return vectorOfDiscretizedPixels;
-}
-vector<unsigned short> IntensityStatistics::getVectorOfDiffGreyLevels() {
-
-	vector<unsigned short> diffGreyLevels(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end()); // 1~nbins 사이 값으로 양자화된 픽셀값들
-	diffGreyLevels.erase(unique(diffGreyLevels.begin(), diffGreyLevels.end()), diffGreyLevels.end()); // size : 168 => 32 bins로 나누면 한 구간 당 약 5개의 픽셀값들의 빈도수들 누적
-
-	return diffGreyLevels;
-}
-vector<double> IntensityStatistics::getHistogram() {
-
-	vector<double> histVec;
-	unsigned int nCnt;
-	unsigned short greyLevel;
-	for (int i = 0; i < diffGreyLevels.size(); i++) {
-		greyLevel = diffGreyLevels[i];
-		nCnt = 0;
-		for (int j = 0; j < vectorOfDiscretizedPixels.size(); j++) {
-			if (vectorOfDiscretizedPixels[j] == greyLevel) {
-				nCnt += 1;
-			}
-		}
-		histVec.push_back(nCnt);
-	}
-
-	return histVec;
-}
-vector<double> IntensityStatistics::getProbabilities() {
-
-	vector<double> probabilities(hist.begin(), hist.end()); // 둘다 size : nBins
-	transform(probabilities.begin(), probabilities.end(), probabilities.begin(), bind2nd(divides<float>(), nPixels));
-
-	return probabilities;
-}
-vector<double> IntensityStatistics::getHistGradient() {
-
-	vector<double> histGradient;
-	double actualGradient;
-	
-	for (int i = 1; i < probabilities.size(); i++) {
-		if (i == 1) {
-			actualGradient = (hist[i] - hist[i - 1]);
-		}
-		else if (i == probabilities.size() - 1) {
-			actualGradient = (hist[i] - hist[i - 1]);
-		}
-		else {
-			actualGradient = (hist[i + 1] - hist[i - 1]) / 2;
-		}
-		histGradient.push_back(actualGradient);
-	}
-
-	histGradient.push_back((hist[probabilities.size() - 1] - hist[probabilities.size() - 2]));
-
-	return histGradient;
-}
 
 void IntensityStatistics::calcMean() {
 
-	meanValue = accumulate(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), 0.0) / nPixels; // 0.0 : initial value of the sum
+	meanValue = accumulate(vectorOfOriPixels.begin(), vectorOfOriPixels.end(), 0.0) / nPixels; // 0.0 : initial value of the sum
 
 }
 void IntensityStatistics::calcVariance() {
@@ -170,7 +77,7 @@ void IntensityStatistics::calcVariance() {
 	}
 		
 	vector<float> diff(size);
-	transform(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), diff.begin(), bind2nd(minus<float>(), meanValue));
+	transform(vectorOfOriPixels.begin(), vectorOfOriPixels.end(), diff.begin(), bind2nd(minus<float>(), meanValue));
 	varianceValue = inner_product(diff.begin(), diff.end(), diff.begin(), 0.0) / size;
 
 	/*
@@ -178,7 +85,7 @@ void IntensityStatistics::calcVariance() {
 	auto variance_func = [&mean, &size](float accumulator, const float& val) {
 	return accumulator + ((val - meanValue) * (val - meanValue) / size);
 	};
-	variance = accumulate(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end(), 0.0, variance_func);
+	variance = accumulate(vectorOfOriPixels.begin(), vectorOfOriPixels.end(), 0.0, variance_func);
 	*/
 
 	/*
@@ -186,7 +93,7 @@ void IntensityStatistics::calcVariance() {
 	float variance = 0;
 	for (int n = 0; n < nPixels; n++)
 	{
-	variance += (vectorOfDiscretizedPixels[n] - meanValue) * (vectorOfDiscretizedPixels[n] - meanValue);
+	variance += (vectorOfOriPixels[n] - meanValue) * (vectorOfOriPixels[n] - meanValue);
 	}
 	variance /= nPixels;
 	*/
@@ -204,7 +111,7 @@ void IntensityStatistics::calcSkewness() {
 	}
 
 	for (int i = 0; i < nPixels; ++i) {
-		skewnessValue += pow(vectorOfDiscretizedPixels[i] - meanValue, 3);
+		skewnessValue += pow(vectorOfOriPixels[i] - meanValue, 3);
 	}
 	skewnessValue *= sqrt(float(nPixels)) / pow(varianceValue*float(nPixels), 1.5);
 
@@ -222,7 +129,7 @@ void IntensityStatistics::calcKurtosis() {
 	}
 
 	for (int i = 0; i < nPixels; ++i) {
-		kurtosisValue += pow(vectorOfDiscretizedPixels[i] - meanValue, 4);
+		kurtosisValue += pow(vectorOfOriPixels[i] - meanValue, 4);
 	}
 	kurtosisValue /= float(nPixels) * pow(varianceValue, 2);
 	kurtosisValue -= 3;
@@ -231,19 +138,19 @@ void IntensityStatistics::calcKurtosis() {
 void IntensityStatistics::calcMedian() {
 
 	int medianIdx = nPixels / 2; // 몫
-	medianValue = vectorOfDiscretizedPixels[medianIdx];
+	medianValue = vectorOfOriPixels[medianIdx];
 
 }
 void IntensityStatistics::calcMinimum() {
 
-	minimumValue = vectorOfDiscretizedPixels.front();
+	minimumValue = vectorOfOriPixels.front();
 
 }
 unsigned short IntensityStatistics::getPercentile(float probability){
 
 	int percentileIdx = int(probability * nPixels);
 
-	return vectorOfDiscretizedPixels[percentileIdx];
+	return vectorOfOriPixels[percentileIdx];
 }
 void IntensityStatistics::calc10percentile() {
 
@@ -257,7 +164,7 @@ void IntensityStatistics::calc90percentile() {
 }
 void IntensityStatistics::calcMaximum() {
 
-	maximumValue = vectorOfDiscretizedPixels.back();
+	maximumValue = vectorOfOriPixels.back();
 
 }
 void IntensityStatistics::calcInterquartileRange() {
@@ -284,7 +191,7 @@ void IntensityStatistics::calcMeanAbsoluteDev() {
 		calcMean();
 	}
 
-	vector<float> tempVector(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end());
+	vector<float> tempVector(vectorOfOriPixels.begin(), vectorOfOriPixels.end());
 	transform(tempVector.begin(), tempVector.end(), tempVector.begin(), bind2nd(minus<float>(), meanValue));
 
 	meanAbsDev = 0;
@@ -319,7 +226,7 @@ void IntensityStatistics::calcRobustMeanAbsDev() {
 		calc90percentile();
 	}
 
-	vector<float> tempVector(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end());
+	vector<float> tempVector(vectorOfOriPixels.begin(), vectorOfOriPixels.end());
 	
 	getSmallerElements(tempVector, percentile10);
 	getGreaterElements(tempVector, percentile90);
@@ -340,7 +247,7 @@ void IntensityStatistics::calcMedianAbsoluteDev() {
 		calcMedian();
 	}
 
-	vector<float> tempVector(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end());
+	vector<float> tempVector(vectorOfOriPixels.begin(), vectorOfOriPixels.end());
 	transform(tempVector.begin(), tempVector.end(), tempVector.begin(), bind2nd(minus<float>(), medianValue));
 
 	medianAbsDev = 0;
@@ -368,6 +275,23 @@ void IntensityStatistics::calcQuartileCoeff() {
 	unsigned short percentile75 = getPercentile(0.75);
 	unsigned short percentile25 = getPercentile(0.25);
 	quartileCoeff = (float)(percentile75 - percentile25) / (float)(percentile75 + percentile25); // float, int 나눗셈 주의
+
+}
+void IntensityStatistics::calcEnergy() {
+
+	energy = 0;
+	for (int i = 0; i < nPixels; i++) {
+		energy += pow(vectorOfOriPixels[i], 2);
+	}
+
+}
+void IntensityStatistics::calcRootMeanSquare() {
+
+	if (isnan(energy)) {
+		calcEnergy();
+	}
+
+	rootMeanSquare = sqrt(energy / nPixels);
 
 }
 
@@ -456,11 +380,13 @@ void IntensityStatistics::calcFeature(int FEATURE_IDX, vector<float> &tempValues
 			break;
 
 		case ENERGY:
-			
+			calcEnergy();
+			tempValues1DVec.push_back(energy);
 			break;
 
 		case ROOTMEANSQUARE:
-			
+			calcRootMeanSquare();
+			tempValues1DVec.push_back(rootMeanSquare);
 			break;
 			
 		default:
@@ -473,14 +399,8 @@ void IntensityStatistics::featureExtraction(short* psImage, unsigned char* pucMa
 	clearVariable(); // 슬라이스마다 초기화
 
 	// get histogram and etc
-	vectorOfOriPixels = getVectorOfPixelsInROI(psImage, pucMask, nHeight, nWidth);
-	vectorOfDiscretizedPixels = getVectorOfDiscretizedPixels_nBins(); // 슬라이스마다 초기화
-	nPixels = vectorOfDiscretizedPixels.size();
-	diffGreyLevels = getVectorOfDiffGreyLevels();
-	hist = getHistogram();
-	probabilities = getProbabilities();
-	histGradient = getHistGradient();
-
+	vectorOfOriPixels = getVectorOfPixelsInROI(psImage, pucMask, nHeight, nWidth); // 슬라이스마다 초기화
+	nPixels = vectorOfOriPixels.size();
 
 	vector<float> tempValues1DVec; // 슬라이스마다 초기화
 
@@ -510,7 +430,7 @@ void IntensityStatistics::averageAllValues() {
 }
 
 void IntensityStatistics::defineFeatureNames(vector<string> &features) {
-	// 총 23가지
+	
 	features[MEAN] = "mean";
 	features[VARIANCE] = "variance";
 	features[SKEWNESS] = "skewness";
@@ -531,26 +451,26 @@ void IntensityStatistics::defineFeatureNames(vector<string> &features) {
 	features[ROOTMEANSQUARE] = "Root mean square";
 
 }
-void IntensityStatistics::extractFeatureValues(vector<float> &intensityHistogramValues) {
+void IntensityStatistics::extractFeatureValues(vector<float> &intensityStatisticsValues) {
 	// platform.cpp의 writeCSVCheckedValue()에서 참조 가능. But, 속도 문제로 사용 x 
-	intensityHistogramValues[MEAN] = meanValue;
-	intensityHistogramValues[VARIANCE] = varianceValue;
-	intensityHistogramValues[SKEWNESS] = skewnessValue;
-	intensityHistogramValues[KURTOSIS] = kurtosisValue;
-	intensityHistogramValues[MEDIAN] = medianValue;
-	intensityHistogramValues[MINIMUM] = minimumValue;
-	intensityHistogramValues[PERCENTILE10] = percentile10;
-	intensityHistogramValues[PERCENTILE90] = percentile90;
-	intensityHistogramValues[MAXIMUM] = maximumValue;
-	intensityHistogramValues[INTERQUARTILERANGE] = interquartileRange;
-	intensityHistogramValues[RANGE] = rangeValue;
-	intensityHistogramValues[MEANABSDEV] = meanAbsDev;
-	intensityHistogramValues[ROBUSTMEANABSDEV] = robustMeanAbsDev;
-	intensityHistogramValues[MEDIANABSDEV] = medianAbsDev;
-	intensityHistogramValues[COEFFOFVAR] = coeffOfVar;
-	intensityHistogramValues[QUARTILECOEFF] = quartileCoeff;
-	intensityHistogramValues[ENERGY] = energy;
-	intensityHistogramValues[ROOTMEANSQUARE] = rootMeanSquare;
+	intensityStatisticsValues[MEAN] = meanValue;
+	intensityStatisticsValues[VARIANCE] = varianceValue;
+	intensityStatisticsValues[SKEWNESS] = skewnessValue;
+	intensityStatisticsValues[KURTOSIS] = kurtosisValue;
+	intensityStatisticsValues[MEDIAN] = medianValue;
+	intensityStatisticsValues[MINIMUM] = minimumValue;
+	intensityStatisticsValues[PERCENTILE10] = percentile10;
+	intensityStatisticsValues[PERCENTILE90] = percentile90;
+	intensityStatisticsValues[MAXIMUM] = maximumValue;
+	intensityStatisticsValues[INTERQUARTILERANGE] = interquartileRange;
+	intensityStatisticsValues[RANGE] = rangeValue;
+	intensityStatisticsValues[MEANABSDEV] = meanAbsDev;
+	intensityStatisticsValues[ROBUSTMEANABSDEV] = robustMeanAbsDev;
+	intensityStatisticsValues[MEDIANABSDEV] = medianAbsDev;
+	intensityStatisticsValues[COEFFOFVAR] = coeffOfVar;
+	intensityStatisticsValues[QUARTILECOEFF] = quartileCoeff;
+	intensityStatisticsValues[ENERGY] = energy;
+	intensityStatisticsValues[ROOTMEANSQUARE] = rootMeanSquare;
 
 }
 
