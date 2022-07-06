@@ -1191,6 +1191,7 @@ void CPlatform::resampling(short* psImage, unsigned char* pucMask, int &nWidth, 
 	Mat mask(nWidth, nHeight, CV_8UC1, pucMask);
 
 	if (nPixelsInMask < 5) {
+		cout << "nPixelsInMask < 5 !!" << endl;
 		//fillCSVwithNANs();
 	}
 	else {
@@ -1817,7 +1818,7 @@ void CPlatform::run()
 			// ROI slice check //
 			float nPixelsInMask = 0;
 			if (!isEmptyMask(ppucMasks[j], nWidth, nHeight, nPixelsInMask)) {
-				
+
 				// filtering //
 				Mat img_filtered;
 				filtering(ppsImages[j], img_filtered, nWidth, nHeight, FILTER_MODE);
@@ -1826,25 +1827,27 @@ void CPlatform::run()
 				
 				// Resampling (Interpolation) //
 				Mat img_resampled, mask_resampled;
+				int nWidth_new = nWidth; // 원본값(nWidth, nHeight)는 한 시리즈 내에서 유지해야 함! 갱신 X! (for. 첫 ROI check)
+				int nHeight_new = nHeight;
 				float pixelSpacingX, pixelSpacingY;
 				m_ciData.getPixelSpacing(i, j, pixelSpacingX, pixelSpacingY);
-				resampling(ppsImages[j], ppucMasks[j], nWidth, nHeight, nPixelsInMask, pixelSpacingX, pixelSpacingY, img_resampled, mask_resampled); // new nWidth, nHeight 
+				resampling(ppsImages[j], ppucMasks[j], nWidth_new, nHeight_new, nPixelsInMask, pixelSpacingX, pixelSpacingY, img_resampled, mask_resampled); // new nWidth, nHeight 
 				SAFE_DELETE_ARRAY(ppucMasks[j]);
 				ppsImages[j] = (short*)img_resampled.data;
 				ppucMasks[j] = (unsigned char*)mask_resampled.data;
 				
 				// Resegmentation (Outlier Filteration) //
 				Mat mask_resegmented;
-				resegmentation(ppsImages[j], ppucMasks[j], nWidth, nHeight, mask_resegmented);
+				resegmentation(ppsImages[j], ppucMasks[j], nWidth_new, nHeight_new, mask_resegmented);
 				ppucMasks[j] = (unsigned char*)mask_resegmented.data;
 				
 				// feature extraction //
-				if (!isEmptyMask(ppucMasks[j], nWidth, nHeight, nPixelsInMask)) {   // resegmentation 후의 mask 재확인
-					featureExtraction(ppsImages[j], ppucMasks[j], nHeight, nWidth); // final2DVec에 각 슬라이스들 값 누적
+				if (!isEmptyMask(ppucMasks[j], nWidth_new, nHeight_new, nPixelsInMask)) {   // resegmentation 후의 mask 재확인
+					featureExtraction(ppsImages[j], ppucMasks[j], nHeight_new, nWidth_new); // final2DVec에 각 슬라이스들 값 누적
 				}
 			}
 		}
-
+		
 		// mean all ROI slices //
 		averageAllSlices(); // final1DVec에 각 슬라이스 평균값 넣기
 

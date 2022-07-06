@@ -84,7 +84,7 @@ class IntensityStatistics
 		void calcKurtosis();
 		void calcMedian();
 		void calcMinimum();
-		unsigned short getPercentile(float probability);
+		short getPercentile(float probability);
 		void calc10percentile();
 		void calc90percentile();
 		void calcMaximum();

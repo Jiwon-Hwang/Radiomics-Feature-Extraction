@@ -59,7 +59,6 @@ vector<short> IntensityStatistics::getVectorOfPixelsInROI(short* psImage, unsign
 	}
 
 	sort(vectorOfOriPixels.begin(), vectorOfOriPixels.end()); // min(front) : -1, max(back) : 180
-
 	return vectorOfOriPixels;
 }
 
@@ -146,7 +145,7 @@ void IntensityStatistics::calcMinimum() {
 	minimumValue = vectorOfOriPixels.front();
 
 }
-unsigned short IntensityStatistics::getPercentile(float probability){
+short IntensityStatistics::getPercentile(float probability){
 
 	int percentileIdx = int(probability * nPixels);
 
@@ -160,7 +159,6 @@ void IntensityStatistics::calc10percentile() {
 void IntensityStatistics::calc90percentile() {
 
 	percentile90 = getPercentile(0.9);
-
 }
 void IntensityStatistics::calcMaximum() {
 
