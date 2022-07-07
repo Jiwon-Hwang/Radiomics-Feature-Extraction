@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>740</height>
+    <height>770</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -23,7 +23,7 @@
    <property name="geometry">
     <rect>
      <x>230</x>
-     <y>680</y>
+     <y>730</y>
      <width>151</width>
      <height>32</height>
     </rect>
@@ -520,7 +520,7 @@
      <x>20</x>
      <y>620</y>
      <width>361</width>
-     <height>51</height>
+     <height>101</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout_2">
@@ -531,15 +531,16 @@
      <number>6</number>
     </property>
     <item row="0" column="0">
-     <widget class="QLabel" name="label_nBins">
-      <property name="layoutDirection">
-       <enum>Qt::LeftToRight</enum>
-      </property>
+     <widget class="QRadioButton" name="radioButton_FBN">
       <property name="text">
-       <string>Number of Bins</string>
+       <string>Fixed Bin Number (FBN)</string>
       </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QRadioButton" name="radioButton_FBS">
+      <property name="text">
+       <string>Fixed Bin Size (FBS)</string>
       </property>
      </widget>
     </item>
@@ -590,6 +591,9 @@
        </property>
       </item>
      </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="lineEdit_sBin"/>
     </item>
    </layout>
   </widget>
