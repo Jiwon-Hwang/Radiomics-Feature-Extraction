@@ -44,14 +44,15 @@ public:
 	std::vector<bool> isCheckedFeature;		// by. platform pop-up
 	int nCheckedFeatures;
 
-	// get GLC-matrix //
+	// get GLRL-matrix //
 	int nBins = 32;
-	int sizeMatrix; // nBins == sizeMatrix == maxIntensity
+	int sizeMatrix;		// N_g == nBins == sizeMatrix == maxIntensity
+	int maxRunLength;	// N_r
 	int nHeight;
 	int nWidth;
 	std::vector<short> vector1DofOriPixelsInROI;							// ROI 안에 있는 픽셀들만
 	std::vector<short> vector1DofOriPixels;									// psImage 전체 픽셀들
-	std::vector<std::vector<unsigned short>> vector2DofDiscretizedPixels;	// psImage 전체 픽셀들
+	std::vector<std::vector<unsigned short>> vector2DofDiscretizedPixels;	// 양자화한 psImage 전체 픽셀들(0 & 1~nBins) == inputMatrix(2d vector)
 	std::vector<float> diagonalProbabilities;
 	std::vector<float> crossProbabilities;
 	std::vector<float> sumProbCols;		// for. correlation
@@ -60,17 +61,16 @@ public:
 	std::vector<short> get1DVectorOfPixels(short* psImage, unsigned char* pucMask);
 	std::vector<std::vector<unsigned short>> get2DVectorOfDiscretizedPixels_nBins(short* psImage, unsigned char* pucMask);
 	void getXYDirections(int &directionX, int &directionY, int angle);
-	std::vector<std::pair<unsigned short, unsigned short>> getNeighbours2D(unsigned char* pucMask, int directionX, int directionY);
-	void fill2DGLRLMatrix(std::vector<std::vector<float>> &GLRLMatrix, unsigned char* pucMask, int angle);
+	int findIndex(int size, unsigned short target);
+	void fill2DGLRLMatrix(std::vector<std::vector<unsigned short>> vector2DofDiscretizedPixels, std::vector<std::vector<float>> &GLRLMatrix, int angle);
 	void calcDiagonalProbabilities(std::vector<std::vector<float>> GLRLMatrix);
 	void calcCrossProbabilities(std::vector<std::vector<float>> GLRLMatrix);
 	void average4DirValues(std::vector<std::vector<float>> temp4DirVals2DVec, std::vector<float> &tempValues1DVec);
 
 	// common calculation functions
-	void inverse(std::vector<std::vector<float>> matrix, std::vector<std::vector<float>> &inverseMatrix);
-	void matrixSum(std::vector<std::vector<float>> &matrix1, std::vector<std::vector<float>> matrix2);
-	float getSumOfElements(std::vector<std::vector<float>> matrix);
-	void divideMatrix(std::vector<std::vector<float>> &matrix, float divisor);
+	float getTotalSum(std::vector<std::vector<float>> matrix);
+	std::vector<float> getRowSums(std::vector<std::vector<float>> matrix);
+	std::vector<float> getColSums(std::vector<std::vector<float>> matrix);
 
 	// put extracted values in 2d vector //
 	std::vector<std::vector<float>> final2DVec;		// slice by slice

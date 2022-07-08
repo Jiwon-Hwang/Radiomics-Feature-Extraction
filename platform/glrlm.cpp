@@ -160,55 +160,66 @@ void GLRLM::getXYDirections(int &directionX, int &directionY, int angle) {
 	}
 
 }
-vector<pair<unsigned short, unsigned short>> GLRLM::getNeighbours2D(unsigned char* pucMask, int directionX, int directionY) {
-	// ROI 안에 속하는 이웃쌍만 push하기!
-	vector<pair<unsigned short, unsigned short>> neighbours;
-	unsigned short neighbour1;
-	unsigned short neighbour2;
-
-	for (int row = 0; row < nHeight; row++) {
-		for (int col = 0; col < nWidth - directionX*(directionX + 1) / 2; col++) {
-			// index out of range check
-			if (row - directionY > -1 && col + directionX > -1) {
-				// isInROI check
-				int index1 = row * nWidth + col;
-				int index2 = (row - directionY) * nWidth + (col + directionX);
-				unsigned char maskValue1 = pucMask[index1];
-				unsigned char maskValue2 = pucMask[index2];
-				// 두 이웃 픽셀 모두 ROI에 있을 때
-				if (maskValue1 >(unsigned char)0 && maskValue2 >(unsigned char)0) {
-					neighbour1 = vector2DofDiscretizedPixels[row][col];
-					neighbour2 = vector2DofDiscretizedPixels[row - directionY][col + directionX];
-
-					neighbours.push_back(make_pair(neighbour1, neighbour2));
-				}
-			}
-		}
-	}
-
-	return neighbours;
-
+int GLRLM::findIndex(int size, unsigned short target) {
+	int i = 0;
+	while ((i < size) && (i+1 != target)) i++; // i+1 == diffGreyLevels[i]
+	return (i < size) ? (i) : (-1);
 }
-void GLRLM::fill2DGLRLMatrix(vector<vector<float>> &GLRLMatrix, unsigned char* pucMask, int angle) {
+void GLRLM::fill2DGLRLMatrix(vector<vector<unsigned short>> vector2DofDiscretizedPixels, vector<vector<float>> &GLRLMatrix, int angle) {
 
-	//vector in which all neihbor pairs are stored
-	vector<pair<unsigned short, unsigned short>> neighbours;
+	// vector2DofDiscretizedPixels : 멤버변수 copy (매개변수로 새 벡터 할당)
+
+	unsigned short actElement = 0;
+	int runLength = 0;
 	int directionX;
 	int directionY;
 
 	//define in which direction you have to look for a neighbor
 	getXYDirections(directionX, directionY, angle); // 방향 당 1회씩만
-	neighbours = getNeighbours2D(pucMask, directionX, directionY);
-	pair<unsigned short, unsigned short> actNeighbour;
 
-	//iterate over the neighbor-vector
-	for (int neighbourNr = 0; neighbourNr<neighbours.size(); neighbourNr++) {
-		actNeighbour = neighbours[neighbourNr];
+	//get the grey level we are interested at the moment
+	int actGreyIndex;
 
-		if (!isnan(float(actNeighbour.first)) && !isnan(float(actNeighbour.second))) {
-			GLRLMatrix[actNeighbour.first - 1][actNeighbour.second - 1] += 1;
+	for (int row = 0; row<nHeight; row++) {
+		for (int col = 0; col<nWidth; col++) {
+			//at the beginning the run length =0
+			runLength = 0;
+			//get the actual matrix element
+			actElement = vector2DofDiscretizedPixels[nHeight - row - 1][col];
+			actGreyIndex = findIndex(nBins, actElement); // in ROI : 0~(nBins-1), not in ROI : -1 return
+			//if the actual matrix element is not 0 (=is in ROI)
+			if (!actElement) {
+				//set the run length to 1
+				runLength = 1;
+				//to avoid to take an element more than once, set the element to 0 => 다시 체크 안하도록 ROI 밖 픽셀처럼 0으로 바꾸기
+				vector2DofDiscretizedPixels[nHeight - row - 1][col] = 0;
+				//now look at the matrix element in the actual direction (depends on the
+				//angle we are interested at the moment)
+				int colValue = col + directionX;
+				int rowValue = nHeight - 1 - (row + directionY);
+				//now have a look at the following elements in the desired direction
+				//stop as soon as we look at an element diifferent from our actual element
+				while (colValue<nWidth && rowValue>-1 && colValue>-1 && vector2DofDiscretizedPixels[rowValue][colValue] == actElement) {
+					//for every element we find, count the runLength
+					runLength += 1;
+					vector2DofDiscretizedPixels[rowValue][colValue] = 0;
+					//go further in the desired direction
+					colValue += 1 * directionX;
+					rowValue -= 1 * directionY;
+				}
+			}
+			//as soon as we cannot find an element in the desired direction, count one up in the desired
+			//position of the glrl-matrix
+			// if not in ROI, runLengh = 0 (actGreyIndex = -1)
+			if (runLength > 0 && runLength < maxRunLength + 1) {
+
+				GLRLMatrix[actGreyIndex][runLength - 1] += 1;
+			}
+
 		}
 	}
+	
+
 }
 void GLRLM::calcDiagonalProbabilities(vector<vector<float>> GLRLMatrix) {
 
@@ -261,26 +272,8 @@ void GLRLM::average4DirValues(vector<vector<float>> temp4DirVals2DVec, vector<fl
 }
 
 // common calculation functions
-void GLRLM::inverse(vector<vector<float>> matrix, vector<vector<float>> &inverseMatrix) {
-
-	for (int i = 0; i<matrix.size(); i++) {
-		for (int j = 0; j<matrix[0].size(); j++) {
-			inverseMatrix[j][i] = matrix[i][j];
-		}
-	}
-
-}
-void GLRLM::matrixSum(vector<vector<float>> &matrix1, vector<vector<float>> matrix2) {
-
-	for (int i = 0; i<matrix1.size(); i++) {
-		for (int j = 0; j<matrix1[0].size(); j++) {
-			matrix1[i][j] += matrix2[i][j];
-		}
-	}
-
-}
-float GLRLM::getSumOfElements(vector<vector<float>> matrix) {
-	
+float GLRLM::getTotalSum(vector<vector<float>> matrix) {
+	// calculate the sum of all matrix elements
 	float sum = 0;
 	for (int i = 0; i<matrix.size(); i++) {
 		for (int j = 0; j<matrix[0].size(); j++) {
@@ -290,12 +283,37 @@ float GLRLM::getSumOfElements(vector<vector<float>> matrix) {
 
 	return sum;
 }
-void GLRLM::divideMatrix(vector<vector<float>> &matrix, float divisor) {
+vector<float> GLRLM::getRowSums(vector<vector<float>> matrix) {
+	// calculates the sum of rows and stores them in the vector rowSums
+	vector<float> rowSums;
+	rowSums.clear();
+	int sum = 0;
+	for (int col = 0; col < matrix[0].size(); col++) {
+		sum = 0;
+		for (int row = 0; row < matrix.size(); row++) {
+			sum += matrix[row][col];
 
-	for (int i = 0; i < matrix.size(); i++) {
-		transform(matrix[i].begin(), matrix[i].end(), matrix[i].begin(), bind2nd(divides<float>(), (int)divisor));
+		}
+		rowSums.push_back(sum);
+
 	}
 
+	return rowSums;
+}
+vector<float> GLRLM::getColSums(vector<vector<float>> matrix) {
+	// calculates the sum of columns and stores them in the vector colSums
+	int sum = 0;
+
+	vector<float> colSums;
+	colSums.clear();
+	for (int row = 0; row < matrix.size(); row++) {
+		sum = 0;
+		for (int col = 0; col < matrix[0].size(); col++) {
+			sum += matrix[row][col];
+		}
+		colSums.push_back(sum);
+	}
+	return colSums;
 }
 
 void GLRLM::calcJointMaximum(vector<vector<float>> GLRLMatrix) {
@@ -778,9 +796,13 @@ void GLRLM::featureExtraction(short* psImage, unsigned char* pucMask, int nHeigh
 	vector<float> tempValues1DVec;				// 슬라이스마다 초기화 (for. final2DVec에 누적)
 
 	// calculate checked feature (4 directions)
-	int ang;
 	sizeMatrix = nBins;
-	float sumMatrElement;
+	maxRunLength = max(nHeight, nWidth);
+	int ang;
+	float totalSum;
+	vector<float> rowSums;
+	vector<float> colSums;
+
 	for (int dir = 0; dir < 4; dir++) {
 
 		clearVariable();					// 방향마다 초기화
@@ -788,27 +810,19 @@ void GLRLM::featureExtraction(short* psImage, unsigned char* pucMask, int nHeigh
 
 		// calculate GLRLM matrix for each dir
 		ang = 180 - dir * 45;
-		vector<vector<float>> sum; 
-		vector<vector<float>> inverseMatrix(sizeMatrix, vector<float>(sizeMatrix, 0)); // 미리 공간 할당 해줘야 추후 함수에서 index로 접근 가능! (out of index error)
-		vector<vector<float>> GLRLMatrix(sizeMatrix, vector<float>(sizeMatrix, 0));
-		fill2DGLRLMatrix(GLRLMatrix, pucMask, ang);
+		vector<vector<float>> GLRLMatrix(sizeMatrix, vector<float>(maxRunLength, 0));
+		fill2DGLRLMatrix(vector2DofDiscretizedPixels, GLRLMatrix, ang); 
 
-		sum = GLRLMatrix;
-		inverse(GLRLMatrix, inverseMatrix);	// get inverseMatrix
-		matrixSum(sum, inverseMatrix);		// get sum (GLRLM + inverseGLRLM)
-
-		//calculate the sum of all matrix elements (= the number of neighbor-pairs in the matrix
-		sumMatrElement = getSumOfElements(sum);
+		totalSum = getTotalSum(GLRLMatrix);
+		rowSums = getRowSums(GLRLMatrix);
+		colSums = getColSums(GLRLMatrix);
 		
-		//divide the whole matrix by the sum to obtain matrix elements representing the probabilities of the occurence of a neighbor pair
-		if (sumMatrElement != 0) divideMatrix(sum, sumMatrElement);
-		
-		calcDiagonalProbabilities(sum);
-		calcCrossProbabilities(sum);
+		//calcDiagonalProbabilities(sum);
+		//calcCrossProbabilities(sum);
 
 		// calculate feature for each dir
 		for (int i = 0; i < FEATURE_COUNT; i++) {
-			if (isCheckedFeature[i]) calcFeature(i, temp1DirVals1DVec, sum);
+			if (isCheckedFeature[i]) calcFeature(i, temp1DirVals1DVec, GLRLMatrix);
 		}
 		temp4DirVals2DVec.push_back(temp1DirVals1DVec); // 4행
 	}
