@@ -107,6 +107,18 @@
     <ClCompile Include="intensityStatistics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_popup_GLRLM.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_popup_GLRLM.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="glrlm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="popup_GLRLM.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="platform.h">
@@ -145,6 +157,12 @@
     <CustomBuild Include="popup_Statistics.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="popup_GLRLM.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="popup_GLRLM.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_platform.h">
@@ -169,6 +187,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_popup_Statistics.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="glrlm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_popup_GLRLM.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

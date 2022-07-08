@@ -1,45 +1,36 @@
-#include "popup_GLCM.h"
+#include "popup_GLRLM.h"
 
 
-popup_GLCM::popup_GLCM(QWidget *parent) :
+popup_GLRLM::popup_GLRLM(QWidget *parent) :
 	QDialog(parent),
-	ui(new Ui::popup_GLCM)
+	ui(new Ui::popup_GLRLM)
 {
 	ui->setupUi(this);
 
 	filterGroup = new QButtonGroup;
 	filterGroup->setExclusive(false); // default : true
-	filterGroup->addButton(ui->checkBox_JointMaximum, GLCM::JOINTMAXIMUM);
-	filterGroup->addButton(ui->checkBox_JointAverage, GLCM::JOINTAVERAGE);
-	filterGroup->addButton(ui->checkBox_JointVariance, GLCM::JOINTVARIANCE);
-	filterGroup->addButton(ui->checkBox_JointEntropy, GLCM::JOINTENTROPY);
-	filterGroup->addButton(ui->checkBox_DifferenceAverage, GLCM::DIFFAVERAGE);
-	filterGroup->addButton(ui->checkBox_DifferenceVariance, GLCM::DIFFVARIANCE);
-	filterGroup->addButton(ui->checkBox_DifferenceEntropy, GLCM::DIFFENTROPY);
-	filterGroup->addButton(ui->checkBox_SumAverage, GLCM::SUMAVERAGE);
-	filterGroup->addButton(ui->checkBox_SumVariance, GLCM::SUMVARIANCE);
-	filterGroup->addButton(ui->checkBox_SumEntropy, GLCM::SUMENTROPY);
-	filterGroup->addButton(ui->checkBox_AngSecMoment, GLCM::ANGSECMOMENT);
-	filterGroup->addButton(ui->checkBox_Contrast, GLCM::CONTRAST);
-	filterGroup->addButton(ui->checkBox_Dissimilarity, GLCM::DISSIMILARITY);
-	filterGroup->addButton(ui->checkBox_InverseDiff, GLCM::INVERSEDIFF);
-	filterGroup->addButton(ui->checkBox_InverseDiffNorm, GLCM::INVERSEDIFFNORM);
-	filterGroup->addButton(ui->checkBox_InverseDiffMom, GLCM::INVERSEDIFFMOM);
-	filterGroup->addButton(ui->checkBox_InverseDiffMomNorm, GLCM::INVERSEDIFFMOMNORM);
-	filterGroup->addButton(ui->checkBox_InverseVariance, GLCM::INVERSEVAR);
-	filterGroup->addButton(ui->checkBox_Correlation, GLCM::CORRELATION);
-	filterGroup->addButton(ui->checkBox_Autocorrelation, GLCM::AUTOCORRELATION);
-	filterGroup->addButton(ui->checkBox_ClusterTendency, GLCM::CLUSTERTENDENCY);
-	filterGroup->addButton(ui->checkBox_ClusterShade, GLCM::CLUSTERSHADE);
-	filterGroup->addButton(ui->checkBox_ClusterProminence, GLCM::CLUSTERPROMINENCE);
-	filterGroup->addButton(ui->checkBox_FirstMCorrelation, GLCM::FIRSTMCORRELATION);
-	filterGroup->addButton(ui->checkBox_SecondMCorrelation, GLCM::SECONDMCORRELATION);
+	filterGroup->addButton(ui->checkBox_SRE, GLRLM::SRE);
+	filterGroup->addButton(ui->checkBox_LRE, GLRLM::LRE);
+	filterGroup->addButton(ui->checkBox_LGE, GLRLM::LGE);
+	filterGroup->addButton(ui->checkBox_HGE, GLRLM::HGE);
+	filterGroup->addButton(ui->checkBox_SRLE, GLRLM::SRLE);
+	filterGroup->addButton(ui->checkBox_SRHE, GLRLM::SRHE);
+	filterGroup->addButton(ui->checkBox_LRLE, GLRLM::LRLE);
+	filterGroup->addButton(ui->checkBox_LRHE, GLRLM::LRHE);
+	filterGroup->addButton(ui->checkBox_GNU, GLRLM::GNU);
+	filterGroup->addButton(ui->checkBox_GNUN, GLRLM::GNUN);
+	filterGroup->addButton(ui->checkBox_RLNU, GLRLM::RLNU);
+	filterGroup->addButton(ui->checkBox_RLNUN, GLRLM::RLNUN);
+	filterGroup->addButton(ui->checkBox_RP, GLRLM::RP);
+	filterGroup->addButton(ui->checkBox_GLV, GLRLM::GLV);
+	filterGroup->addButton(ui->checkBox_RLV, GLRLM::RLV);
+	filterGroup->addButton(ui->checkBox_RE, GLRLM::RE);
 	
-	filterGroup->addButton(ui->checkBox_All, GLCM::FEATURE_COUNT);
+	filterGroup->addButton(ui->checkBox_All, GLRLM::FEATURE_COUNT);
 
 }
 
-popup_GLCM::~popup_GLCM()
+popup_GLRLM::~popup_GLRLM()
 {
 	delete ui;
 }

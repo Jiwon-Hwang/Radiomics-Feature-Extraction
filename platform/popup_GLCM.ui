@@ -43,8 +43,8 @@
     <rect>
      <x>20</x>
      <y>30</y>
-     <width>361</width>
-     <height>581</height>
+     <width>360</width>
+     <height>580</height>
     </rect>
    </property>
    <property name="title">
@@ -620,7 +620,7 @@
      </widget>
     </item>
     <item row="0" column="0">
-     <widget class="QRadioButton" name="radioButton_FBN_2">
+     <widget class="QRadioButton" name="radioButton_FBN">
       <property name="text">
        <string>Fixed Bin Number (FBN)</string>
       </property>

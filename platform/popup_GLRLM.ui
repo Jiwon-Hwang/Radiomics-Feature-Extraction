@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>popup_GLCM</class>
- <widget class="QDialog" name="popup_GLCM">
+ <class>popup_GLRLM</class>
+ <widget class="QDialog" name="popup_GLRLM">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>440</width>
     <height>770</height>
    </rect>
   </property>
@@ -22,7 +22,7 @@
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
-     <x>230</x>
+     <x>270</x>
      <y>730</y>
      <width>151</width>
      <height>32</height>
@@ -43,8 +43,8 @@
     <rect>
      <x>20</x>
      <y>30</y>
-     <width>361</width>
-     <height>581</height>
+     <width>401</width>
+     <height>580</height>
     </rect>
    </property>
    <property name="title">
@@ -61,236 +61,18 @@
      <number>10</number>
     </property>
     <property name="rightMargin">
-     <number>12</number>
+     <number>6</number>
     </property>
     <property name="bottomMargin">
      <number>10</number>
     </property>
-    <item row="12" column="0">
-     <widget class="QCheckBox" name="checkBox_Correlation">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Correlation</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="11" column="0">
-     <widget class="QCheckBox" name="checkBox_InverseDiffMomNorm">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Inverse Diff Mom Norm</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="10" column="0">
-     <widget class="QCheckBox" name="checkBox_InverseDiffNorm">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="font">
-       <font>
-        <family>굴림</family>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Inverse Diff Normalised</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="11" column="1">
-     <widget class="QCheckBox" name="checkBox_InverseVariance">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Inverse Variance</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="9" column="1">
-     <widget class="QCheckBox" name="checkBox_InverseDiff">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="font">
-       <font>
-        <family>굴림</family>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="acceptDrops">
-       <bool>false</bool>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Inverse Difference</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="1">
-     <widget class="QCheckBox" name="checkBox_SumAverage">
+    <item row="1" column="1">
+     <widget class="QCheckBox" name="checkBox_LRE">
       <property name="enabled">
        <bool>true</bool>
       </property>
       <property name="text">
-       <string>Sum Average</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="14" column="1">
-     <widget class="QCheckBox" name="checkBox_FirstMCorrelation">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Correlation 1</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="14" column="0">
-     <widget class="QCheckBox" name="checkBox_ClusterProminence">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Cluster Prominence</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="7" column="0">
-     <widget class="QCheckBox" name="checkBox_SumVariance">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Sum Variance</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="12" column="1">
-     <widget class="QCheckBox" name="checkBox_Autocorrelation">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Autocorrelation</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="8" column="0">
-     <widget class="QCheckBox" name="checkBox_AngSecMoment">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Angular Second Moment</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="7" column="1">
-     <widget class="QCheckBox" name="checkBox_SumEntropy">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="text">
-       <string>Sum Entropy</string>
+       <string>Long Run Emphasis</string>
       </property>
       <property name="checkable">
        <bool>true</bool>
@@ -303,13 +85,23 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="1">
-     <widget class="QCheckBox" name="checkBox_JointEntropy">
+    <item row="2" column="0">
+     <widget class="QCheckBox" name="checkBox_LGE">
       <property name="enabled">
        <bool>true</bool>
       </property>
       <property name="text">
-       <string>Joint Entropy</string>
+       <string>Low Grey Emphasis</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0">
+     <widget class="QCheckBox" name="checkBox_LRLE">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>Long Run Low Emphasis</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -317,78 +109,55 @@
      </widget>
     </item>
     <item row="1" column="0">
-     <widget class="QCheckBox" name="checkBox_JointMaximum">
+     <widget class="QCheckBox" name="checkBox_SRE">
       <property name="autoFillBackground">
        <bool>false</bool>
       </property>
       <property name="text">
-       <string>Joint Maximum</string>
+       <string>Short Run Emphasis</string>
       </property>
       <property name="checked">
        <bool>false</bool>
       </property>
       <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QCheckBox" name="checkBox_JointAverage">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="text">
-       <string>Joint Average</string>
-      </property>
-      <property name="checkable">
-       <bool>true</bool>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="0">
-     <widget class="QCheckBox" name="checkBox_DifferenceEntropy">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="text">
-       <string>Difference Entropy</string>
-      </property>
-      <property name="checked">
        <bool>false</bool>
       </property>
      </widget>
     </item>
     <item row="5" column="1">
-     <widget class="QCheckBox" name="checkBox_DifferenceVariance">
+     <widget class="QCheckBox" name="checkBox_SRHE">
       <property name="enabled">
        <bool>true</bool>
       </property>
       <property name="text">
-       <string>Difference Variance</string>
+       <string>Short Run High Emphasis</string>
       </property>
       <property name="checked">
        <bool>false</bool>
       </property>
      </widget>
     </item>
-    <item row="2" column="0">
-     <widget class="QCheckBox" name="checkBox_JointVariance">
+    <item row="8" column="1">
+     <widget class="QCheckBox" name="checkBox_RLNUN">
       <property name="enabled">
        <bool>true</bool>
       </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
       <property name="text">
-       <string>Joint Variance</string>
+       <string>Run Length Non-Uniform Norm</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+      <property name="tristate">
+       <bool>false</bool>
       </property>
      </widget>
     </item>
     <item row="10" column="1">
-     <widget class="QCheckBox" name="checkBox_InverseDiffMom">
+     <widget class="QCheckBox" name="checkBox_RE">
       <property name="enabled">
        <bool>true</bool>
       </property>
@@ -402,7 +171,7 @@
        <bool>false</bool>
       </property>
       <property name="text">
-       <string>Inverse Diff Moment</string>
+       <string>Run Entropy</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -412,73 +181,22 @@
       </property>
      </widget>
     </item>
-    <item row="8" column="1">
-     <widget class="QCheckBox" name="checkBox_Contrast">
+    <item row="9" column="0">
+     <widget class="QCheckBox" name="checkBox_RP">
       <property name="enabled">
        <bool>true</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>굴림</family>
+        <pointsize>9</pointsize>
+       </font>
       </property>
       <property name="autoFillBackground">
        <bool>false</bool>
       </property>
       <property name="text">
-       <string>Contrast</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="13" column="1">
-     <widget class="QCheckBox" name="checkBox_ClusterShade">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Cluster Shade</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="13" column="0">
-     <widget class="QCheckBox" name="checkBox_ClusterTendency">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Cluster Tendency</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="15" column="0">
-     <widget class="QCheckBox" name="checkBox_SecondMCorrelation">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Correlation 2</string>
+       <string>Run Percentage</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -489,39 +207,14 @@
      </widget>
     </item>
     <item row="5" column="0">
-     <widget class="QCheckBox" name="checkBox_DifferenceAverage">
+     <widget class="QCheckBox" name="checkBox_SRLE">
       <property name="enabled">
        <bool>true</bool>
       </property>
       <property name="text">
-       <string>Difference Average</string>
+       <string>Short Run Low Emphasis</string>
       </property>
       <property name="checked">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="9" column="0">
-     <widget class="QCheckBox" name="checkBox_Dissimilarity">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="font">
-       <font>
-        <family>굴림</family>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Dissimilarity</string>
-      </property>
-      <property name="checked">
-       <bool>false</bool>
-      </property>
-      <property name="tristate">
        <bool>false</bool>
       </property>
      </widget>
@@ -553,6 +246,142 @@
       </property>
      </widget>
     </item>
+    <item row="10" column="0">
+     <widget class="QCheckBox" name="checkBox_RLV">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>굴림</family>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Run Length Variance</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+      <property name="tristate">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="1">
+     <widget class="QCheckBox" name="checkBox_GLV">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="font">
+       <font>
+        <family>굴림</family>
+        <pointsize>9</pointsize>
+       </font>
+      </property>
+      <property name="acceptDrops">
+       <bool>false</bool>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Grey Level Variance</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+      <property name="tristate">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="1">
+     <widget class="QCheckBox" name="checkBox_LRHE">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>Long Run High Emphasis</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0">
+     <widget class="QCheckBox" name="checkBox_GNU">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Grey Non-Uniform</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+      <property name="tristate">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QCheckBox" name="checkBox_HGE">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>High Grey Emphasis</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="1">
+     <widget class="QCheckBox" name="checkBox_GNUN">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="text">
+       <string>Grey Non-Uniform Norm</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+      <property name="tristate">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="0">
+     <widget class="QCheckBox" name="checkBox_RLNU">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Run Length Non-Uniform</string>
+      </property>
+      <property name="checked">
+       <bool>false</bool>
+      </property>
+      <property name="tristate">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="gridLayoutWidget">
@@ -560,7 +389,7 @@
     <rect>
      <x>20</x>
      <y>620</y>
-     <width>361</width>
+     <width>401</width>
      <height>101</height>
     </rect>
    </property>
@@ -620,7 +449,7 @@
      </widget>
     </item>
     <item row="0" column="0">
-     <widget class="QRadioButton" name="radioButton_FBN_2">
+     <widget class="QRadioButton" name="radioButton_FBN">
       <property name="text">
        <string>Fixed Bin Number (FBN)</string>
       </property>
@@ -644,7 +473,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>popup_GLCM</receiver>
+   <receiver>popup_GLRLM</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -660,7 +489,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>popup_GLCM</receiver>
+   <receiver>popup_GLRLM</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

@@ -227,14 +227,8 @@ void CPlatform::createPopup() {
 	ppopup_Statistics = new popup_Statistics;
 	ppopup_Statistics->setModal(true);
 
-	/*
-	ppopup_Histogram = new popup_Histogram;
-	ppopup_Histogram->setModal(true);
-	ppopup_Histogram = new popup_Histogram;
-	ppopup_Histogram->setModal(true);
-	ppopup_Histogram = new popup_Histogram;
-	ppopup_Histogram->setModal(true);
-	*/
+	ppopup_GLRLM = new popup_GLRLM;
+	ppopup_GLRLM->setModal(true);
 
 }
 void CPlatform::createProgressBar()
@@ -300,6 +294,15 @@ void CPlatform::setSignalSlot()
 	}
 	featureBox.clear();
 
+	// GLCM (popup)
+	connect(ppopup_GLRLM->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool)));
+	featureBox = ppopup_GLRLM->ui->groupBox_Features->findChildren<QCheckBox *>();
+	for (int i = 0; i < featureBox.size(); i++) {
+		if (featureBox[i]->objectName() == "checkBox_All") continue;
+		connect(featureBox[i], SIGNAL(clicked()), this, SLOT(checkFeatureBoxState()));
+	}
+	featureBox.clear();
+
 }
 void CPlatform::showPopUp(QObject* sender) {
 	// for loop으로 대체 가능 (for auto, break)
@@ -324,7 +327,7 @@ void CPlatform::showPopUp(QObject* sender) {
 	}
 
 	if (sender == ui.checkBox_GLRLM) {
-		//ppopup_Histogram->show();
+		ppopup_GLRLM->show();
 	}
 
 }
@@ -353,72 +356,68 @@ void CPlatform::loadSettings() {
 
 		// filter 
 		settings.beginGroup("filter");
-		
 		QList<QRadioButton *> filterBox = ui.tabWidget_Filters->findChildren<QRadioButton *>();
 		for (int i = 0; i < filterBox.size(); i++) {
 			filterBox[i]->setChecked(settings.value(filterBox[i]->objectName(), false /* default value */).toBool());
 		}
-		
 		settings.endGroup();
 
 
 		// resampling
 		settings.beginGroup("resampling");
-
 		ui.lineEdit_x->setText(settings.value(ui.lineEdit_x->objectName()).toString());
 		ui.lineEdit_y->setText(settings.value(ui.lineEdit_y->objectName()).toString());
-
 		settings.endGroup();
 		
 				
 		// radiomics feature family 
 		settings.beginGroup("feature_family");
-		
 		QList<QCheckBox *> familyBox = ui.groupBox_Families->findChildren<QCheckBox *>();
 		for (int i = 0; i < familyBox.size(); i++) {
 			familyBox[i]->setChecked(settings.value(familyBox[i]->objectName(), false).toBool());
 			initIsActivatedFamily(i); //get<i>(featureFamily).isActivatedFamily = true;
 		}
-				
 		settings.endGroup();
 
 		
 		// Intensity Histogram (popup) 
 		settings.beginGroup("popup_Statistics");
-
 		int nfeatures_Statistics = IntensityStatistics::FEATURE_COUNT;
 		for (int i = 0; i < nfeatures_Statistics + 1; i++) {
 			ppopup_Statistics->filterGroup->button(i)->setChecked(settings.value(ppopup_Statistics->filterGroup->button(i)->objectName(), false).toBool());
 		}
-
 		settings.endGroup();
 
 
 		settings.beginGroup("popup_Histogram");
-
 		//int nfeatures_Histogram = ppopup_Histogram->ui->groupBox_Features->findChildren<QCheckBox *>().size();
 		int nfeatures_Histogram = IntensityHistogram::FEATURE_COUNT;
 		for (int i = 0; i < nfeatures_Histogram + 1; i++) {
 			ppopup_Histogram->filterGroup->button(i)->setChecked(settings.value(ppopup_Histogram->filterGroup->button(i)->objectName(), false).toBool());
 		}
-		
 		ppopup_Histogram->ui->comboBox_nBins->setCurrentText(settings.value(ppopup_Histogram->ui->comboBox_nBins->objectName(), "32").toString());
-
 		settings.endGroup();
 
 
 		// GLCM (popup) 
 		settings.beginGroup("popup_GLCM");
-
-		//int nfeatures_GLCM = ppopup_GLCM->ui->groupBox_Features->findChildren<QCheckBox *>().size();
 		int nfeatures_GLCM = GLCM::FEATURE_COUNT;
 		for (int i = 0; i < nfeatures_GLCM + 1; i++) {
 			ppopup_GLCM->filterGroup->button(i)->setChecked(settings.value(ppopup_GLCM->filterGroup->button(i)->objectName(), false).toBool());
 		}
-
 		ppopup_GLCM->ui->comboBox_nBins->setCurrentText(settings.value(ppopup_GLCM->ui->comboBox_nBins->objectName(), "32").toString());
-
 		settings.endGroup();
+
+
+		// GLCM (popup) 
+		settings.beginGroup("popup_GLRLM");
+		int nfeatures_GLRLM = GLRLM::FEATURE_COUNT;
+		for (int i = 0; i < nfeatures_GLRLM + 1; i++) {
+			ppopup_GLRLM->filterGroup->button(i)->setChecked(settings.value(ppopup_GLRLM->filterGroup->button(i)->objectName(), false).toBool());
+		}
+		ppopup_GLRLM->ui->comboBox_nBins->setCurrentText(settings.value(ppopup_GLRLM->ui->comboBox_nBins->objectName(), "32").toString());
+		settings.endGroup();
+
 
 		ui.pushButton_run->setEnabled(true); // enable run button
 
@@ -431,32 +430,26 @@ void CPlatform::saveSettings() {
 
 	// filter (tab widget)
 	settings.beginGroup("filter");
-
 	QList<QRadioButton *> filterBox = ui.tabWidget_Filters->findChildren<QRadioButton *>();
 	for (int i = 0; i < filterBox.size(); i++) {
 		settings.setValue(filterBox[i]->objectName(), QVariant(filterBox[i]->isChecked()));
 	}
-
 	settings.endGroup();
 
 
 	// resampling (tab widget)
 	settings.beginGroup("resampling");
-
 	settings.setValue(ui.lineEdit_x->objectName(), ui.lineEdit_x->text());
 	settings.setValue(ui.lineEdit_y->objectName(), ui.lineEdit_y->text());
-
 	settings.endGroup();
 	
 
 	// radiomics feature family 
 	settings.beginGroup("feature_family");
-
 	QList<QCheckBox *> familyBox = ui.groupBox_Families->findChildren<QCheckBox *>();
 	for (int i = 0; i < familyBox.size(); i++) {
 		settings.setValue(familyBox[i]->objectName(), QVariant(familyBox[i]->isChecked()));
 	}
-
 	settings.endGroup();
 
 
@@ -464,10 +457,8 @@ void CPlatform::saveSettings() {
 
 	// Intensity Statistics (popup)
 	settings.beginGroup("popup_Statistics");
-
 	intenseStat.isCheckedFeature.assign(IntensityStatistics::FEATURE_COUNT, false);
 	intenseStat.nCheckedFeatures = 0;
-
 	int nfeatures_Statistics = IntensityStatistics::FEATURE_COUNT;
 	for (int i = 0; i < nfeatures_Statistics + 1; i++) {
 		settings.setValue(ppopup_Statistics->filterGroup->button(i)->objectName(), QVariant(ppopup_Statistics->filterGroup->button(i)->isChecked()));
@@ -475,16 +466,13 @@ void CPlatform::saveSettings() {
 		intenseStat.isCheckedFeature[i] = ppopup_Statistics->filterGroup->button(i)->isChecked();
 		if (intenseStat.isCheckedFeature[i] == true) intenseStat.nCheckedFeatures++;
 	}
-
 	settings.endGroup();
 
 
 	// Intensity Histogram (popup)
 	settings.beginGroup("popup_Histogram");
-
 	intenseHisto.isCheckedFeature.assign(IntensityHistogram::FEATURE_COUNT, false);
 	intenseHisto.nCheckedFeatures = 0;
-
 	//int nfeatures_Histogram = ppopup_Histogram->ui->groupBox_Features->findChildren<QCheckBox *>().size();
 	int nfeatures_Histogram = IntensityHistogram::FEATURE_COUNT;
 	for (int i = 0; i < nfeatures_Histogram + 1; i++) {
@@ -493,10 +481,8 @@ void CPlatform::saveSettings() {
 		intenseHisto.isCheckedFeature[i] = ppopup_Histogram->filterGroup->button(i)->isChecked();
 		if (intenseHisto.isCheckedFeature[i] == true) intenseHisto.nCheckedFeatures++;
 	}
-
 	settings.setValue(ppopup_Histogram->ui->comboBox_nBins->objectName(), ppopup_Histogram->ui->comboBox_nBins->currentText());
 	intenseHisto.nBins = ppopup_Histogram->ui->comboBox_nBins->currentText().toInt();
-
 	settings.endGroup();
 
 
@@ -506,26 +492,33 @@ void CPlatform::saveSettings() {
 
 	// GLCM (popup)
 	settings.beginGroup("popup_GLCM");
-
 	glcm.isCheckedFeature.assign(GLCM::FEATURE_COUNT, false);
 	glcm.nCheckedFeatures = 0;
-
-	//int nfeatures_GLCM = ppopup_GLCM->ui->groupBox_Features->findChildren<QCheckBox *>().size();
 	int nfeatures_GLCM = GLCM::FEATURE_COUNT;
 	for (int i = 0; i < nfeatures_GLCM; i++) {
 		settings.setValue(ppopup_GLCM->filterGroup->button(i)->objectName(), QVariant(ppopup_GLCM->filterGroup->button(i)->isChecked()));
-		if (i == nfeatures_Histogram) break; // exclude 'All' btn
+		if (i == nfeatures_GLCM) break; // exclude 'All' btn
 		glcm.isCheckedFeature[i] = ppopup_GLCM->filterGroup->button(i)->isChecked();
 		if (glcm.isCheckedFeature[i] == true) glcm.nCheckedFeatures++;
 	}
-
 	settings.setValue(ppopup_GLCM->ui->comboBox_nBins->objectName(), ppopup_GLCM->ui->comboBox_nBins->currentText());
 	glcm.nBins = ppopup_GLCM->ui->comboBox_nBins->currentText().toInt(); // nBins == sizeMatrix
-
 	settings.endGroup();
 
 	// GLRLM (popup)
-
+	settings.beginGroup("popup_GLRLM");
+	glrlm.isCheckedFeature.assign(GLRLM::FEATURE_COUNT, false);
+	glrlm.nCheckedFeatures = 0;
+	int nfeatures_GLRLM = GLRLM::FEATURE_COUNT;
+	for (int i = 0; i < nfeatures_GLRLM; i++) {
+		settings.setValue(ppopup_GLRLM->filterGroup->button(i)->objectName(), QVariant(ppopup_GLRLM->filterGroup->button(i)->isChecked()));
+		if (i == nfeatures_GLRLM) break; // exclude 'All' btn
+		glrlm.isCheckedFeature[i] = ppopup_GLRLM->filterGroup->button(i)->isChecked();
+		if (glrlm.isCheckedFeature[i] == true) glrlm.nCheckedFeatures++;
+	}
+	settings.setValue(ppopup_GLRLM->ui->comboBox_nBins->objectName(), ppopup_GLRLM->ui->comboBox_nBins->currentText());
+	glrlm.nBins = ppopup_GLRLM->ui->comboBox_nBins->currentText().toInt(); // nBins == sizeMatrix
+	settings.endGroup();
 
 
 }
@@ -1328,7 +1321,11 @@ void CPlatform::setCheckedFamilyState() { // check box 클릭될 때마다(시그널) 호�
 	}
 
 	if (obj == ui.checkBox_GLRLM) {
+		glrlm.isActivatedFamily = !glrlm.isActivatedFamily;
 
+		if (glrlm.isActivatedFamily == true) {
+			showPopUp(obj); // pop-up
+		}
 	}
 
 }
@@ -1356,7 +1353,7 @@ void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, int nH
 	}
 
 	if (glrlm.isActivatedFamily) {
-		//glrlm.featureExtraction(psImage, pucMask, nHeight, nWidth);
+		glrlm.featureExtraction(psImage, pucMask, nHeight, nWidth);
 	}
 }
 
@@ -1382,8 +1379,8 @@ void CPlatform::averageAllSlices() {
 		glcm.averageAllValues();
 	}
 
-	if (ui.checkBox_GLRLM->isChecked()) {
-
+	if (glrlm.isActivatedFamily) {
+		glrlm.averageAllValues();
 	}
 
 }
@@ -1525,6 +1522,11 @@ void CPlatform::presetCSVFile(string csvName) {
 			resultCSV << "GLCM" << ",";
 		}
 	}
+	if (glrlm.isActivatedFamily) {
+		for (int i = 0; i < glrlm.nCheckedFeatures; i++) {
+			resultCSV << "GLRLM" << ",";
+		}
+	}
 	/*
 	if (localIntense.isActivatedFamily) {
 	for (int i = 0; i < localIntense.nCheckedFeatures; i++) {
@@ -1534,11 +1536,6 @@ void CPlatform::presetCSVFile(string csvName) {
 	if (morphology.isActivatedFamily) {
 	for (int i = 0; i < morphology.nCheckedFeatures; i++) {
 	resultCSV << "Morphology" << ",";
-	}
-	}
-	if (glrlm.isActivatedFamily) {
-	for (int i = 0; i < glrlm.nCheckedFeatures; i++) {
-	resultCSV << "GLRLM" << ",";
 	}
 	}
 	*/
@@ -1585,8 +1582,15 @@ void CPlatform::presetCSVFile(string csvName) {
 			}
 		}
 	}
-	if (ui.checkBox_GLRLM->isChecked()) {
-
+	
+	if (glrlm.isActivatedFamily) {
+		vector<string> featureNames(GLRLM::FEATURE_COUNT, "");
+		glrlm.defineFeatureNames(featureNames); // 일단 전체 feature name들 get
+		for (int i = 0; i < featureNames.size(); i++) {
+			if (glrlm.isCheckedFeature[i]) {
+				resultCSV << featureNames[i] << ",";
+			}
+		}
 	}
 
 	resultCSV.close();
@@ -1646,8 +1650,8 @@ void CPlatform::writeCSVFeatureValue(string csvName) {
 		writeCSVCheckedValue(glcm.final1DVec, csvName);
 	}
 
-	if (ui.checkBox_GLRLM->isChecked()) {
-
+	if (glrlm.isActivatedFamily) {
+		writeCSVCheckedValue(glrlm.final1DVec, csvName);
 	}
 
 }
@@ -1665,10 +1669,10 @@ void CPlatform::clearAll(int seriesIdx) {
 	intenseStat.clearVector();
 	intenseHisto.clearVector();
 	glcm.clearVector();
+	glrlm.clearVector();
 	/*
 	localIntense.clear();
 	morphology.clear();
-	glrlm.clear();
 	*/
 
 	cout << "clear series[" << seriesIdx << "]'s all values!" << endl;

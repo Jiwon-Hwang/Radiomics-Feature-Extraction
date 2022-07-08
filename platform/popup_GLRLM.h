@@ -1,29 +1,29 @@
 #pragma once
-#ifndef POPUP_GLCM_H
-#define POPUP_GLCM_H
+#ifndef POPUP_GLRLM_H
+#define POPUP_GLRLM_H
 
 #include <QDialog>
-#include "ui_popup_GLCM.h"
-#include "glcm.h"
+#include "ui_popup_GLRLM.h"
+#include "glrlm.h"
 
 namespace Ui {
-	class popup_GLCM;
+	class popup_GLRLM;
 }
 
-class popup_GLCM : public QDialog
+class popup_GLRLM : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit popup_GLCM(QWidget *parent = nullptr);
-	~popup_GLCM();
+	explicit popup_GLRLM(QWidget *parent = nullptr);
+	~popup_GLRLM();
 
 	QButtonGroup *filterGroup;
 
-	Ui::popup_GLCM *ui;
+	Ui::popup_GLRLM *ui;
 
 private:
 	
 };
 
-#endif // POPUP_GLCM_H
+#endif // POPUP_GLRLM_H

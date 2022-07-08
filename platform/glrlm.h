@@ -6,44 +6,35 @@
 #include <functional>
 
 
-class GLCM
+class GLRLM
 {
 public:
 	enum FEATURE
 	{
-		JOINTMAXIMUM,
-		JOINTAVERAGE,
-		JOINTVARIANCE,
-		JOINTENTROPY,
-		DIFFAVERAGE,
-		DIFFVARIANCE,
-		DIFFENTROPY,
-		SUMAVERAGE,
-		SUMVARIANCE,
-		SUMENTROPY,
-		ANGSECMOMENT,
-		CONTRAST,
-		DISSIMILARITY,
-		INVERSEDIFF,
-		INVERSEDIFFNORM,
-		INVERSEDIFFMOM,
-		INVERSEDIFFMOMNORM,
-		INVERSEVAR,
-		CORRELATION,
-		AUTOCORRELATION,
-		CLUSTERTENDENCY,
-		CLUSTERSHADE,
-		CLUSTERPROMINENCE,
-		FIRSTMCORRELATION,
-		SECONDMCORRELATION,
+		SRE,
+		LRE,
+		LGE,
+		HGE,
+		SRLE,
+		SRHE,
+		LRLE,
+		LRHE,
+		GNU,
+		GNUN,
+		RLNU,
+		RLNUN,
+		RP,
+		GLV,
+		RLV,
+		RE,
 
 		FEATURE_COUNT
 
 	};
 
 public:
-	GLCM();
-	~GLCM();
+	GLRLM();
+	~GLRLM();
 
 	void clearVariable();
 	void clearVector();
@@ -70,10 +61,16 @@ public:
 	std::vector<std::vector<unsigned short>> get2DVectorOfDiscretizedPixels_nBins(short* psImage, unsigned char* pucMask);
 	void getXYDirections(int &directionX, int &directionY, int angle);
 	std::vector<std::pair<unsigned short, unsigned short>> getNeighbours2D(unsigned char* pucMask, int directionX, int directionY);
-	void fill2DGLCMatrix(std::vector<std::vector<float>> &GLCMatrix, unsigned char* pucMask, int angle);
-	void calcDiagonalProbabilities(std::vector<std::vector<float>> GLCMatrix);
-	void calcCrossProbabilities(std::vector<std::vector<float>> GLCMatrix);
+	void fill2DGLRLMatrix(std::vector<std::vector<float>> &GLRLMatrix, unsigned char* pucMask, int angle);
+	void calcDiagonalProbabilities(std::vector<std::vector<float>> GLRLMatrix);
+	void calcCrossProbabilities(std::vector<std::vector<float>> GLRLMatrix);
 	void average4DirValues(std::vector<std::vector<float>> temp4DirVals2DVec, std::vector<float> &tempValues1DVec);
+
+	// common calculation functions
+	void inverse(std::vector<std::vector<float>> matrix, std::vector<std::vector<float>> &inverseMatrix);
+	void matrixSum(std::vector<std::vector<float>> &matrix1, std::vector<std::vector<float>> matrix2);
+	float getSumOfElements(std::vector<std::vector<float>> matrix);
+	void divideMatrix(std::vector<std::vector<float>> &matrix, float divisor);
 
 	// put extracted values in 2d vector //
 	std::vector<std::vector<float>> final2DVec;		// slice by slice
@@ -115,38 +112,38 @@ public:
 	float secondMCorrelation = NAN;
 
 	// calculate feature value //
-	void calcJointMaximum(std::vector<std::vector<float>> GLCMatrix);
-	void calcJointAverage(std::vector<std::vector<float>> GLCMatrix);
-	void calcJointVariance(std::vector<std::vector<float>> GLCMatrix);
-	void calcJointEntropy(std::vector<std::vector<float>> GLCMatrix);
-	void calcDiffAverage(std::vector<std::vector<float>> GLCMatrix);
-	void calcDiffVariance(std::vector<std::vector<float>> GLCMatrix);
-	void calcDiffEntropy(std::vector<std::vector<float>> GLCMatrix);
-	void calcSumAverage(std::vector<std::vector<float>> GLCMatrix);
-	void calcSumVariance(std::vector<std::vector<float>> GLCMatrix);
-	void calcSumEntropy(std::vector<std::vector<float>> GLCMatrix);
-	void calcAngSecMoment(std::vector<std::vector<float>> GLCMatrix);
-	void calcContrast(std::vector<std::vector<float>> GLCMatrix);
-	void calcDissimilarity(std::vector<std::vector<float>> GLCMatrix);
-	void calcInverseDiff(std::vector<std::vector<float>> GLCMatrix);
-	void calcInverseDiffNorm(std::vector<std::vector<float>> GLCMatrix);
-	void calcInverseDiffMom(std::vector<std::vector<float>> GLCMatrix);
-	void calcInverseDiffMomNorm(std::vector<std::vector<float>> GLCMatrix);
-	void calcInverseVar(std::vector<std::vector<float>> GLCMatrix);
-	void calcColProb(std::vector<std::vector<float>> GLCMatrix);	// for. correlation
-	void calcRowProb(std::vector<std::vector<float>> GLCMatrix);	// for. correlation
-	void calcMeanColProb(std::vector<std::vector<float>> GLCMatrix);	// for. correlation, clusterTendency, clusterShade, clusterProminence
-	void calcMeanRowProb(std::vector<std::vector<float>> GLCMatrix);	// for. correlation
-	void calcCorrelation(std::vector<std::vector<float>> GLCMatrix);
-	void calcAutoCorrelation(std::vector<std::vector<float>> GLCMatrix);
-	void calcClusterTendency(std::vector<std::vector<float>> GLCMatrix);
-	void calcClusterShade(std::vector<std::vector<float>> GLCMatrix);
-	void calcClusterProminence(std::vector<std::vector<float>> GLCMatrix);
-	void calcFirstMCorrelation(std::vector<std::vector<float>> GLCMatrix);
-	void calcSecondMCorrelation(std::vector<std::vector<float>> GLCMatrix);
+	void calcJointMaximum(std::vector<std::vector<float>> GLRLMatrix);
+	void calcJointAverage(std::vector<std::vector<float>> GLRLMatrix);
+	void calcJointVariance(std::vector<std::vector<float>> GLRLMatrix);
+	void calcJointEntropy(std::vector<std::vector<float>> GLRLMatrix);
+	void calcDiffAverage(std::vector<std::vector<float>> GLRLMatrix);
+	void calcDiffVariance(std::vector<std::vector<float>> GLRLMatrix);
+	void calcDiffEntropy(std::vector<std::vector<float>> GLRLMatrix);
+	void calcSumAverage(std::vector<std::vector<float>> GLRLMatrix);
+	void calcSumVariance(std::vector<std::vector<float>> GLRLMatrix);
+	void calcSumEntropy(std::vector<std::vector<float>> GLRLMatrix);
+	void calcAngSecMoment(std::vector<std::vector<float>> GLRLMatrix);
+	void calcContrast(std::vector<std::vector<float>> GLRLMatrix);
+	void calcDissimilarity(std::vector<std::vector<float>> GLRLMatrix);
+	void calcInverseDiff(std::vector<std::vector<float>> GLRLMatrix);
+	void calcInverseDiffNorm(std::vector<std::vector<float>> GLRLMatrix);
+	void calcInverseDiffMom(std::vector<std::vector<float>> GLRLMatrix);
+	void calcInverseDiffMomNorm(std::vector<std::vector<float>> GLRLMatrix);
+	void calcInverseVar(std::vector<std::vector<float>> GLRLMatrix);
+	void calcColProb(std::vector<std::vector<float>> GLRLMatrix);	// for. correlation
+	void calcRowProb(std::vector<std::vector<float>> GLRLMatrix);	// for. correlation
+	void calcMeanColProb(std::vector<std::vector<float>> GLRLMatrix);	// for. correlation, clusterTendency, clusterShade, clusterProminence
+	void calcMeanRowProb(std::vector<std::vector<float>> GLRLMatrix);	// for. correlation
+	void calcCorrelation(std::vector<std::vector<float>> GLRLMatrix);
+	void calcAutoCorrelation(std::vector<std::vector<float>> GLRLMatrix);
+	void calcClusterTendency(std::vector<std::vector<float>> GLRLMatrix);
+	void calcClusterShade(std::vector<std::vector<float>> GLRLMatrix);
+	void calcClusterProminence(std::vector<std::vector<float>> GLRLMatrix);
+	void calcFirstMCorrelation(std::vector<std::vector<float>> GLRLMatrix);
+	void calcSecondMCorrelation(std::vector<std::vector<float>> GLRLMatrix);
 
 	// feature extraction - slice by slice //
-	void calcFeature(int FEATURE_IDX, std::vector<float> &temp1DirVals1DVec, std::vector<std::vector<float>> sumGLCM);
+	void calcFeature(int FEATURE_IDX, std::vector<float> &temp1DirVals1DVec, std::vector<std::vector<float>> sumGLRLM);
 	void featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
 
 	// mean all slices - get final feature value //

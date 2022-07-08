@@ -45,14 +45,9 @@
 #include "popup_GLCM.h"
 #include "ui_popup_Statistics.h"
 #include "popup_Statistics.h"
-/*
-#include "ui_popup_Intensity.h"
-#include "popup_Intensity.h"
-#include "ui_popup_Morph.h"
-#include "popup_Morph.h"
 #include "ui_popup_GLRLM.h"
 #include "popup_GLRLM.h"
-*/
+
 
 #include "dcmtk/dcmimgle/dcmimage.h"
 #include "dcmtk/config/osconfig.h" 
@@ -68,6 +63,7 @@
 #include "intensityHistogram.h"
 #include "glcm.h"
 #include "intensityStatistics.h"
+#include "glrlm.h"
 
 
 #define MAX_FILE_LENGTH 64
@@ -113,12 +109,7 @@ public:
 	IntensityHistogram localIntense;
 	IntensityHistogram morphology;
 	GLCM glcm;
-	IntensityHistogram glrlm;
-	/*
-	LocalIntensity localIntense;
-	Morphological morphology;
 	GLRLM glrlm;
-	*/
 
 	// pop-up objects
 	popup_Statistics *ppopup_Statistics;
@@ -126,12 +117,7 @@ public:
 	popup_Histogram *ppopup_Intensity;
 	popup_Histogram *ppopup_Morph;
 	popup_GLCM *ppopup_GLCM;
-	popup_Histogram *ppopup_GLRLM;
-	/*
-	popup_Intensity *ppopup_Intensity;
-	popup_Morph *ppopup_Morph;
 	popup_GLRLM *ppopup_GLRLM;
-	*/
 		
 
 // QT layout, action º¯¼ö

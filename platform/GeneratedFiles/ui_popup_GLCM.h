@@ -20,7 +20,8 @@
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHeaderView>
-#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QRadioButton>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -59,14 +60,16 @@ public:
     QCheckBox *checkBox_All;
     QWidget *gridLayoutWidget;
     QGridLayout *gridLayout_2;
-    QLabel *label_nBins;
     QComboBox *comboBox_nBins;
+    QRadioButton *radioButton_FBN;
+    QRadioButton *radioButton_FBS;
+    QLineEdit *lineEdit_sBin;
 
     void setupUi(QDialog *popup_GLCM)
     {
         if (popup_GLCM->objectName().isEmpty())
             popup_GLCM->setObjectName(QStringLiteral("popup_GLCM"));
-        popup_GLCM->resize(400, 740);
+        popup_GLCM->resize(400, 770);
         QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
@@ -74,13 +77,13 @@ public:
         popup_GLCM->setSizePolicy(sizePolicy);
         buttonBox = new QDialogButtonBox(popup_GLCM);
         buttonBox->setObjectName(QStringLiteral("buttonBox"));
-        buttonBox->setGeometry(QRect(230, 680, 151, 32));
+        buttonBox->setGeometry(QRect(230, 730, 151, 32));
         buttonBox->setOrientation(Qt::Horizontal);
         buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
         buttonBox->setCenterButtons(false);
         groupBox_Features = new QGroupBox(popup_GLCM);
         groupBox_Features->setObjectName(QStringLiteral("groupBox_Features"));
-        groupBox_Features->setGeometry(QRect(20, 30, 361, 581));
+        groupBox_Features->setGeometry(QRect(20, 30, 360, 580));
         groupBox_Features->setCheckable(false);
         gridLayout = new QGridLayout(groupBox_Features);
         gridLayout->setObjectName(QStringLiteral("gridLayout"));
@@ -321,19 +324,12 @@ public:
 
         gridLayoutWidget = new QWidget(popup_GLCM);
         gridLayoutWidget->setObjectName(QStringLiteral("gridLayoutWidget"));
-        gridLayoutWidget->setGeometry(QRect(20, 620, 361, 51));
+        gridLayoutWidget->setGeometry(QRect(20, 620, 361, 101));
         gridLayout_2 = new QGridLayout(gridLayoutWidget);
         gridLayout_2->setObjectName(QStringLiteral("gridLayout_2"));
         gridLayout_2->setSizeConstraint(QLayout::SetDefaultConstraint);
         gridLayout_2->setHorizontalSpacing(6);
         gridLayout_2->setContentsMargins(0, 0, 0, 0);
-        label_nBins = new QLabel(gridLayoutWidget);
-        label_nBins->setObjectName(QStringLiteral("label_nBins"));
-        label_nBins->setLayoutDirection(Qt::LeftToRight);
-        label_nBins->setAlignment(Qt::AlignCenter);
-
-        gridLayout_2->addWidget(label_nBins, 0, 0, 1, 1);
-
         comboBox_nBins = new QComboBox(gridLayoutWidget);
         comboBox_nBins->setObjectName(QStringLiteral("comboBox_nBins"));
         QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Fixed);
@@ -347,6 +343,21 @@ public:
         comboBox_nBins->setIconSize(QSize(16, 16));
 
         gridLayout_2->addWidget(comboBox_nBins, 0, 1, 1, 1);
+
+        radioButton_FBN = new QRadioButton(gridLayoutWidget);
+        radioButton_FBN->setObjectName(QStringLiteral("radioButton_FBN"));
+
+        gridLayout_2->addWidget(radioButton_FBN, 0, 0, 1, 1);
+
+        radioButton_FBS = new QRadioButton(gridLayoutWidget);
+        radioButton_FBS->setObjectName(QStringLiteral("radioButton_FBS"));
+
+        gridLayout_2->addWidget(radioButton_FBS, 1, 0, 1, 1);
+
+        lineEdit_sBin = new QLineEdit(gridLayoutWidget);
+        lineEdit_sBin->setObjectName(QStringLiteral("lineEdit_sBin"));
+
+        gridLayout_2->addWidget(lineEdit_sBin, 1, 1, 1, 1);
 
 
         retranslateUi(popup_GLCM);
@@ -386,7 +397,6 @@ public:
         checkBox_DifferenceAverage->setText(QApplication::translate("popup_GLCM", "Difference Average", Q_NULLPTR));
         checkBox_Dissimilarity->setText(QApplication::translate("popup_GLCM", "Dissimilarity", Q_NULLPTR));
         checkBox_All->setText(QApplication::translate("popup_GLCM", "All", Q_NULLPTR));
-        label_nBins->setText(QApplication::translate("popup_GLCM", "Number of Bins", Q_NULLPTR));
         comboBox_nBins->clear();
         comboBox_nBins->insertItems(0, QStringList()
          << QApplication::translate("popup_GLCM", "8", Q_NULLPTR)
@@ -395,6 +405,8 @@ public:
          << QApplication::translate("popup_GLCM", "64", Q_NULLPTR)
         );
         comboBox_nBins->setCurrentText(QApplication::translate("popup_GLCM", "8", Q_NULLPTR));
+        radioButton_FBN->setText(QApplication::translate("popup_GLCM", "Fixed Bin Number (FBN)", Q_NULLPTR));
+        radioButton_FBS->setText(QApplication::translate("popup_GLCM", "Fixed Bin Size (FBS)", Q_NULLPTR));
     } // retranslateUi
 
 };
