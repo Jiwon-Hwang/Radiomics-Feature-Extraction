@@ -294,7 +294,7 @@ void CPlatform::setSignalSlot()
 	}
 	featureBox.clear();
 
-	// GLCM (popup)
+	// GLRLM (popup)
 	connect(ppopup_GLRLM->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool)));
 	featureBox = ppopup_GLRLM->ui->groupBox_Features->findChildren<QCheckBox *>();
 	for (int i = 0; i < featureBox.size(); i++) {
@@ -380,7 +380,7 @@ void CPlatform::loadSettings() {
 		settings.endGroup();
 
 		
-		// Intensity Histogram (popup) 
+		// Intensity Statistics (popup) 
 		settings.beginGroup("popup_Statistics");
 		int nfeatures_Statistics = IntensityStatistics::FEATURE_COUNT;
 		for (int i = 0; i < nfeatures_Statistics + 1; i++) {
@@ -389,6 +389,7 @@ void CPlatform::loadSettings() {
 		settings.endGroup();
 
 
+		// Intensity Histogram (popup) 
 		settings.beginGroup("popup_Histogram");
 		//int nfeatures_Histogram = ppopup_Histogram->ui->groupBox_Features->findChildren<QCheckBox *>().size();
 		int nfeatures_Histogram = IntensityHistogram::FEATURE_COUNT;
@@ -495,7 +496,7 @@ void CPlatform::saveSettings() {
 	glcm.isCheckedFeature.assign(GLCM::FEATURE_COUNT, false);
 	glcm.nCheckedFeatures = 0;
 	int nfeatures_GLCM = GLCM::FEATURE_COUNT;
-	for (int i = 0; i < nfeatures_GLCM; i++) {
+	for (int i = 0; i < nfeatures_GLCM + 1; i++) {
 		settings.setValue(ppopup_GLCM->filterGroup->button(i)->objectName(), QVariant(ppopup_GLCM->filterGroup->button(i)->isChecked()));
 		if (i == nfeatures_GLCM) break; // exclude 'All' btn
 		glcm.isCheckedFeature[i] = ppopup_GLCM->filterGroup->button(i)->isChecked();
@@ -510,7 +511,7 @@ void CPlatform::saveSettings() {
 	glrlm.isCheckedFeature.assign(GLRLM::FEATURE_COUNT, false);
 	glrlm.nCheckedFeatures = 0;
 	int nfeatures_GLRLM = GLRLM::FEATURE_COUNT;
-	for (int i = 0; i < nfeatures_GLRLM; i++) {
+	for (int i = 0; i < nfeatures_GLRLM + 1; i++) {
 		settings.setValue(ppopup_GLRLM->filterGroup->button(i)->objectName(), QVariant(ppopup_GLRLM->filterGroup->button(i)->isChecked()));
 		if (i == nfeatures_GLRLM) break; // exclude 'All' btn
 		glrlm.isCheckedFeature[i] = ppopup_GLRLM->filterGroup->button(i)->isChecked();
