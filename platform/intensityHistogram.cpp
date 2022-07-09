@@ -124,7 +124,6 @@ vector<double> IntensityHistogram::getHistogram() {
 	unsigned short greyLevel;
 	for (int i = 0; i < diffGreyLevels.size(); i++) {
 		greyLevel = diffGreyLevels[i];
-		cout << greyLevel << endl;
 		nCnt = 0;
 		for (int j = 0; j < vectorOfDiscretizedPixels.size(); j++) {
 			if (vectorOfDiscretizedPixels[j] == greyLevel) {

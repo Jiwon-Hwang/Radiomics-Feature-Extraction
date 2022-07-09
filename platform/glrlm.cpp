@@ -9,51 +9,30 @@ GLRLM::~GLRLM() {
 
 }
 void GLRLM::clearVariable() {
-
+	// 슬라이스마다, 방향마다 초기화
 	vector1DofOriPixelsInROI.clear();
 	vector<short>().swap(vector1DofOriPixelsInROI); // size & capacity 모두 0으로 초기화
-	diagonalProbabilities.clear();
-	vector<float>().swap(diagonalProbabilities);
-	crossProbabilities.clear();
-	vector<float>().swap(crossProbabilities);
-	sumProbCols.clear();
-	vector<float>().swap(sumProbCols);
-	sumProbRows.clear();
-	vector<float>().swap(sumProbRows);
+	rowSums.clear();
+	vector<float>().swap(rowSums);
+	colSums.clear();
+	vector<float>().swap(colSums);
 
-	jointMaximum = NAN;
-	jointAverage = NAN;
-	jointVariance = NAN;
-	jointEntropy = NAN;
-	diffAverage = NAN;
-	diffVariance = NAN;
-	diffEntropy = NAN;
-	sumAverage = NAN;
-	sumVariance = NAN;
-	sumEntropy = NAN;
-	angSecMoment = NAN;
-	contrast = NAN;
-	dissimilarity = NAN;
-	inverseDiff = NAN;
-	inverseDiffNorm = NAN;
-	inverseDiffMom = NAN;
-	inverseDiffMomNorm = NAN;
-	inverseVar = NAN;
-	meanRowProb = NAN;
-	meanColProb = NAN;
-	stdRowProb = NAN;
-	stdColProb = NAN;
-	correlation = NAN;
-	autoCorrelation = NAN;
-	clusterTendency = NAN;
-	clusterShade = NAN;
-	clusterProminence = NAN;
-	HXY = NAN;			
-	HX = NAN;				
-	HXY1 = NAN;			
-	HXY2 = NAN;
-	firstMCorrelation = NAN;
-	secondMCorrelation = NAN;
+	shortRunEmph = NAN;
+	longRunEmph = NAN;
+	lowGreyRunEmph = NAN;
+	highGreyRunEmph = NAN;
+	shortRunLowEmph = NAN;
+	shortRunHighEmph = NAN;
+	longRunLowEmph = NAN;
+	longRunHighEmph = NAN;
+	greyNonUnimformity = NAN;
+	greyNonUnimformityNorm = NAN;
+	runLengthNonUniformity = NAN;
+	runLengthNonUniformityNorm = NAN;
+	runPercentage = NAN;
+	greyLevelVar = NAN;
+	runLengthVar = NAN;
+	runEntropy = NAN;
 
 }
 void GLRLM::clearVector() {
@@ -87,6 +66,7 @@ vector<short> GLRLM::get1DVectorOfPixels(short* psImage, unsigned char* pucMask)
 			}
 		}
 	}
+	nPixelsInROI = vector1DofOriPixelsInROI.size();
 
 	return vector1DofOriPixels;
 }
@@ -187,8 +167,8 @@ void GLRLM::fill2DGLRLMatrix(vector<vector<unsigned short>> vector2DofDiscretize
 			//get the actual matrix element
 			actElement = vector2DofDiscretizedPixels[nHeight - row - 1][col];
 			actGreyIndex = findIndex(nBins, actElement); // in ROI : 0~(nBins-1), not in ROI : -1 return
-			//if the actual matrix element is not 0 (=is in ROI)
-			if (!actElement) {
+			//if the actual matrix element is not 0(NAN) (=is in ROI)
+			if (actElement) {
 				//set the run length to 1
 				runLength = 1;
 				//to avoid to take an element more than once, set the element to 0 => 다시 체크 안하도록 ROI 밖 픽셀처럼 0으로 바꾸기
@@ -221,41 +201,14 @@ void GLRLM::fill2DGLRLMatrix(vector<vector<unsigned short>> vector2DofDiscretize
 	
 
 }
-void GLRLM::calcDiagonalProbabilities(vector<vector<float>> GLRLMatrix) {
-
-	float diagProbability;
-
-	for (int k = 0; k < sizeMatrix; k++) {
-		diagProbability = 0;
-		//get the diagonal elements
-		for (int row = 0; row < sizeMatrix; row++) {
-			for (int col = 0; col < sizeMatrix; col++) {
-				//Kronecker delta
-				if (k == abs(row - col)) {
-					diagProbability += GLRLMatrix[row][col];
-				}
-			}
-		}
-		//store the diagonal probabilities in a vector
-		diagonalProbabilities.push_back(diagProbability);
+void GLRLM::fill2DprobMatrix(vector<vector<float>> GLRLMatrix, vector<vector<float>> &probMatrix) {
+	
+	probMatrix = GLRLMatrix; // 깊은 복사
+	
+	for (int i = 0; i < probMatrix.size(); i++) {
+		transform(probMatrix[i].begin(), probMatrix[i].end(), probMatrix[i].begin(), bind2nd(divides<float>(), int(totalSum)));
 	}
-}
-void GLRLM::calcCrossProbabilities(vector<vector<float>> GLRLMatrix) {
 
-	float crossProbability;
-
-	for (int k = 0; k < 2 * sizeMatrix; k++) {
-		crossProbability = 0;
-		for (int row = 0; row < sizeMatrix; row++) {
-			for (int col = 0; col < sizeMatrix; col++) {
-				//Kronecker delta
-				if (k == abs(row + col)) {
-					crossProbability += GLRLMatrix[row][col];
-				}
-			}
-		}
-		crossProbabilities.push_back(crossProbability);
-	}
 }
 void GLRLM::average4DirValues(vector<vector<float>> temp4DirVals2DVec, vector<float> &tempValues1DVec) {
 
@@ -315,466 +268,306 @@ vector<float> GLRLM::getColSums(vector<vector<float>> matrix) {
 	}
 	return colSums;
 }
+float GLRLM::getMeanProbGrey(vector<vector<float>> probMatrix) {
+	// calculate the mean probability of the appearance of every grey level
+	float mean = 0;
+	for (int i = 0; i<probMatrix.size(); i++) {
+		for (int j = 0; j<probMatrix[0].size(); j++) {
+			mean += (i+1) * probMatrix[i][j];
+		}
+	}
 
-void GLRLM::calcJointMaximum(vector<vector<float>> GLRLMatrix) {
+	return mean;
+}
+float GLRLM::getMeanProbRun(vector<vector<float>> probMatrix) {
+	// calculate the mean probability of the runlength
+	float mean = 0;
+	for (int i = 0; i<probMatrix.size(); i++) {
+		for (int j = 0; j<probMatrix[0].size(); j++) {
+			mean += j * probMatrix[i][j];
+		}
+	}
+
+	return mean;
+}
+
+void GLRLM::calcShortRunEmph() {
 	
-	jointMaximum = 0;
+	shortRunEmph = 0;
 
-	for (int row = 0; row < sizeMatrix; row++) {
-		for (int col = 0; col < sizeMatrix; col++) {
-			jointMaximum = (GLRLMatrix[row][col] > jointMaximum) ? GLRLMatrix[row][col] : jointMaximum;
+	if (totalSum != 0) {
+		for (int j = 0; j < rowSums.size(); j++) {
+			shortRunEmph += rowSums[j] / pow(j + 1, 2);
 		}
+		shortRunEmph /= totalSum;
 	}
-}
-void GLRLM::calcJointAverage(vector<vector<float>> GLRLMatrix) {
-
-	jointAverage = 0;
-
-	for (int row = 0; row < sizeMatrix; row++) {
-		for (int col = 0; col < sizeMatrix; col++) {
-			jointAverage += (row + 1) * GLRLMatrix[row][col];
-		}
-	}
-}
-void GLRLM::calcJointVariance(vector<vector<float>> GLRLMatrix) {
-
-	jointVariance = 0;
-
-	if (isnan(jointAverage)) {
-		calcJointAverage(GLRLMatrix);
-	}
-
-	for (int row = 0; row < sizeMatrix; row++) {
-		for (int col = 0; col < sizeMatrix; col++) {
-			jointVariance += pow((row + 1 - jointAverage), 2) * GLRLMatrix[row][col];
-		}
-	}
-}
-void GLRLM::calcJointEntropy(vector<vector<float>> GLRLMatrix) {
 	
-	jointEntropy = 0;
+}
+void GLRLM::calcLongRunEmph() {
 
-	float tempElement;
-	for (int i = 0; i < sizeMatrix; i++) {
-		for (int j = 0; j < sizeMatrix; j++) {
-			tempElement = GLRLMatrix[i][j];
-			if (tempElement != 0) {
-				jointEntropy -= tempElement * log2(tempElement);
+	longRunEmph = 0;
+
+	if (totalSum != 0) {
+		for (int j = 0; j < rowSums.size(); j++) {
+			longRunEmph += rowSums[j] * pow(j + 1, 2);
+		}
+		longRunEmph /= totalSum;
+	}
+
+}
+void GLRLM::calcLowGreyRunEmph() {
+
+	lowGreyRunEmph = 0;
+
+	if (totalSum != 0) {
+		for (int i = 0; i < colSums.size(); i++) {
+			lowGreyRunEmph += colSums[i] / pow(i + 1, 2);
+		}
+		lowGreyRunEmph /= totalSum;
+	}
+
+}
+void GLRLM::calcHighGreyRunEmph() {
+	
+	highGreyRunEmph = 0;
+
+	if (totalSum != 0) {
+		for (int i = 0; i < colSums.size(); i++) {
+			highGreyRunEmph += colSums[i] * pow(i + 1, 2);
+		}
+		highGreyRunEmph /= totalSum;
+	}
+
+}
+void GLRLM::calcShortRunLowEmph(vector<vector<float>> GLRLMatrix) {
+
+	shortRunLowEmph = 0;
+
+	if (totalSum != 0) {
+		for (int row = 0; row < GLRLMatrix.size(); row++) {
+			for (int col = 1; col < GLRLMatrix[0].size() + 1; col++) {
+				shortRunLowEmph += GLRLMatrix[row][col - 1] / (pow(row+1, 2) * pow(col, 2));
 			}
 		}
-	}
-}
-void GLRLM::calcDiffAverage(vector<vector<float>> GLRLMatrix) {
-
-	diffAverage = 0;
-
-	for (int diagElement = 0; diagElement < diagonalProbabilities.size(); diagElement++) {
-		diffAverage += diagonalProbabilities[diagElement] * diagElement;
-	}
-}
-void GLRLM::calcDiffVariance(vector<vector<float>> GLRLMatrix) {
-
-	diffVariance = 0;
-
-	if (isnan(diffAverage)) {
-		calcDiffAverage(GLRLMatrix);
-	}
-
-	for (int diagElement = 0; diagElement < diagonalProbabilities.size(); diagElement++) {
-		diffVariance += diagonalProbabilities[diagElement] * pow((diagElement - diffAverage), 2);
-	}
-}
-void GLRLM::calcDiffEntropy(vector<vector<float>> GLRLMatrix) {
-
-	diffEntropy = 0;
-
-	float tempElement = 0;
-	for (int k = 0; k < diagonalProbabilities.size(); k++) {
-		tempElement = diagonalProbabilities[k];
-		if (tempElement != 0) {
-			diffEntropy -= tempElement*log2(tempElement);
-		}
-	}
-}
-void GLRLM::calcSumAverage(vector<vector<float>> GLRLMatrix) {
-
-	sumAverage = 0;
-
-	for (int crossElement = 1; crossElement < crossProbabilities.size() + 1; crossElement++) {
-		sumAverage += crossProbabilities[crossElement - 1] * (crossElement + 1);
-	}
-}
-void GLRLM::calcSumVariance(vector<vector<float>> GLRLMatrix) {
-
-	sumVariance = 0;
-
-	if (isnan(sumAverage)) {
-		calcSumAverage(GLRLMatrix);
-	}
-
-	for (int crossElement = 1; crossElement < crossProbabilities.size() + 1; crossElement++) {
-		sumVariance += crossProbabilities[crossElement - 1] * pow((crossElement + 1 - sumAverage), 2);
-	}
-}
-void GLRLM::calcSumEntropy(vector<vector<float>> GLRLMatrix) {
-
-	sumEntropy = 0;
-
-	float tempElement = 0;
-	for (int k = 0; k < crossProbabilities.size(); k++) {
-		tempElement = crossProbabilities[k];
-		if (tempElement != 0 && !isnan(tempElement)) {
-			sumEntropy -= tempElement*log2(tempElement);
-		}
-	}
-}
-void GLRLM::calcAngSecMoment(vector<vector<float>> GLRLMatrix) {
-	
-	// Angular Second Moment (== Energy, Uniformity)
-	angSecMoment = 0;
-
-	for (int row = 0; row < sizeMatrix; row++) {
-		for (int col = 0; col < sizeMatrix; col++) {
-			angSecMoment += pow(GLRLMatrix[row][col], 2);
-		}
+		shortRunLowEmph /= totalSum;
 	}
 
 }
-void GLRLM::calcContrast(vector<vector<float>> GLRLMatrix) {
+void GLRLM::calcShortRunHighEmph(vector<vector<float>> GLRLMatrix) {
 
-	contrast = 0;
+	shortRunHighEmph = 0;
 
-	for (int i = 0; i < sizeMatrix; i++) {
-		for (int j = 0; j < sizeMatrix; j++) {
-			contrast += pow((i - j), 2)*GLRLMatrix[i][j];
-		}
-	}
-}
-void GLRLM::calcDissimilarity(vector<vector<float>> GLRLMatrix) {
-
-	dissimilarity = 0;
-
-	for (int i = 0; i < sizeMatrix; i++) {
-		for (int j = 0; j < sizeMatrix; j++) {
-			dissimilarity += abs(i - j)*GLRLMatrix[i][j];
-		}
-	}
-}
-void GLRLM::calcInverseDiff(vector<vector<float>> GLRLMatrix) {
-
-	inverseDiff = 0;
-
-	for (int i = 0; i < sizeMatrix; i++) {
-		for (int j = 0; j < sizeMatrix; j++) {
-			inverseDiff += GLRLMatrix[i][j] / (1 + abs(i - j));
-		}
-	}
-}
-void GLRLM::calcInverseDiffNorm(vector<vector<float>> GLRLMatrix) {
-
-	inverseDiffNorm = 0;
-
-	for (int i = 0; i < sizeMatrix; i++) {
-		for (int j = 0; j < sizeMatrix; j++) {
-			inverseDiffNorm += GLRLMatrix[i][j] / (1 + float(abs(i - j)) / float(sizeMatrix));
-		}
-	}
-}
-void GLRLM::calcInverseDiffMom(vector<vector<float>> GLRLMatrix) {
-
-	inverseDiffMom = 0;
-
-	for (int i = 0; i < sizeMatrix; i++) {
-		for (int j = 0; j < sizeMatrix; j++) {
-			inverseDiffMom += GLRLMatrix[i][j] / (1 + pow((i - j), 2));
-		}
-	}
-}
-void GLRLM::calcInverseDiffMomNorm(vector<vector<float>> GLRLMatrix) {
-
-	inverseDiffMomNorm = 0;
-
-	for (int i = 0; i < sizeMatrix; i++) {
-		for (int j = 0; j < sizeMatrix; j++) {
-			inverseDiffMomNorm += GLRLMatrix[i][j] / (1 + pow((i - j), 2) / pow(sizeMatrix, 2));
-		}
-	}
-}
-void GLRLM::calcInverseVar(vector<vector<float>> GLRLMatrix) {
-
-	inverseVar = 0;
-
-	for (int i = 0; i < sizeMatrix; i++) {
-		for (int j = i + 1; j < sizeMatrix; j++) {
-			inverseVar += 2 * GLRLMatrix[i][j] / pow((i - j), 2);
-		}
-	}
-}
-void GLRLM::calcColProb(vector<vector<float>> GLRLMatrix) {
-
-	float colProb;
-	sumProbCols.clear();
-
-	for (int j = 0; j < sizeMatrix; j++) {
-		colProb = 0;
-		for (int i = 0; i < sizeMatrix; i++) {
-			colProb += GLRLMatrix[i][j];
-		}
-		sumProbCols.push_back(colProb);
-	}
-}
-void GLRLM::calcRowProb(vector<vector<float>> GLRLMatrix) {
-
-	float rowProb;
-	sumProbRows.clear();
-
-	for (int i = 0; i < sizeMatrix; i++) {
-		rowProb = 0;
-		for (int j = 0; j < sizeMatrix; j++) {
-			rowProb += GLRLMatrix[i][j];
-		}
-		sumProbRows.push_back(rowProb);
-	}
-}
-void GLRLM::calcMeanColProb(vector<vector<float>> GLRLMatrix) {
-
-	calcColProb(GLRLMatrix);
-
-	meanColProb = 0;
-	stdColProb = 0;
-
-	for (int k = 0; k < sizeMatrix; k++) {
-		meanColProb += (k + 1) * sumProbCols[k];
-	}
-
-	for (int k = 0; k < sizeMatrix; k++) {
-		stdColProb += pow(((k + 1) - meanColProb), 2)*sumProbCols[k];
-	}
-
-	stdColProb = sqrt(stdColProb);
-
-}
-void GLRLM::calcMeanRowProb(vector<vector<float>> GLRLMatrix) {
-
-	calcRowProb(GLRLMatrix);
-
-	meanRowProb = 0;
-	stdRowProb = 0;
-
-	for (int k = 0; k < sizeMatrix; k++) {
-		meanRowProb += (k + 1) * sumProbRows[k];
-	}
-
-	for (int k = 0; k < sizeMatrix; k++) {
-		stdRowProb += pow(((k + 1) - meanRowProb), 2)*sumProbRows[k];
-	}
-
-	stdRowProb = sqrt(stdRowProb);
-
-}
-void GLRLM::calcCorrelation(vector<vector<float>> GLRLMatrix) {
-
-	calcMeanColProb(GLRLMatrix); 
-	calcMeanRowProb(GLRLMatrix); 
-
-	correlation = 0;
-
-	for (int row = 1; row < sizeMatrix + 1; row++) {
-		for (int col = 1; col < sizeMatrix + 1; col++) {
-			correlation += (row - meanRowProb)*(col - meanRowProb)*GLRLMatrix[row - 1][col - 1];
-		}
-	}
-
-	if (!isnan(correlation) && stdRowProb != 0 && !isnan(stdRowProb)) {
-		correlation = correlation / pow(stdRowProb, 2);
-	}
-}
-void GLRLM::calcAutoCorrelation(vector<vector<float>> GLRLMatrix) {
-
-	autoCorrelation = 0;
-
-	for (int row = 1; row < sizeMatrix + 1; row++) {
-		for (int col = 1; col < sizeMatrix + 1; col++) {
-			autoCorrelation += GLRLMatrix[row - 1][col - 1] * (row)*(col);
-		}
-	}
-}
-void GLRLM::calcClusterTendency(vector<vector<float>> GLRLMatrix) {
-
-	clusterTendency = 0;
-
-	if (isnan(meanRowProb)) {
-		calcMeanRowProb(GLRLMatrix);
-	}
-
-	for (int i = 0; i < sizeMatrix; i++) {
-		for (int j = 0; j < sizeMatrix; j++) {
-			clusterTendency += pow((i + j + 2 - 2 * meanRowProb), 2)*GLRLMatrix[i][j];
-		}
-	}
-
-}
-void GLRLM::calcClusterShade(vector<vector<float>> GLRLMatrix) {
-
-	clusterShade = 0;
-
-	if (isnan(meanRowProb)) {
-		calcMeanRowProb(GLRLMatrix);
-	}
-
-	for (int i = 0; i < sizeMatrix; i++) {
-		for (int j = 0; j < sizeMatrix; j++) {
-			clusterShade += pow((i + j + 2 - 2 * meanRowProb), 3)*GLRLMatrix[i][j];
-		}
-	}
-
-}
-void GLRLM::calcClusterProminence(vector<vector<float>> GLRLMatrix) {
-
-	clusterProminence = 0;
-
-	if (isnan(meanRowProb)) {
-		calcMeanRowProb(GLRLMatrix);
-	}
-
-	for (int i = 0; i < sizeMatrix; i++) {
-		for (int j = 0; j < sizeMatrix; j++) {
-			clusterProminence += pow((i + j + 2 - 2 * meanRowProb), 4)*GLRLMatrix[i][j];
-		}
-	}
-}
-void GLRLM::calcFirstMCorrelation(vector<vector<float>> GLRLMatrix) {
-
-	calcColProb(GLRLMatrix); // for. sumProbCols
-	calcRowProb(GLRLMatrix); // for. sumProbRows
-	
-	HXY = 0;
-	HX = 0;
-	HXY1 = 0;
-	float actualProbRows = 0;
-	float actualProbCols = 0;
-
-	for (int i = 0; i < sizeMatrix; i++) {
-		actualProbRows = sumProbRows[i];
-		if (actualProbRows != 0) {
-			HX -= actualProbRows*log2(actualProbRows);
-
-			for (int j = 0; j < sizeMatrix; j++) {
-				actualProbCols = sumProbCols[j];
-				if (actualProbCols != 0 && GLRLMatrix[i][j] != 0 && !isnan(GLRLMatrix[i][j]) && actualProbRows != 0) {
-					HXY -= GLRLMatrix[i][j] * log2(GLRLMatrix[i][j]);
-					HXY1 -= GLRLMatrix[i][j] * log2(actualProbRows*actualProbCols);
-				}
+	if (totalSum != 0) {
+		for (int row = 0; row < GLRLMatrix.size(); row++) {
+			for (int col = 1; col < GLRLMatrix[0].size() + 1; col++) {
+				shortRunHighEmph += pow(row+1, 2) * GLRLMatrix[row][col - 1] / pow(col, 2);
 			}
 		}
+		shortRunHighEmph /= totalSum;
 	}
-	if (HX > 0) {
-		firstMCorrelation = (HXY - HXY1) / HX;
+
+}
+void GLRLM::calcLongRunLowEmph(vector<vector<float>> GLRLMatrix) {
+
+	longRunLowEmph = 0;
+
+	if (totalSum != 0) {
+		for (int row = 0; row < GLRLMatrix.size(); row++) {
+			for (int col = 1; col < GLRLMatrix[0].size() + 1; col++) {
+				longRunLowEmph += pow(col, 2) * GLRLMatrix[row][col - 1] / pow(row+1, 2);
+			}
+		}
+		longRunLowEmph /= totalSum;
+	}
+
+}
+void GLRLM::calcLongRunHighEmph(vector<vector<float>> GLRLMatrix) {
+
+	longRunHighEmph = 0;
+
+	if (totalSum != 0) {
+		for (int row = 0; row < GLRLMatrix.size(); row++) {
+			for (int col = 1; col < GLRLMatrix[0].size() + 1; col++) {
+				longRunHighEmph += pow(col, 2) * pow(row+1, 2) * GLRLMatrix[row][col - 1];
+			}
+		}
+		longRunHighEmph /= totalSum;
+	}
+
+}
+void GLRLM::calcGreyNonUnimformity() {
+
+	greyNonUnimformity = 0;
+
+	if (totalSum != 0) {
+		for (int i = 0; i < colSums.size(); i++) {
+			greyNonUnimformity += pow(colSums[i], 2);
+		}
+		greyNonUnimformity /= totalSum;
+	}
+
+}
+void GLRLM::calcGreyNonUnimformityNorm() {
+
+	greyNonUnimformityNorm = 0;
+
+	if (totalSum != 0) {
+		for (int i = 0; i < colSums.size(); i++) {
+			greyNonUnimformityNorm += pow(colSums[i], 2);
+		}
+		greyNonUnimformityNorm /= pow(totalSum, 2);
+	}
+
+}
+void GLRLM::calcRunLengthNonUniformity() {
+	
+	runLengthNonUniformity = 0;
+
+	if (totalSum != 0) {
+		for (int i = 0; i < rowSums.size(); i++) {
+			runLengthNonUniformity += pow(rowSums[i], 2);
+		}
+		runLengthNonUniformity /= totalSum;
+	}
+	
+}
+void GLRLM::calcRunLengthNonUniformityNorm() {
+
+	runLengthNonUniformityNorm = 0;
+
+	if (totalSum != 0) {
+		for (int i = 0; i < rowSums.size(); i++) {
+			runLengthNonUniformityNorm += pow(rowSums[i], 2);
+		}
+		runLengthNonUniformityNorm /= pow(totalSum, 2);
+	}
+
+}
+void GLRLM::calcRunPercentage() {
+
+	if (nPixelsInROI != 0) {
+		runPercentage = totalSum / nPixelsInROI;
 	}
 	else {
-		firstMCorrelation = 0;
+		runPercentage = 0;
+	}
+	
+}
+void GLRLM::calcGreyLevelVar(vector<vector<float>> probMatrix) {
+
+	greyLevelVar = 0;
+
+	for (int i = 0; i<probMatrix.size(); i++) {
+		for (int j = 0; j<probMatrix[0].size(); j++) {
+			greyLevelVar += pow((i+1 - meanGrey), 2)*probMatrix[i][j];
+		}
 	}
 }
-void GLRLM::calcSecondMCorrelation(vector<vector<float>> GLRLMatrix) {
+void GLRLM::calcRunLengthVar(vector<vector<float>> probMatrix) {
 
-	if (isnan(HXY)) {
-		calcFirstMCorrelation(GLRLMatrix);
+	runLengthVar = 0;
+
+	for (int i = 0; i<probMatrix.size(); i++) {
+		for (int j = 0; j<probMatrix[0].size(); j++) {
+			runLengthVar += pow((j - meanRun), 2)*probMatrix[i][j];
+		}
 	}
+}
+void GLRLM::calcRunEntropy(vector<vector<float>> probMatrix) {
 
-	HXY2 = 0;
+	runEntropy = 0;
 
-	for (int i = 0; i < sizeMatrix; i++) {
-		for (int j = 0; j < sizeMatrix; j++) {
-			if (sumProbRows[i] * sumProbCols[j] != 0) {
-				HXY2 -= sumProbRows[i] * sumProbCols[j] * log2(sumProbRows[i] * sumProbCols[j]);
+	for (int i = 0; i<probMatrix.size(); i++) {
+		for (int j = 0; j<probMatrix[0].size(); j++) {
+			if (probMatrix[i][j] > 0) {
+				runEntropy -= probMatrix[i][j] * log2(probMatrix[i][j]);
 			}
 		}
 	}
-	secondMCorrelation = pow((1 - exp(-2 * (HXY2 - HXY))), 0.5);
 }
 
-void GLRLM::calcFeature(int FEATURE_IDX, vector<float> &temp1DirVals1DVec, vector<vector<float>> sumGLRLM) {
+void GLRLM::calcFeature(int FEATURE_IDX, vector<float> &temp1DirVals1DVec, vector<vector<float>> GLRLMatrix, vector<vector<float>> probMatrix) {
 
 	switch (FEATURE_IDX)
 	{
 	case SRE:
-		calcJointMaximum(sumGLRLM);
-		temp1DirVals1DVec.push_back(jointMaximum);
+		calcShortRunEmph();
+		temp1DirVals1DVec.push_back(shortRunEmph);
 		break;
 
 	case LRE:
-		calcJointAverage(sumGLRLM);
-		temp1DirVals1DVec.push_back(jointAverage);
+		calcLongRunEmph();
+		temp1DirVals1DVec.push_back(longRunEmph);
 		break;
 
-	case LGE:
-		calcJointVariance(sumGLRLM);
-		temp1DirVals1DVec.push_back(jointVariance);
+	case LGRE:
+		calcLowGreyRunEmph();
+		temp1DirVals1DVec.push_back(lowGreyRunEmph);
 		break;
 
-	case HGE:
-		calcJointEntropy(sumGLRLM);
-		temp1DirVals1DVec.push_back(jointEntropy);
+	case HGRE:
+		calcHighGreyRunEmph();
+		temp1DirVals1DVec.push_back(highGreyRunEmph);
 		break; 
 
 	case SRLE:
-		calcDiffAverage(sumGLRLM);
-		temp1DirVals1DVec.push_back(diffAverage);
+		calcShortRunLowEmph(GLRLMatrix);
+		temp1DirVals1DVec.push_back(shortRunLowEmph);
 		break;
 
 	case SRHE:
-		calcDiffVariance(sumGLRLM);
-		temp1DirVals1DVec.push_back(diffVariance);
+		calcShortRunHighEmph(GLRLMatrix);
+		temp1DirVals1DVec.push_back(shortRunHighEmph);
 		break;
 
 	case LRLE:
-		calcDiffEntropy(sumGLRLM);
-		temp1DirVals1DVec.push_back(diffEntropy);
+		calcLongRunLowEmph(GLRLMatrix);
+		temp1DirVals1DVec.push_back(longRunLowEmph);
 		break;
 
 	case LRHE:
-		calcSumAverage(sumGLRLM);
-		temp1DirVals1DVec.push_back(sumAverage);
+		calcLongRunHighEmph(GLRLMatrix);
+		temp1DirVals1DVec.push_back(longRunHighEmph);
 		break;
 
 	case GNU:
-		calcSumVariance(sumGLRLM);
-		temp1DirVals1DVec.push_back(sumVariance);
+		calcGreyNonUnimformity();
+		temp1DirVals1DVec.push_back(greyNonUnimformity);
 		break;
 
 	case GNUN:
-		calcSumEntropy(sumGLRLM);
-		temp1DirVals1DVec.push_back(sumEntropy);
+		calcGreyNonUnimformityNorm();
+		temp1DirVals1DVec.push_back(greyNonUnimformityNorm);
 		break;
 
 	case RLNU:
-		calcAngSecMoment(sumGLRLM);
-		temp1DirVals1DVec.push_back(angSecMoment);
+		calcRunLengthNonUniformity();
+		temp1DirVals1DVec.push_back(runLengthNonUniformity);
 		break;
 
 	case RLNUN:
-		calcContrast(sumGLRLM);
-		temp1DirVals1DVec.push_back(contrast);
+		calcRunLengthNonUniformityNorm();
+		temp1DirVals1DVec.push_back(runLengthNonUniformityNorm);
 		break;
 
 	case RP:
-		calcDissimilarity(sumGLRLM);
-		temp1DirVals1DVec.push_back(dissimilarity);
+		calcRunPercentage();
+		temp1DirVals1DVec.push_back(runPercentage);
 		break;
 
 	case GLV:
-		calcInverseDiff(sumGLRLM);
-		temp1DirVals1DVec.push_back(inverseDiff);
+		calcGreyLevelVar(probMatrix);
+		temp1DirVals1DVec.push_back(greyLevelVar);
 		break;
 
 	case RLV:
-		calcInverseDiffNorm(sumGLRLM);
-		temp1DirVals1DVec.push_back(inverseDiffNorm);
+		calcRunLengthVar(probMatrix);
+		temp1DirVals1DVec.push_back(runLengthVar);
 		break;
 
 	case RE:
-		calcInverseDiffMom(sumGLRLM);
-		temp1DirVals1DVec.push_back(inverseDiffMom);
+		calcRunEntropy(probMatrix);
+		temp1DirVals1DVec.push_back(runEntropy);
 		break;
 
 	default:
@@ -789,7 +582,7 @@ void GLRLM::featureExtraction(short* psImage, unsigned char* pucMask, int nHeigh
 	// get discretized 2D input matrix (2d vector)
 	nHeight = nHeight_;
 	nWidth = nWidth_;
-	vector1DofOriPixels = get1DVectorOfPixels(psImage, pucMask); 
+	vector1DofOriPixels = get1DVectorOfPixels(psImage, pucMask);  // 슬라이스마다 초기화, nPixelsInROI 산출)
 	vector2DofDiscretizedPixels = get2DVectorOfDiscretizedPixels_nBins(psImage, pucMask); // 슬라이스마다 초기화
 	
 	vector<vector<float>> temp4DirVals2DVec;	// 슬라이스마다 초기화 (for. 4방향 1d vec 평균내기)
@@ -799,15 +592,12 @@ void GLRLM::featureExtraction(short* psImage, unsigned char* pucMask, int nHeigh
 	sizeMatrix = nBins;
 	maxRunLength = max(nHeight, nWidth);
 	int ang;
-	float totalSum;
-	vector<float> rowSums;
-	vector<float> colSums;
 
 	for (int dir = 0; dir < 4; dir++) {
 
 		clearVariable();					// 방향마다 초기화
 		vector<float> temp1DirVals1DVec;	// 방향마다 초기화
-
+		
 		// calculate GLRLM matrix for each dir
 		ang = 180 - dir * 45;
 		vector<vector<float>> GLRLMatrix(sizeMatrix, vector<float>(maxRunLength, 0));
@@ -817,12 +607,15 @@ void GLRLM::featureExtraction(short* psImage, unsigned char* pucMask, int nHeigh
 		rowSums = getRowSums(GLRLMatrix);
 		colSums = getColSums(GLRLMatrix);
 		
-		//calcDiagonalProbabilities(sum);
-		//calcCrossProbabilities(sum);
+		vector<vector<float>> probMatrix(sizeMatrix, vector<float>(maxRunLength, 0));
+		fill2DprobMatrix(GLRLMatrix, probMatrix);
+
+		meanGrey = getMeanProbGrey(probMatrix);
+		meanRun = getMeanProbRun(probMatrix);
 
 		// calculate feature for each dir
 		for (int i = 0; i < FEATURE_COUNT; i++) {
-			if (isCheckedFeature[i]) calcFeature(i, temp1DirVals1DVec, GLRLMatrix);
+			if (isCheckedFeature[i]) calcFeature(i, temp1DirVals1DVec, GLRLMatrix, probMatrix);
 		}
 		temp4DirVals2DVec.push_back(temp1DirVals1DVec); // 4행
 	}
@@ -850,7 +643,7 @@ void GLRLM::averageAllValues() {
 }
 
 void GLRLM::defineFeatureNames(vector<string> &features) {
-	
+	/*
 	features[SRE] = "short run emphasis";
 	features[LRE] = "long run emphasis";
 	features[LGE] = "Low grey level run emphasis";
@@ -867,6 +660,22 @@ void GLRLM::defineFeatureNames(vector<string> &features) {
 	features[GLV] = "Grey level variance";
 	features[RLV] = "Run length variance";
 	features[RE] = "Run entropy";
-	
+	*/
+	features[SRE] = "SRE";
+	features[LRE] = "LRE";
+	features[LGRE] = "LGRE";
+	features[HGRE] = "HGRE";
+	features[SRLE] = "SRLE";
+	features[SRHE] = "SRHE";
+	features[LRLE] = "LRLE";
+	features[LRHE] = "LRHE";
+	features[GNU] = "GNU";
+	features[GNUN] = "GNUN";
+	features[RLNU] = "RLNU";
+	features[RLNUN] = "RLNUN";
+	features[RP] = "RP";
+	features[GLV] = "GLV";
+	features[RLV] = "RLV";
+	features[RE] = "RE";
 }
 

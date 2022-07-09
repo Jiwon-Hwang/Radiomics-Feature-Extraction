@@ -33,7 +33,7 @@ public:
     QGroupBox *groupBox_Features;
     QGridLayout *gridLayout;
     QCheckBox *checkBox_LRE;
-    QCheckBox *checkBox_LGE;
+    QCheckBox *checkBox_LGRE;
     QCheckBox *checkBox_LRLE;
     QCheckBox *checkBox_SRE;
     QCheckBox *checkBox_SRHE;
@@ -46,7 +46,7 @@ public:
     QCheckBox *checkBox_GLV;
     QCheckBox *checkBox_LRHE;
     QCheckBox *checkBox_GNU;
-    QCheckBox *checkBox_HGE;
+    QCheckBox *checkBox_HGRE;
     QCheckBox *checkBox_GNUN;
     QCheckBox *checkBox_RLNU;
     QWidget *gridLayoutWidget;
@@ -88,11 +88,11 @@ public:
 
         gridLayout->addWidget(checkBox_LRE, 1, 1, 1, 1);
 
-        checkBox_LGE = new QCheckBox(groupBox_Features);
-        checkBox_LGE->setObjectName(QStringLiteral("checkBox_LGE"));
-        checkBox_LGE->setEnabled(true);
+        checkBox_LGRE = new QCheckBox(groupBox_Features);
+        checkBox_LGRE->setObjectName(QStringLiteral("checkBox_LGRE"));
+        checkBox_LGRE->setEnabled(true);
 
-        gridLayout->addWidget(checkBox_LGE, 2, 0, 1, 1);
+        gridLayout->addWidget(checkBox_LGRE, 2, 0, 1, 1);
 
         checkBox_LRLE = new QCheckBox(groupBox_Features);
         checkBox_LRLE->setObjectName(QStringLiteral("checkBox_LRLE"));
@@ -207,12 +207,12 @@ public:
 
         gridLayout->addWidget(checkBox_GNU, 7, 0, 1, 1);
 
-        checkBox_HGE = new QCheckBox(groupBox_Features);
-        checkBox_HGE->setObjectName(QStringLiteral("checkBox_HGE"));
-        checkBox_HGE->setEnabled(true);
-        checkBox_HGE->setChecked(false);
+        checkBox_HGRE = new QCheckBox(groupBox_Features);
+        checkBox_HGRE->setObjectName(QStringLiteral("checkBox_HGRE"));
+        checkBox_HGRE->setEnabled(true);
+        checkBox_HGRE->setChecked(false);
 
-        gridLayout->addWidget(checkBox_HGE, 2, 1, 1, 1);
+        gridLayout->addWidget(checkBox_HGRE, 2, 1, 1, 1);
 
         checkBox_GNUN = new QCheckBox(groupBox_Features);
         checkBox_GNUN->setObjectName(QStringLiteral("checkBox_GNUN"));
@@ -282,7 +282,7 @@ public:
         popup_GLRLM->setWindowTitle(QApplication::translate("popup_GLRLM", "Set Measurements", Q_NULLPTR));
         groupBox_Features->setTitle(QApplication::translate("popup_GLRLM", "Features", Q_NULLPTR));
         checkBox_LRE->setText(QApplication::translate("popup_GLRLM", "Long Run Emphasis", Q_NULLPTR));
-        checkBox_LGE->setText(QApplication::translate("popup_GLRLM", "Low Grey Emphasis", Q_NULLPTR));
+        checkBox_LGRE->setText(QApplication::translate("popup_GLRLM", "Low Grey Run Emphasis", Q_NULLPTR));
         checkBox_LRLE->setText(QApplication::translate("popup_GLRLM", "Long Run Low Emphasis", Q_NULLPTR));
         checkBox_SRE->setText(QApplication::translate("popup_GLRLM", "Short Run Emphasis", Q_NULLPTR));
         checkBox_SRHE->setText(QApplication::translate("popup_GLRLM", "Short Run High Emphasis", Q_NULLPTR));
@@ -295,7 +295,7 @@ public:
         checkBox_GLV->setText(QApplication::translate("popup_GLRLM", "Grey Level Variance", Q_NULLPTR));
         checkBox_LRHE->setText(QApplication::translate("popup_GLRLM", "Long Run High Emphasis", Q_NULLPTR));
         checkBox_GNU->setText(QApplication::translate("popup_GLRLM", "Grey Non-Uniform", Q_NULLPTR));
-        checkBox_HGE->setText(QApplication::translate("popup_GLRLM", "High Grey Emphasis", Q_NULLPTR));
+        checkBox_HGRE->setText(QApplication::translate("popup_GLRLM", "High Grey Run Emphasis", Q_NULLPTR));
         checkBox_GNUN->setText(QApplication::translate("popup_GLRLM", "Grey Non-Uniform Norm", Q_NULLPTR));
         checkBox_RLNU->setText(QApplication::translate("popup_GLRLM", "Run Length Non-Uniform", Q_NULLPTR));
         comboBox_nBins->clear();

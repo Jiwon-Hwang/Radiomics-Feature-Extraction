@@ -86,12 +86,12 @@
      </widget>
     </item>
     <item row="2" column="0">
-     <widget class="QCheckBox" name="checkBox_LGE">
+     <widget class="QCheckBox" name="checkBox_LGRE">
       <property name="enabled">
        <bool>true</bool>
       </property>
       <property name="text">
-       <string>Low Grey Emphasis</string>
+       <string>Low Grey Run Emphasis</string>
       </property>
      </widget>
     </item>
@@ -332,12 +332,12 @@
      </widget>
     </item>
     <item row="2" column="1">
-     <widget class="QCheckBox" name="checkBox_HGE">
+     <widget class="QCheckBox" name="checkBox_HGRE">
       <property name="enabled">
        <bool>true</bool>
       </property>
       <property name="text">
-       <string>High Grey Emphasis</string>
+       <string>High Grey Run Emphasis</string>
       </property>
       <property name="checked">
        <bool>false</bool>

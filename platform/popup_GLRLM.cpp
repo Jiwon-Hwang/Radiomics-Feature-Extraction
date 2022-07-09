@@ -11,8 +11,8 @@ popup_GLRLM::popup_GLRLM(QWidget *parent) :
 	filterGroup->setExclusive(false); // default : true
 	filterGroup->addButton(ui->checkBox_SRE, GLRLM::SRE);
 	filterGroup->addButton(ui->checkBox_LRE, GLRLM::LRE);
-	filterGroup->addButton(ui->checkBox_LGE, GLRLM::LGE);
-	filterGroup->addButton(ui->checkBox_HGE, GLRLM::HGE);
+	filterGroup->addButton(ui->checkBox_LGRE, GLRLM::LGRE);
+	filterGroup->addButton(ui->checkBox_HGRE, GLRLM::HGRE);
 	filterGroup->addButton(ui->checkBox_SRLE, GLRLM::SRLE);
 	filterGroup->addButton(ui->checkBox_SRHE, GLRLM::SRHE);
 	filterGroup->addButton(ui->checkBox_LRLE, GLRLM::LRLE);

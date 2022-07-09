@@ -13,8 +13,8 @@ public:
 	{
 		SRE,
 		LRE,
-		LGE,
-		HGE,
+		LGRE,
+		HGRE,
 		SRLE,
 		SRHE,
 		LRLE,
@@ -50,100 +50,74 @@ public:
 	int maxRunLength;	// N_r
 	int nHeight;
 	int nWidth;
+	int nPixelsInROI;
 	std::vector<short> vector1DofOriPixelsInROI;							// ROI 안에 있는 픽셀들만
 	std::vector<short> vector1DofOriPixels;									// psImage 전체 픽셀들
 	std::vector<std::vector<unsigned short>> vector2DofDiscretizedPixels;	// 양자화한 psImage 전체 픽셀들(0 & 1~nBins) == inputMatrix(2d vector)
-	std::vector<float> diagonalProbabilities;
-	std::vector<float> crossProbabilities;
-	std::vector<float> sumProbCols;		// for. correlation
-	std::vector<float> sumProbRows;		// for. correlation
+	// 방향마다 초기화
+	float totalSum;
+	std::vector<float> rowSums; 
+	std::vector<float> colSums; 
+	float meanGrey;
+	float meanRun;
 
 	std::vector<short> get1DVectorOfPixels(short* psImage, unsigned char* pucMask);
 	std::vector<std::vector<unsigned short>> get2DVectorOfDiscretizedPixels_nBins(short* psImage, unsigned char* pucMask);
 	void getXYDirections(int &directionX, int &directionY, int angle);
 	int findIndex(int size, unsigned short target);
 	void fill2DGLRLMatrix(std::vector<std::vector<unsigned short>> vector2DofDiscretizedPixels, std::vector<std::vector<float>> &GLRLMatrix, int angle);
-	void calcDiagonalProbabilities(std::vector<std::vector<float>> GLRLMatrix);
-	void calcCrossProbabilities(std::vector<std::vector<float>> GLRLMatrix);
+	void fill2DprobMatrix(std::vector<std::vector<float>> GLRLMatrix, std::vector<std::vector<float>> &probMatrix);
 	void average4DirValues(std::vector<std::vector<float>> temp4DirVals2DVec, std::vector<float> &tempValues1DVec);
 
 	// common calculation functions
 	float getTotalSum(std::vector<std::vector<float>> matrix);
 	std::vector<float> getRowSums(std::vector<std::vector<float>> matrix);
 	std::vector<float> getColSums(std::vector<std::vector<float>> matrix);
+	float getMeanProbGrey(std::vector<std::vector<float>> probMatrix);
+	float getMeanProbRun(std::vector<std::vector<float>> probMatrix);
 
 	// put extracted values in 2d vector //
 	std::vector<std::vector<float>> final2DVec;		// slice by slice
 	std::vector<float> final1DVec;					// series by series (average)
 
 	// final feature value //
-	float jointMaximum = NAN;
-	float jointAverage = NAN;
-	float jointVariance = NAN;
-	float jointEntropy = NAN;
-	float diffAverage = NAN;
-	float diffVariance = NAN;
-	float diffEntropy = NAN;
-	float sumAverage = NAN;
-	float sumVariance = NAN;
-	float sumEntropy = NAN;
-	float angSecMoment = NAN;
-	float contrast = NAN;
-	float dissimilarity = NAN;
-	float inverseDiff = NAN;
-	float inverseDiffNorm = NAN;
-	float inverseDiffMom = NAN;
-	float inverseDiffMomNorm = NAN;
-	float inverseVar = NAN;
-	float meanRowProb = NAN;	// for. correlation, clusterTendency, clusterShade, clusterProminence
-	float meanColProb = NAN;	// for. correlation
-	float stdRowProb = NAN;		// for. correlation
-	float stdColProb = NAN;		// for. correlation
-	float correlation = NAN;
-	float autoCorrelation = NAN;
-	float clusterTendency = NAN;
-	float clusterShade = NAN;
-	float clusterProminence = NAN;
-	float HXY = NAN;			// for. firstMCorrelation, secondMCorrelation
-	float HX = NAN;				// for. firstMCorrelation
-	float HXY1 = NAN;			// for. firstMCorrelation
-	float HXY2 = NAN;			// for. secondMCorrelation
-	float firstMCorrelation = NAN;
-	float secondMCorrelation = NAN;
+	float shortRunEmph = NAN;
+	float longRunEmph = NAN;
+	float lowGreyRunEmph = NAN;
+	float highGreyRunEmph = NAN;
+	float shortRunLowEmph = NAN;
+	float shortRunHighEmph = NAN;
+	float longRunLowEmph = NAN;
+	float longRunHighEmph = NAN;
+	float greyNonUnimformity = NAN;
+	float greyNonUnimformityNorm = NAN;
+	float runLengthNonUniformity = NAN;
+	float runLengthNonUniformityNorm = NAN;
+	float runPercentage = NAN;
+	float greyLevelVar = NAN;
+	float runLengthVar = NAN;
+	float runEntropy = NAN;
 
 	// calculate feature value //
-	void calcJointMaximum(std::vector<std::vector<float>> GLRLMatrix);
-	void calcJointAverage(std::vector<std::vector<float>> GLRLMatrix);
-	void calcJointVariance(std::vector<std::vector<float>> GLRLMatrix);
-	void calcJointEntropy(std::vector<std::vector<float>> GLRLMatrix);
-	void calcDiffAverage(std::vector<std::vector<float>> GLRLMatrix);
-	void calcDiffVariance(std::vector<std::vector<float>> GLRLMatrix);
-	void calcDiffEntropy(std::vector<std::vector<float>> GLRLMatrix);
-	void calcSumAverage(std::vector<std::vector<float>> GLRLMatrix);
-	void calcSumVariance(std::vector<std::vector<float>> GLRLMatrix);
-	void calcSumEntropy(std::vector<std::vector<float>> GLRLMatrix);
-	void calcAngSecMoment(std::vector<std::vector<float>> GLRLMatrix);
-	void calcContrast(std::vector<std::vector<float>> GLRLMatrix);
-	void calcDissimilarity(std::vector<std::vector<float>> GLRLMatrix);
-	void calcInverseDiff(std::vector<std::vector<float>> GLRLMatrix);
-	void calcInverseDiffNorm(std::vector<std::vector<float>> GLRLMatrix);
-	void calcInverseDiffMom(std::vector<std::vector<float>> GLRLMatrix);
-	void calcInverseDiffMomNorm(std::vector<std::vector<float>> GLRLMatrix);
-	void calcInverseVar(std::vector<std::vector<float>> GLRLMatrix);
-	void calcColProb(std::vector<std::vector<float>> GLRLMatrix);	// for. correlation
-	void calcRowProb(std::vector<std::vector<float>> GLRLMatrix);	// for. correlation
-	void calcMeanColProb(std::vector<std::vector<float>> GLRLMatrix);	// for. correlation, clusterTendency, clusterShade, clusterProminence
-	void calcMeanRowProb(std::vector<std::vector<float>> GLRLMatrix);	// for. correlation
-	void calcCorrelation(std::vector<std::vector<float>> GLRLMatrix);
-	void calcAutoCorrelation(std::vector<std::vector<float>> GLRLMatrix);
-	void calcClusterTendency(std::vector<std::vector<float>> GLRLMatrix);
-	void calcClusterShade(std::vector<std::vector<float>> GLRLMatrix);
-	void calcClusterProminence(std::vector<std::vector<float>> GLRLMatrix);
-	void calcFirstMCorrelation(std::vector<std::vector<float>> GLRLMatrix);
-	void calcSecondMCorrelation(std::vector<std::vector<float>> GLRLMatrix);
+	void calcShortRunEmph();
+	void calcLongRunEmph();
+	void calcLowGreyRunEmph();
+	void calcHighGreyRunEmph();
+	void calcShortRunLowEmph(std::vector<std::vector<float>> GLRLMatrix);
+	void calcShortRunHighEmph(std::vector<std::vector<float>> GLRLMatrix);
+	void calcLongRunLowEmph(std::vector<std::vector<float>> GLRLMatrix);
+	void calcLongRunHighEmph(std::vector<std::vector<float>> GLRLMatrix);
+	void calcGreyNonUnimformity();
+	void calcGreyNonUnimformityNorm();
+	void calcRunLengthNonUniformity();
+	void calcRunLengthNonUniformityNorm();
+	void calcRunPercentage();
+	void calcGreyLevelVar(std::vector<std::vector<float>> probMatrix);
+	void calcRunLengthVar(std::vector<std::vector<float>> probMatrix);
+	void calcRunEntropy(std::vector<std::vector<float>> probMatrix);
 
 	// feature extraction - slice by slice //
-	void calcFeature(int FEATURE_IDX, std::vector<float> &temp1DirVals1DVec, std::vector<std::vector<float>> sumGLRLM);
+	void calcFeature(int FEATURE_IDX, std::vector<float> &temp1DirVals1DVec, std::vector<std::vector<float>> GLRLMatrix, std::vector<std::vector<float>> probMatrix);
 	void featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
 
 	// mean all slices - get final feature value //
