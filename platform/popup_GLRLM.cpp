@@ -28,6 +28,11 @@ popup_GLRLM::popup_GLRLM(QWidget *parent) :
 	
 	filterGroup->addButton(ui->checkBox_All, GLRLM::FEATURE_COUNT);
 
+
+	// QLineEdit 입력 제약조건 - "int"만 허용
+	QIntValidator *intValidator = new QIntValidator(0, 999999); //최소수, 최대수
+	ui->lineEdit_sBin->setValidator(intValidator);
+
 }
 
 popup_GLRLM::~popup_GLRLM()
