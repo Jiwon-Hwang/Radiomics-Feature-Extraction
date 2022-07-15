@@ -24,7 +24,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>Resources/Deep Imaging Laboratory.bmp</normaloff>Resources/Deep Imaging Laboratory.bmp</iconset>
+    <normaloff>../../../../../../../.designer/backup/Resources/Deep Imaging Laboratory.bmp</normaloff>../../../../../../../.designer/backup/Resources/Deep Imaging Laboratory.bmp</iconset>
   </property>
   <property name="autoFillBackground">
    <bool>false</bool>
@@ -531,7 +531,7 @@
               <item>
                <widget class="QCheckBox" name="checkBox_GLRLM">
                 <property name="enabled">
-                 <bool>true</bool>
+                 <bool>false</bool>
                 </property>
                 <property name="focusPolicy">
                  <enum>Qt::NoFocus</enum>

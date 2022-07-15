@@ -92,7 +92,7 @@ public:
         platformClass->setMaximumSize(QSize(16777215, 16777215));
         platformClass->setFocusPolicy(Qt::StrongFocus);
         QIcon icon;
-        icon.addFile(QStringLiteral("Resources/Deep Imaging Laboratory.bmp"), QSize(), QIcon::Normal, QIcon::Off);
+        icon.addFile(QStringLiteral("../../../../../../../.designer/backup/Resources/Deep Imaging Laboratory.bmp"), QSize(), QIcon::Normal, QIcon::Off);
         platformClass->setWindowIcon(icon);
         platformClass->setAutoFillBackground(false);
         platformClass->setStyleSheet(QStringLiteral(""));
@@ -357,7 +357,7 @@ public:
 
         checkBox_GLRLM = new QCheckBox(groupBox_Families);
         checkBox_GLRLM->setObjectName(QStringLiteral("checkBox_GLRLM"));
-        checkBox_GLRLM->setEnabled(true);
+        checkBox_GLRLM->setEnabled(false);
         checkBox_GLRLM->setFocusPolicy(Qt::NoFocus);
         checkBox_GLRLM->setChecked(false);
 

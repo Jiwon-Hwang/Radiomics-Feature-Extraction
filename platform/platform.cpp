@@ -284,6 +284,7 @@ void CPlatform::setSignalSlot()
 		connect(featureBox[i], SIGNAL(clicked()), this, SLOT(checkFeatureBoxState()));
 	}
 	featureBox.clear();
+	connect(ppopup_Histogram->ui->radioButton_FBN, SIGNAL(clicked()), this, SLOT(checkBinOption()));
 
 	// GLCM (popup)
 	connect(ppopup_GLCM->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool)));
@@ -625,6 +626,17 @@ void CPlatform::checkFeatureBoxState() {
 	}
 	
 	obj->parent()->findChild<QCheckBox *>("checkBox_All")->setChecked(isAllChecked);
+
+}
+void CPlatform::checkBinOption() {
+
+	QObject* obj = sender(); 
+	
+	if (obj->objectName() == "radioButton_FBN") {
+		//obj->parent()
+	}
+
+
 
 }
 
