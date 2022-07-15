@@ -514,7 +514,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QGroupBox" name="groupBox">
+  <widget class="QGroupBox" name="groupBox_Bins">
    <property name="geometry">
     <rect>
      <x>20</x>

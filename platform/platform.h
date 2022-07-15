@@ -187,6 +187,7 @@ public slots:
 	bool checkReadyToRun();
 	void selectAll(bool checked);
 	void checkFeatureBoxState();
+	void checkBinOption();
 
 	// pop-up //
 	void showPopUp(QObject* sender);

@@ -267,6 +267,7 @@ void CPlatform::setSignalSlot()
 	}
 
 	// pop-up
+
 	// Intensity Statistics (popup)
 	connect(ppopup_Statistics->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool))); // 'All' btn 눌렀을 때 나머지 체크박스 선택/해제
 	QList<QCheckBox *> featureBox = ppopup_Statistics->ui->groupBox_Features->findChildren<QCheckBox *>(); // 나머지 체크박스들 눌렀을 때 'All' 선택/해제
@@ -285,6 +286,7 @@ void CPlatform::setSignalSlot()
 	}
 	featureBox.clear();
 	connect(ppopup_Histogram->ui->radioButton_FBN, SIGNAL(clicked()), this, SLOT(checkBinOption()));
+	connect(ppopup_Histogram->ui->radioButton_FBS, SIGNAL(clicked()), this, SLOT(checkBinOption()));
 
 	// GLCM (popup)
 	connect(ppopup_GLCM->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool)));
@@ -294,6 +296,8 @@ void CPlatform::setSignalSlot()
 		connect(featureBox[i], SIGNAL(clicked()), this, SLOT(checkFeatureBoxState()));
 	}
 	featureBox.clear();
+	connect(ppopup_GLCM->ui->radioButton_FBN, SIGNAL(clicked()), this, SLOT(checkBinOption()));
+	connect(ppopup_GLCM->ui->radioButton_FBS, SIGNAL(clicked()), this, SLOT(checkBinOption()));
 
 	// GLRLM (popup)
 	connect(ppopup_GLRLM->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool)));
@@ -303,6 +307,8 @@ void CPlatform::setSignalSlot()
 		connect(featureBox[i], SIGNAL(clicked()), this, SLOT(checkFeatureBoxState()));
 	}
 	featureBox.clear();
+	connect(ppopup_GLRLM->ui->radioButton_FBN, SIGNAL(clicked()), this, SLOT(checkBinOption()));
+	connect(ppopup_GLRLM->ui->radioButton_FBS, SIGNAL(clicked()), this, SLOT(checkBinOption()));
 
 }
 void CPlatform::showPopUp(QObject* sender) {
@@ -631,12 +637,10 @@ void CPlatform::checkFeatureBoxState() {
 void CPlatform::checkBinOption() {
 
 	QObject* obj = sender(); 
-	
-	if (obj->objectName() == "radioButton_FBN") {
-		//obj->parent()
-	}
+	bool isFBN = obj->objectName() == "radioButton_FBN"? true : false;
 
-
+	obj->parent()->findChild<QComboBox *>("comboBox_nBins")->setEnabled(isFBN);
+	obj->parent()->findChild<QLineEdit *>("lineEdit_sBin")->setEnabled(!isFBN);
 
 }
 

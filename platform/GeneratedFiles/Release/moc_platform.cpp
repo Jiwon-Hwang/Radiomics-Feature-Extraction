@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_CPlatform_t {
-    QByteArrayData data[24];
-    char stringdata0[288];
+    QByteArrayData data[25];
+    char stringdata0[303];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -52,9 +52,10 @@ QT_MOC_LITERAL(17, 212, 15), // "checkReadyToRun"
 QT_MOC_LITERAL(18, 228, 9), // "selectAll"
 QT_MOC_LITERAL(19, 238, 7), // "checked"
 QT_MOC_LITERAL(20, 246, 20), // "checkFeatureBoxState"
-QT_MOC_LITERAL(21, 267, 9), // "showPopUp"
-QT_MOC_LITERAL(22, 277, 6), // "sender"
-QT_MOC_LITERAL(23, 284, 3) // "run"
+QT_MOC_LITERAL(21, 267, 14), // "checkBinOption"
+QT_MOC_LITERAL(22, 282, 9), // "showPopUp"
+QT_MOC_LITERAL(23, 292, 6), // "sender"
+QT_MOC_LITERAL(24, 299, 3) // "run"
 
     },
     "CPlatform\0slotDataScanFinish\0\0"
@@ -64,7 +65,7 @@ QT_MOC_LITERAL(23, 284, 3) // "run"
     "scrollChangeImage\0nValue\0setFilterMode\0"
     "setCheckedFamilyState\0checkReadyToRun\0"
     "selectAll\0checked\0checkFeatureBoxState\0"
-    "showPopUp\0sender\0run"
+    "checkBinOption\0showPopUp\0sender\0run"
 };
 #undef QT_MOC_LITERAL
 
@@ -74,7 +75,7 @@ static const uint qt_meta_data_CPlatform[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      13,   14, // methods
+      14,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -82,19 +83,20 @@ static const uint qt_meta_data_CPlatform[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,   79,    2, 0x0a /* Public */,
-       3,    2,   80,    2, 0x0a /* Public */,
-       6,    1,   85,    2, 0x0a /* Public */,
-       8,    1,   88,    2, 0x0a /* Public */,
-       8,    2,   91,    2, 0x0a /* Public */,
-      13,    1,   96,    2, 0x0a /* Public */,
-      15,    0,   99,    2, 0x0a /* Public */,
-      16,    0,  100,    2, 0x0a /* Public */,
-      17,    0,  101,    2, 0x0a /* Public */,
-      18,    1,  102,    2, 0x0a /* Public */,
-      20,    0,  105,    2, 0x0a /* Public */,
-      21,    1,  106,    2, 0x0a /* Public */,
-      23,    0,  109,    2, 0x0a /* Public */,
+       1,    0,   84,    2, 0x0a /* Public */,
+       3,    2,   85,    2, 0x0a /* Public */,
+       6,    1,   90,    2, 0x0a /* Public */,
+       8,    1,   93,    2, 0x0a /* Public */,
+       8,    2,   96,    2, 0x0a /* Public */,
+      13,    1,  101,    2, 0x0a /* Public */,
+      15,    0,  104,    2, 0x0a /* Public */,
+      16,    0,  105,    2, 0x0a /* Public */,
+      17,    0,  106,    2, 0x0a /* Public */,
+      18,    1,  107,    2, 0x0a /* Public */,
+      20,    0,  110,    2, 0x0a /* Public */,
+      21,    0,  111,    2, 0x0a /* Public */,
+      22,    1,  112,    2, 0x0a /* Public */,
+      24,    0,  115,    2, 0x0a /* Public */,
 
  // slots: parameters
     QMetaType::Void,
@@ -108,7 +110,8 @@ static const uint qt_meta_data_CPlatform[] = {
     QMetaType::Bool,
     QMetaType::Void, QMetaType::Bool,   19,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::QObjectStar,   22,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::QObjectStar,   23,
     QMetaType::Void,
 
        0        // eod
@@ -132,8 +135,9 @@ void CPlatform::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
             if (_a[0]) *reinterpret_cast< bool*>(_a[0]) = std::move(_r); }  break;
         case 9: _t->selectAll((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 10: _t->checkFeatureBoxState(); break;
-        case 11: _t->showPopUp((*reinterpret_cast< QObject*(*)>(_a[1]))); break;
-        case 12: _t->run(); break;
+        case 11: _t->checkBinOption(); break;
+        case 12: _t->showPopUp((*reinterpret_cast< QObject*(*)>(_a[1]))); break;
+        case 13: _t->run(); break;
         default: ;
         }
     }
@@ -164,13 +168,13 @@ int CPlatform::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 13)
+        if (_id < 14)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 13;
+        _id -= 14;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 13)
+        if (_id < 14)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 13;
+        _id -= 14;
     }
     return _id;
 }

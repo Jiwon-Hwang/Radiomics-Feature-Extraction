@@ -22,7 +22,6 @@
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QRadioButton>
-#include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
 
@@ -49,12 +48,12 @@ public:
     QCheckBox *checkBox_HGRE;
     QCheckBox *checkBox_GNUN;
     QCheckBox *checkBox_RLNU;
-    QWidget *gridLayoutWidget;
-    QGridLayout *gridLayout_2;
+    QGroupBox *groupBox_Bins;
+    QGridLayout *gridLayout_3;
+    QLineEdit *lineEdit_sBin;
     QComboBox *comboBox_nBins;
     QRadioButton *radioButton_FBN;
     QRadioButton *radioButton_FBS;
-    QLineEdit *lineEdit_sBin;
 
     void setupUi(QDialog *popup_GLRLM)
     {
@@ -232,15 +231,18 @@ public:
 
         gridLayout->addWidget(checkBox_RLNU, 8, 0, 1, 1);
 
-        gridLayoutWidget = new QWidget(popup_GLRLM);
-        gridLayoutWidget->setObjectName(QStringLiteral("gridLayoutWidget"));
-        gridLayoutWidget->setGeometry(QRect(20, 620, 401, 101));
-        gridLayout_2 = new QGridLayout(gridLayoutWidget);
-        gridLayout_2->setObjectName(QStringLiteral("gridLayout_2"));
-        gridLayout_2->setSizeConstraint(QLayout::SetDefaultConstraint);
-        gridLayout_2->setHorizontalSpacing(6);
-        gridLayout_2->setContentsMargins(0, 0, 0, 0);
-        comboBox_nBins = new QComboBox(gridLayoutWidget);
+        groupBox_Bins = new QGroupBox(popup_GLRLM);
+        groupBox_Bins->setObjectName(QStringLiteral("groupBox_Bins"));
+        groupBox_Bins->setGeometry(QRect(20, 620, 400, 100));
+        gridLayout_3 = new QGridLayout(groupBox_Bins);
+        gridLayout_3->setObjectName(QStringLiteral("gridLayout_3"));
+        lineEdit_sBin = new QLineEdit(groupBox_Bins);
+        lineEdit_sBin->setObjectName(QStringLiteral("lineEdit_sBin"));
+        lineEdit_sBin->setEnabled(false);
+
+        gridLayout_3->addWidget(lineEdit_sBin, 2, 1, 1, 1);
+
+        comboBox_nBins = new QComboBox(groupBox_Bins);
         comboBox_nBins->setObjectName(QStringLiteral("comboBox_nBins"));
         QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Fixed);
         sizePolicy1.setHorizontalStretch(0);
@@ -252,22 +254,18 @@ public:
         comboBox_nBins->setSizeAdjustPolicy(QComboBox::AdjustToContentsOnFirstShow);
         comboBox_nBins->setIconSize(QSize(16, 16));
 
-        gridLayout_2->addWidget(comboBox_nBins, 0, 1, 1, 1);
+        gridLayout_3->addWidget(comboBox_nBins, 0, 1, 1, 1);
 
-        radioButton_FBN = new QRadioButton(gridLayoutWidget);
+        radioButton_FBN = new QRadioButton(groupBox_Bins);
         radioButton_FBN->setObjectName(QStringLiteral("radioButton_FBN"));
+        radioButton_FBN->setChecked(true);
 
-        gridLayout_2->addWidget(radioButton_FBN, 0, 0, 1, 1);
+        gridLayout_3->addWidget(radioButton_FBN, 0, 0, 1, 1);
 
-        radioButton_FBS = new QRadioButton(gridLayoutWidget);
+        radioButton_FBS = new QRadioButton(groupBox_Bins);
         radioButton_FBS->setObjectName(QStringLiteral("radioButton_FBS"));
 
-        gridLayout_2->addWidget(radioButton_FBS, 1, 0, 1, 1);
-
-        lineEdit_sBin = new QLineEdit(gridLayoutWidget);
-        lineEdit_sBin->setObjectName(QStringLiteral("lineEdit_sBin"));
-
-        gridLayout_2->addWidget(lineEdit_sBin, 1, 1, 1, 1);
+        gridLayout_3->addWidget(radioButton_FBS, 2, 0, 1, 1);
 
 
         retranslateUi(popup_GLRLM);
@@ -298,6 +296,7 @@ public:
         checkBox_HGRE->setText(QApplication::translate("popup_GLRLM", "High Grey Run Emphasis", Q_NULLPTR));
         checkBox_GNUN->setText(QApplication::translate("popup_GLRLM", "Grey Non-Uniform Norm", Q_NULLPTR));
         checkBox_RLNU->setText(QApplication::translate("popup_GLRLM", "Run Length Non-Uniform", Q_NULLPTR));
+        groupBox_Bins->setTitle(QApplication::translate("popup_GLRLM", "Discretization", Q_NULLPTR));
         comboBox_nBins->clear();
         comboBox_nBins->insertItems(0, QStringList()
          << QApplication::translate("popup_GLRLM", "8", Q_NULLPTR)
@@ -306,7 +305,7 @@ public:
          << QApplication::translate("popup_GLRLM", "64", Q_NULLPTR)
         );
         comboBox_nBins->setCurrentText(QApplication::translate("popup_GLRLM", "8", Q_NULLPTR));
-        radioButton_FBN->setText(QApplication::translate("popup_GLRLM", "Fixed Bin Number (FBN)", Q_NULLPTR));
+        radioButton_FBN->setText(QApplication::translate("popup_GLRLM", "Fixed Bin Number (FBN)      ", Q_NULLPTR));
         radioButton_FBS->setText(QApplication::translate("popup_GLRLM", "Fixed Bin Size (FBS)", Q_NULLPTR));
     } // retranslateUi
 
