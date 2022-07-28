@@ -354,6 +354,7 @@ public:
 
         radioButton_FBS = new QRadioButton(groupBox_Bins);
         radioButton_FBS->setObjectName(QStringLiteral("radioButton_FBS"));
+        radioButton_FBS->setEnabled(false);
 
         gridLayout_4->addWidget(radioButton_FBS, 2, 0, 1, 1);
 
