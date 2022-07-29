@@ -357,7 +357,7 @@ public:
 
         checkBox_GLRLM = new QCheckBox(groupBox_Families);
         checkBox_GLRLM->setObjectName(QStringLiteral("checkBox_GLRLM"));
-        checkBox_GLRLM->setEnabled(false);
+        checkBox_GLRLM->setEnabled(true);
         checkBox_GLRLM->setFocusPolicy(Qt::NoFocus);
         checkBox_GLRLM->setChecked(false);
 

@@ -405,8 +405,10 @@ void CPlatform::loadSettings() {
 		}
 		ppopup_Histogram->ui->radioButton_FBN->setChecked(settings.value(ppopup_Histogram->ui->radioButton_FBN->objectName(), false).toBool());
 		ppopup_Histogram->ui->comboBox_nBins->setCurrentText(settings.value(ppopup_Histogram->ui->comboBox_nBins->objectName(), "32").toString());
+		ppopup_Histogram->ui->comboBox_nBins->setEnabled(settings.value(ppopup_Histogram->ui->radioButton_FBN->objectName()).toBool());
 		ppopup_Histogram->ui->radioButton_FBS->setChecked(settings.value(ppopup_Histogram->ui->radioButton_FBS->objectName(), false).toBool());
 		ppopup_Histogram->ui->lineEdit_sBin->setText(settings.value(ppopup_Histogram->ui->lineEdit_sBin->objectName()).toString());
+		ppopup_Histogram->ui->lineEdit_sBin->setEnabled(settings.value(ppopup_Histogram->ui->radioButton_FBS->objectName()).toBool());
 		settings.endGroup();
 
 
@@ -418,8 +420,10 @@ void CPlatform::loadSettings() {
 		}
 		ppopup_GLCM->ui->radioButton_FBN->setChecked(settings.value(ppopup_GLCM->ui->radioButton_FBN->objectName(), false).toBool());
 		ppopup_GLCM->ui->comboBox_nBins->setCurrentText(settings.value(ppopup_GLCM->ui->comboBox_nBins->objectName(), "32").toString());
+		ppopup_GLCM->ui->comboBox_nBins->setEnabled(settings.value(ppopup_GLCM->ui->radioButton_FBN->objectName()).toBool());
 		ppopup_GLCM->ui->radioButton_FBS->setChecked(settings.value(ppopup_GLCM->ui->radioButton_FBS->objectName(), false).toBool());
 		ppopup_GLCM->ui->lineEdit_sBin->setText(settings.value(ppopup_GLCM->ui->lineEdit_sBin->objectName()).toString());
+		ppopup_GLCM->ui->lineEdit_sBin->setEnabled(settings.value(ppopup_GLCM->ui->radioButton_FBS->objectName()).toBool());
 		settings.endGroup();
 
 
@@ -431,8 +435,10 @@ void CPlatform::loadSettings() {
 		}
 		ppopup_GLRLM->ui->radioButton_FBN->setChecked(settings.value(ppopup_GLRLM->ui->radioButton_FBN->objectName(), false).toBool());
 		ppopup_GLRLM->ui->comboBox_nBins->setCurrentText(settings.value(ppopup_GLRLM->ui->comboBox_nBins->objectName(), "32").toString());
+		ppopup_GLRLM->ui->comboBox_nBins->setEnabled(settings.value(ppopup_GLRLM->ui->radioButton_FBN->objectName()).toBool());
 		ppopup_GLRLM->ui->radioButton_FBS->setChecked(settings.value(ppopup_GLRLM->ui->radioButton_FBS->objectName(), false).toBool());
 		ppopup_GLRLM->ui->lineEdit_sBin->setText(settings.value(ppopup_GLRLM->ui->lineEdit_sBin->objectName()).toString());
+		ppopup_GLRLM->ui->lineEdit_sBin->setEnabled(settings.value(ppopup_GLRLM->ui->radioButton_FBS->objectName()).toBool());
 		settings.endGroup();
 
 

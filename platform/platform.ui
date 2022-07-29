@@ -531,7 +531,7 @@
               <item>
                <widget class="QCheckBox" name="checkBox_GLRLM">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="focusPolicy">
                  <enum>Qt::NoFocus</enum>
