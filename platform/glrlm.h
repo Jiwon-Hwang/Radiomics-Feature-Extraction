@@ -64,7 +64,8 @@ public:
 	float meanRun;
 
 	std::vector<short> get1DVectorOfPixels(short* psImage, unsigned char* pucMask);
-	std::vector<std::vector<unsigned short>> get2DVectorOfDiscretizedPixels_nBins(short* psImage, unsigned char* pucMask);
+	std::vector<std::vector<unsigned short>> get2DVectorOfDiscretizedPixels_FBN(short* psImage, unsigned char* pucMask);
+	std::vector<std::vector<unsigned short>> get2DVectorOfDiscretizedPixels_FBS(short* psImage, unsigned char* pucMask);
 	void getXYDirections(int &directionX, int &directionY, int angle);
 	int findIndex(int size, unsigned short target);
 	void fill2DGLRLMatrix(std::vector<std::vector<unsigned short>> vector2DofDiscretizedPixels, std::vector<std::vector<float>> &GLRLMatrix, int angle);

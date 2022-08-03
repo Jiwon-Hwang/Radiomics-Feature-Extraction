@@ -90,7 +90,7 @@ vector<short> GLCM::get1DVectorOfPixels(short* psImage, unsigned char* pucMask) 
 
 	return vector1DofOriPixels;
 }
-vector<vector<unsigned short>> GLCM::get2DVectorOfDiscretizedPixels_nBins(short* psImage, unsigned char* pucMask) {
+vector<vector<unsigned short>> GLCM::get2DVectorOfDiscretizedPixels_FBN(short* psImage, unsigned char* pucMask) {
 
 	// min(front) : -1, max(back) : 180
 	float min = (float)*min_element(vector1DofOriPixelsInROI.begin(), vector1DofOriPixelsInROI.end()); // min_element() : pointer return
@@ -112,7 +112,7 @@ vector<vector<unsigned short>> GLCM::get2DVectorOfDiscretizedPixels_nBins(short*
 	//subtract minimum value from every matrix element
 	transform(tempFloatVec.begin(), tempFloatVec.end(), tempFloatVec.begin(), bind2nd(minus<float>(), min)); // minus<T> : 이항 연산 함수 객체 (-) / bind2nd : 2번째 인수를 고정해 함수 객체로 변환 / transform : 일괄 연산
 
-																											 //get the range
+	//get the range
 	float range = (max - min) / nBins; // range : 몫 (width of a bin) => ***float이 들어가면 / 는 몫이 아니라 진짜 "나누기" 연산!!!***
 
 	//divide every element of the matrix by the range
@@ -128,6 +128,37 @@ vector<vector<unsigned short>> GLCM::get2DVectorOfDiscretizedPixels_nBins(short*
 			int index = row * nWidth + col;
 			unsigned char maskValue = pucMask[index];
 			unsigned short imageValue_discretized = (unsigned short)ceil(tempFloatVec[index]); // psImage (ori) -> tempFloatVec (discretized)
+
+			// ROI 밖(0)과 안(discretized) 픽셀값들 2D Vec에 할당
+			vector2DofDiscretizedPixels[row][col] = (maskValue >(unsigned char)0) ? imageValue_discretized : 0;
+		}
+	}
+
+	return vector2DofDiscretizedPixels;
+}
+vector<vector<unsigned short>> GLCM::get2DVectorOfDiscretizedPixels_FBS(short* psImage, unsigned char* pucMask) {
+
+	float min = (float)*min_element(vector1DofOriPixelsInROI.begin(), vector1DofOriPixelsInROI.end());
+	float max = (float)*max_element(vector1DofOriPixelsInROI.begin(), vector1DofOriPixelsInROI.end());
+	vector<float> tempFloatVec(vector1DofOriPixels.begin(), vector1DofOriPixels.end()); 
+
+	//subtract minimum value from every matrix element
+	transform(tempFloatVec.begin(), tempFloatVec.end(), tempFloatVec.begin(), bind2nd(minus<float>(), min));
+
+	//divide every element of the matrix by the sBin (width of bin)
+	if (isnan(sBin)) {
+		cout << "invalid value error : sBin! It will be replaced with nBins=32..." << endl;
+		sBin = (max - min) / 32; // range
+	}
+	transform(tempFloatVec.begin(), tempFloatVec.end(), tempFloatVec.begin(), bind2nd(divides<float>(), sBin));
+	
+	//do rounding(floor) +1, type casting(unsigned short) and asigning to 2D Vec (with ROI)
+	vector<vector<unsigned short>> vector2DofDiscretizedPixels(nHeight, vector<unsigned short>(nWidth, 0)); 
+	for (int row = 0; row < nHeight; row++) {
+		for (int col = 0; col < nWidth; col++) {
+			int index = row * nWidth + col;
+			unsigned char maskValue = pucMask[index];
+			unsigned short imageValue_discretized = (unsigned short)floor(tempFloatVec[index]) + 1; 
 
 			// ROI 밖(0)과 안(discretized) 픽셀값들 2D Vec에 할당
 			vector2DofDiscretizedPixels[row][col] = (maskValue >(unsigned char)0) ? imageValue_discretized : 0;
@@ -819,7 +850,7 @@ void GLCM::featureExtraction(short* psImage, unsigned char* pucMask, int nHeight
 	nHeight = nHeight_;
 	nWidth = nWidth_;
 	vector1DofOriPixels = get1DVectorOfPixels(psImage, pucMask); 
-	vector2DofDiscretizedPixels = get2DVectorOfDiscretizedPixels_nBins(psImage, pucMask); // 슬라이스마다 초기화
+	vector2DofDiscretizedPixels = isFBN? get2DVectorOfDiscretizedPixels_FBN(psImage, pucMask) : get2DVectorOfDiscretizedPixels_FBS(psImage, pucMask); // 슬라이스마다 초기화
 	
 	vector<vector<float>> temp4DirVals2DVec;	// 슬라이스마다 초기화 (for. 4방향 1d vec 평균내기)
 	vector<float> tempValues1DVec;				// 슬라이스마다 초기화 (for. final2DVec에 누적)

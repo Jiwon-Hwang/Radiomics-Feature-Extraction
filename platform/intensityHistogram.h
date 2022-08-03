@@ -66,7 +66,8 @@ class IntensityHistogram
 		std::vector<double> histGradient;
 
 		std::vector<short> getVectorOfPixelsInROI(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
-		std::vector<unsigned short> getVectorOfDiscretizedPixels_nBins();
+		std::vector<unsigned short> getVectorOfDiscretizedPixels_FBN();
+		std::vector<unsigned short> getVectorOfDiscretizedPixels_FBS();
 		std::vector<unsigned short> getVectorOfDiffGreyLevels();
 		std::vector<double> getHistogram();
 		std::vector<double> getProbabilities();

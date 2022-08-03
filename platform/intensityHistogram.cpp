@@ -71,7 +71,7 @@ vector<short> IntensityHistogram::getVectorOfPixelsInROI(short* psImage, unsigne
 
 	return vectorOfOriPixels;
 }
-vector<unsigned short> IntensityHistogram::getVectorOfDiscretizedPixels_nBins() {
+vector<unsigned short> IntensityHistogram::getVectorOfDiscretizedPixels_FBN() {
 
 	float min = (float)*min_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end()); // min_element() : pointer return
 	float max = (float)*max_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end());
@@ -90,6 +90,10 @@ vector<unsigned short> IntensityHistogram::getVectorOfDiscretizedPixels_nBins() 
 	transform(tempFloatVec.begin(), tempFloatVec.end(), tempFloatVec.begin(), bind2nd(minus<float>(), min)); // minus<T> : 이항 연산 함수 객체 (-) / bind2nd : 2번째 인수를 고정해 함수 객체로 변환 / transform : 일괄 연산
 
 	//get the range
+	if (nBins == -1) {
+		cout << "invalid value error : nBins! It will be replaced with 32..." << endl;
+		nBins = 32;
+	}
 	float range = (max - min) / nBins; // range : 몫 (width of a bin) => ***float이 들어가면 / 는 몫이 아니라 진짜 "나누기" 연산!!!***
 
 	//divide every element of the matrix by the range
@@ -101,6 +105,34 @@ vector<unsigned short> IntensityHistogram::getVectorOfDiscretizedPixels_nBins() 
 	//do rounding
 	for (int i = 0; i < tempFloatVec.size(); i++) {
 		tempFloatVec[i] = ceil(tempFloatVec[i]);
+	}
+
+	//type casting
+	vector<unsigned short> vectorOfDiscretizedPixels(tempFloatVec.begin(), tempFloatVec.end()); // 양자화한 최종 결과 픽셀값들 담을 벡터
+
+	sort(vectorOfDiscretizedPixels.begin(), vectorOfDiscretizedPixels.end());
+
+	return vectorOfDiscretizedPixels;
+}
+vector<unsigned short> IntensityHistogram::getVectorOfDiscretizedPixels_FBS() {
+
+	float min = (float)*min_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end());
+	float max = (float)*max_element(vectorOfOriPixels.begin(), vectorOfOriPixels.end());
+	vector<float> tempFloatVec(vectorOfOriPixels.begin(), vectorOfOriPixels.end());
+
+	//subtract minimum value from every matrix element
+	transform(tempFloatVec.begin(), tempFloatVec.end(), tempFloatVec.begin(), bind2nd(minus<float>(), min));
+
+	//divide every element of the matrix by the sBin (width of bin)
+	if (isnan(sBin)) {
+		cout << "invalid value error : sBin! It will be replaced with nBins=32..." << endl;
+		sBin = (max - min) / 32; // range
+	}
+	transform(tempFloatVec.begin(), tempFloatVec.end(), tempFloatVec.begin(), bind2nd(divides<float>(), sBin));
+
+	// do rounding and +1
+	for (int i = 0; i<tempFloatVec.size(); i++) {
+		tempFloatVec[i] = floor(tempFloatVec[i]) + 1; // 내림(버림)
 	}
 
 	//type casting
@@ -614,7 +646,7 @@ void IntensityHistogram::featureExtraction(short* psImage, unsigned char* pucMas
 
 	// get histogram and etc
 	vectorOfOriPixels = getVectorOfPixelsInROI(psImage, pucMask, nHeight, nWidth);
-	vectorOfDiscretizedPixels = getVectorOfDiscretizedPixels_nBins(); // 슬라이스마다 초기화
+	vectorOfDiscretizedPixels = isFBN? getVectorOfDiscretizedPixels_FBN() : getVectorOfDiscretizedPixels_FBS(); // 슬라이스마다 초기화
 	nPixels = vectorOfDiscretizedPixels.size();
 	diffGreyLevels = getVectorOfDiffGreyLevels();
 	hist = getHistogram();

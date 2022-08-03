@@ -69,7 +69,8 @@ public:
 	std::vector<float> sumProbRows;		// for. correlation
 
 	std::vector<short> get1DVectorOfPixels(short* psImage, unsigned char* pucMask);
-	std::vector<std::vector<unsigned short>> get2DVectorOfDiscretizedPixels_nBins(short* psImage, unsigned char* pucMask);
+	std::vector<std::vector<unsigned short>> get2DVectorOfDiscretizedPixels_FBN(short* psImage, unsigned char* pucMask);
+	std::vector<std::vector<unsigned short>> get2DVectorOfDiscretizedPixels_FBS(short* psImage, unsigned char* pucMask);
 	void getXYDirections(int &directionX, int &directionY, int angle);
 	std::vector<std::pair<unsigned short, unsigned short>> getNeighbours2D(unsigned char* pucMask, int directionX, int directionY);
 	void fill2DGLCMatrix(std::vector<std::vector<float>> &GLCMatrix, unsigned char* pucMask, int angle);
