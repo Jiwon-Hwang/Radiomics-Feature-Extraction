@@ -54,7 +54,9 @@ class IntensityHistogram
 		int nCheckedFeatures;					
 
 		// get histogram //
-		int nBins = 32;
+		bool isFBN = false;
+		int nBins = -1;			// FBN (Fixed Bin Number)
+		float sBin = NAN;		// FBS (Fixed Bin Size(Width))
 		int nPixels;
 		std::vector<short> vectorOfOriPixels;					// sorted
 		std::vector<unsigned short> vectorOfDiscretizedPixels;  // sorted

@@ -45,7 +45,9 @@ public:
 	int nCheckedFeatures;
 
 	// get GLRL-matrix //
-	int nBins = 32;
+	bool isFBN = false;
+	int nBins = -1;			// FBN (Fixed Bin Number)
+	float sBin = NAN;		// FBS (Fixed Bin Size)
 	int sizeMatrix;		// N_g == nBins == sizeMatrix == maxIntensity
 	int maxRunLength;	// N_r
 	int nHeight;

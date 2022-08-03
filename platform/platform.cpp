@@ -508,8 +508,13 @@ void CPlatform::saveSettings() {
 	settings.setValue(ppopup_Histogram->ui->comboBox_nBins->objectName(), ppopup_Histogram->ui->comboBox_nBins->currentText());
 	settings.setValue(ppopup_Histogram->ui->radioButton_FBS->objectName(), QVariant(ppopup_Histogram->ui->radioButton_FBS->isChecked()));
 	settings.setValue(ppopup_Histogram->ui->lineEdit_sBin->objectName(), ppopup_Histogram->ui->lineEdit_sBin->text());
-	intenseHisto.nBins = ppopup_Histogram->ui->comboBox_nBins->currentText().toInt();
-	//intenseHisto.sBin = ppopup_Histogram->ui->lineEdit_sBin->text().toInt();
+	intenseHisto.isFBN = ppopup_Histogram->ui->radioButton_FBN->isChecked() ? true : false;
+	if (intenseHisto.isFBN) {
+		intenseHisto.nBins = ppopup_Histogram->ui->comboBox_nBins->currentText().toInt();
+	}
+	else {
+		intenseHisto.sBin = ppopup_Histogram->ui->lineEdit_sBin->text().toInt();
+	}
 	settings.endGroup();
 
 
@@ -532,8 +537,13 @@ void CPlatform::saveSettings() {
 	settings.setValue(ppopup_GLCM->ui->comboBox_nBins->objectName(), ppopup_GLCM->ui->comboBox_nBins->currentText());
 	settings.setValue(ppopup_GLCM->ui->radioButton_FBS->objectName(), QVariant(ppopup_GLCM->ui->radioButton_FBS->isChecked()));
 	settings.setValue(ppopup_GLCM->ui->lineEdit_sBin->objectName(), ppopup_GLCM->ui->lineEdit_sBin->text());
-	glcm.nBins = ppopup_GLCM->ui->comboBox_nBins->currentText().toInt(); // nBins == sizeMatrix
-	//glcm.sBin = ppopup_GLCM->ui->lineEdit_sBin->text().toInt();
+	glcm.isFBN = ppopup_GLCM->ui->radioButton_FBN->isChecked() ? true : false;
+	if (glcm.isFBN) {
+		glcm.nBins = ppopup_GLCM->ui->comboBox_nBins->currentText().toInt();
+	}
+	else {
+		glcm.sBin = ppopup_GLCM->ui->lineEdit_sBin->text().toInt();
+	}
 	settings.endGroup();
 
 	// GLRLM (popup)
@@ -551,8 +561,13 @@ void CPlatform::saveSettings() {
 	settings.setValue(ppopup_GLRLM->ui->comboBox_nBins->objectName(), ppopup_GLRLM->ui->comboBox_nBins->currentText());
 	settings.setValue(ppopup_GLRLM->ui->radioButton_FBS->objectName(), QVariant(ppopup_GLRLM->ui->radioButton_FBS->isChecked()));
 	settings.setValue(ppopup_GLRLM->ui->lineEdit_sBin->objectName(), ppopup_GLRLM->ui->lineEdit_sBin->text());
-	glrlm.nBins = ppopup_GLRLM->ui->comboBox_nBins->currentText().toInt(); // nBins == sizeMatrix
-	//glrlm.sBin = ppopup_GLRLM->ui->lineEdit_sBin->text().toInt();
+	glrlm.isFBN = ppopup_GLRLM->ui->radioButton_FBN->isChecked() ? true : false;
+	if (glrlm.isFBN) {
+		glrlm.nBins = ppopup_GLRLM->ui->comboBox_nBins->currentText().toInt();
+	}
+	else {
+		glrlm.sBin = ppopup_GLRLM->ui->lineEdit_sBin->text().toInt();
+	}
 	settings.endGroup();
 
 

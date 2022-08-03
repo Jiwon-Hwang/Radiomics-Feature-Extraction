@@ -54,7 +54,9 @@ public:
 	int nCheckedFeatures;
 
 	// get GLC-matrix //
-	int nBins = 32;
+	bool isFBN = false;
+	int nBins = -1;			// FBN (Fixed Bin Number)
+	float sBin = NAN;		// FBS (Fixed Bin Size)
 	int sizeMatrix; // nBins == sizeMatrix == maxIntensity
 	int nHeight;
 	int nWidth;
