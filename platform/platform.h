@@ -47,6 +47,8 @@
 #include "popup_Statistics.h"
 #include "ui_popup_GLRLM.h"
 #include "popup_GLRLM.h"
+#include "ui_popup_Intensity.h"
+#include "popup_Intensity.h"
 
 
 #include "dcmtk/dcmimgle/dcmimage.h"
@@ -64,6 +66,7 @@
 #include "glcm.h"
 #include "intensityStatistics.h"
 #include "glrlm.h"
+#include "localIntensity.h"
 
 
 #define MAX_FILE_LENGTH 64
@@ -101,21 +104,21 @@ public:
 	void setThread();
 
 public:	
-	enum FAMILY { E_INTENSESTAT, E_INTENSEHISTO, E_LOCALINTENSE, E_MORPHOLOGY, E_GLCM, E_GLRLM, FAMILY_COUNT };
+	enum FAMILY { E_MORPHOLOGY, E_LOCALINTENSE, E_INTENSESTAT, E_INTENSEHISTO, E_GLCM, E_GLRLM, FAMILY_COUNT };
 
 	// Feature Family objects
+	IntensityHistogram morphology;
+	LocalIntensity localIntense;
 	IntensityStatistics intenseStat;
 	IntensityHistogram intenseHisto;
-	IntensityHistogram localIntense;
-	IntensityHistogram morphology;
 	GLCM glcm;
 	GLRLM glrlm;
 
 	// pop-up objects
+	popup_Histogram *ppopup_Morph;
+	popup_Intensity *ppopup_Intensity;
 	popup_Statistics *ppopup_Statistics;
 	popup_Histogram *ppopup_Histogram;
-	popup_Histogram *ppopup_Intensity;
-	popup_Histogram *ppopup_Morph;
 	popup_GLCM *ppopup_GLCM;
 	popup_GLRLM *ppopup_GLRLM;
 		
@@ -145,10 +148,8 @@ public:
 	void resampling(short* psImage, unsigned char* pucMask, int &nWidth, int &nHeight, int nPixelsInMask, float pixelSpacingX, float pixelSpacingY, cv::Mat &image_resampled, cv::Mat &mask_resampled);
 
 	// feature extraction //
-	void featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
+	void featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth, float pixelSpacingX, float pixelSpacingY);
 	void averageAllSlices();
-
-	short calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth); // class 함수로 넣기, m_ciData.getPixelSpacing() call
 					
 	// write CSV //
 	void presetCSVFile(string csvName);

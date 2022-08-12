@@ -322,7 +322,7 @@ public:
 
         checkBox_Intensity = new QCheckBox(groupBox_Families);
         checkBox_Intensity->setObjectName(QStringLiteral("checkBox_Intensity"));
-        checkBox_Intensity->setEnabled(false);
+        checkBox_Intensity->setEnabled(true);
         checkBox_Intensity->setFocusPolicy(Qt::NoFocus);
         checkBox_Intensity->setCheckable(true);
         checkBox_Intensity->setChecked(false);

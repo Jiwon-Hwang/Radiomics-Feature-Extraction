@@ -230,6 +230,9 @@ void CPlatform::createPopup() {
 	ppopup_GLRLM = new popup_GLRLM;
 	ppopup_GLRLM->setModal(true);
 
+	ppopup_Intensity = new popup_Intensity;
+	ppopup_Intensity->setModal(true);
+
 }
 void CPlatform::createProgressBar()
 {
@@ -267,10 +270,19 @@ void CPlatform::setSignalSlot()
 	}
 
 	// pop-up
+	
+	// Local Intensity (popup)
+	connect(ppopup_Intensity->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool))); // 'All' btn 눌렀을 때 나머지 체크박스 선택/해제
+	QList<QCheckBox *> featureBox = ppopup_Intensity->ui->groupBox_Features->findChildren<QCheckBox *>(); // 나머지 체크박스들 눌렀을 때 'All' 선택/해제
+	for (int i = 0; i < featureBox.size(); i++) {
+		if (featureBox[i]->objectName() == "checkBox_All") continue;
+		connect(featureBox[i], SIGNAL(clicked()), this, SLOT(checkFeatureBoxState()));
+	}
+	featureBox.clear();
 
 	// Intensity Statistics (popup)
-	connect(ppopup_Statistics->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool))); // 'All' btn 눌렀을 때 나머지 체크박스 선택/해제
-	QList<QCheckBox *> featureBox = ppopup_Statistics->ui->groupBox_Features->findChildren<QCheckBox *>(); // 나머지 체크박스들 눌렀을 때 'All' 선택/해제
+	connect(ppopup_Statistics->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool))); 
+	featureBox = ppopup_Statistics->ui->groupBox_Features->findChildren<QCheckBox *>();
 	for (int i = 0; i < featureBox.size(); i++) {
 		if (featureBox[i]->objectName() == "checkBox_All") continue;
 		connect(featureBox[i], SIGNAL(clicked()), this, SLOT(checkFeatureBoxState()));
@@ -313,20 +325,20 @@ void CPlatform::setSignalSlot()
 }
 void CPlatform::showPopUp(QObject* sender) {
 	// for loop으로 대체 가능 (for auto, break)
+	if (sender == ui.checkBox_Morph) {
+		//ppopup_Histogram->show();
+	}
+
+	if (sender == ui.checkBox_Intensity) {
+		ppopup_Intensity->show();
+	}
+
 	if (sender == ui.checkBox_Statistics) {
 		ppopup_Statistics->show();
 	}
 
 	if (sender == ui.checkBox_Histogram) {
 		ppopup_Histogram->show();
-	}
-
-	if (sender == ui.checkBox_Intensity) {
-		//ppopup_Histogram->show();
-	}
-
-	if (sender == ui.checkBox_Morph) {
-		//ppopup_Histogram->show();
 	}
 
 	if (sender == ui.checkBox_GLCM) {
@@ -387,6 +399,15 @@ void CPlatform::loadSettings() {
 		settings.endGroup();
 
 		
+		// Local Intensity (popup) 
+		settings.beginGroup("popup_Intensity");
+		int nfeatures_Intensity = LocalIntensity::FEATURE_COUNT;
+		for (int i = 0; i < nfeatures_Intensity + 1; i++) {
+			ppopup_Intensity->filterGroup->button(i)->setChecked(settings.value(ppopup_Intensity->filterGroup->button(i)->objectName(), false).toBool());
+		}
+		settings.endGroup();
+
+
 		// Intensity Statistics (popup) 
 		settings.beginGroup("popup_Statistics");
 		int nfeatures_Statistics = IntensityStatistics::FEATURE_COUNT;
@@ -478,6 +499,20 @@ void CPlatform::saveSettings() {
 
 	// popup - save settings to config and to object's member variable
 
+	// Local Intensity (popup)
+	settings.beginGroup("popup_Intensity");
+	localIntense.isCheckedFeature.assign(LocalIntensity::FEATURE_COUNT, false);
+	localIntense.nCheckedFeatures = 0;
+	int nfeatures_Intensity = LocalIntensity::FEATURE_COUNT;
+	for (int i = 0; i < nfeatures_Intensity + 1; i++) {
+		settings.setValue(ppopup_Intensity->filterGroup->button(i)->objectName(), QVariant(ppopup_Intensity->filterGroup->button(i)->isChecked()));
+		if (i == nfeatures_Intensity) break;
+		localIntense.isCheckedFeature[i] = ppopup_Intensity->filterGroup->button(i)->isChecked();
+		if (localIntense.isCheckedFeature[i] == true) localIntense.nCheckedFeatures++;
+	}
+	settings.endGroup();
+
+
 	// Intensity Statistics (popup)
 	settings.beginGroup("popup_Statistics");
 	intenseStat.isCheckedFeature.assign(IntensityStatistics::FEATURE_COUNT, false);
@@ -518,10 +553,6 @@ void CPlatform::saveSettings() {
 	settings.endGroup();
 
 
-	// Local Intensity (popup)
-
-	// Morphological (popup)
-
 	// GLCM (popup)
 	settings.beginGroup("popup_GLCM");
 	glcm.isCheckedFeature.assign(GLCM::FEATURE_COUNT, false);
@@ -545,6 +576,7 @@ void CPlatform::saveSettings() {
 		glcm.sBin = ppopup_GLCM->ui->lineEdit_sBin->text().toInt();
 	}
 	settings.endGroup();
+
 
 	// GLRLM (popup)
 	settings.beginGroup("popup_GLRLM");
@@ -580,15 +612,9 @@ void CPlatform::initIsActivatedFamily(int FAMILY_IDX)
 
 	switch (FAMILY_IDX) 
 	{
-		case E_INTENSESTAT:
-			if (settings.value(ui.checkBox_Statistics->objectName()).toBool() == true) {
-				intenseStat.isActivatedFamily = true;
-			}
-			break;
-
-		case E_INTENSEHISTO:
-			if (settings.value(ui.checkBox_Histogram->objectName()).toBool() == true) {
-				intenseHisto.isActivatedFamily = true;
+		case E_MORPHOLOGY:
+			if (settings.value(ui.checkBox_Morph->objectName()).toBool() == true) {
+				morphology.isActivatedFamily = true;
 			}
 			break;
 
@@ -598,9 +624,15 @@ void CPlatform::initIsActivatedFamily(int FAMILY_IDX)
 			}
 			break;
 
-		case E_MORPHOLOGY:
-			if (settings.value(ui.checkBox_Morph->objectName()).toBool() == true) {
-				morphology.isActivatedFamily = true;
+		case E_INTENSESTAT:
+			if (settings.value(ui.checkBox_Statistics->objectName()).toBool() == true) {
+				intenseStat.isActivatedFamily = true;
+			}
+			break;
+
+		case E_INTENSEHISTO:
+			if (settings.value(ui.checkBox_Histogram->objectName()).toBool() == true) {
+				intenseHisto.isActivatedFamily = true;
 			}
 			break;
 
@@ -1256,8 +1288,8 @@ void CPlatform::resampling(short* psImage, unsigned char* pucMask, int &nWidth, 
 
 		if (float(outputSpacing[0]) * float(outputSpacing[1]) < pixelSpacingX * pixelSpacingY) {
 			// up-sampling
-			cv::resize(image, image_resampled, Size(newImageSize[0], newImageSize[1]), INTER_NEAREST); 
-			cv::resize(mask, mask_resampled, Size(newImageSize[0], newImageSize[1]), INTER_LINEAR);
+			cv::resize(image, image_resampled, Size(newImageSize[0], newImageSize[1]), INTER_NEAREST); // Size(width, height)
+			cv::resize(mask, mask_resampled, Size(newImageSize[0], newImageSize[1]), INTER_LINEAR);  // Size(width, height)
 		}
 		else {
 			// down-sampling
@@ -1347,6 +1379,18 @@ void CPlatform::setCheckedFamilyState() { // check box 클릭될 때마다(시그널) 호�
 	// for loop으로 대체 가능 (for auto, break)
 	QObject* obj = sender();
 
+	if (obj == ui.checkBox_Morph) {
+
+	}
+
+	if (obj == ui.checkBox_Intensity) {
+		localIntense.isActivatedFamily = !localIntense.isActivatedFamily;
+
+		if (localIntense.isActivatedFamily == true) {
+			showPopUp(obj); // pop-up
+		}
+	}
+
 	if (obj == ui.checkBox_Statistics) {
 		intenseStat.isActivatedFamily = !intenseStat.isActivatedFamily;
 
@@ -1361,14 +1405,6 @@ void CPlatform::setCheckedFamilyState() { // check box 클릭될 때마다(시그널) 호�
 		if (intenseHisto.isActivatedFamily == true) {
 			showPopUp(obj); // pop-up
 		}
-	}
-
-	if (obj == ui.checkBox_Intensity) {
-
-	}
-
-	if (obj == ui.checkBox_Morph) {
-
 	}
 
 	if (obj == ui.checkBox_GLCM) {
@@ -1388,23 +1424,22 @@ void CPlatform::setCheckedFamilyState() { // check box 클릭될 때마다(시그널) 호�
 	}
 
 }
-void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth) {
+void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth, float pixelSpacingX, float pixelSpacingY) {
 	// for loop으로 대체 가능 (for auto, break)
+	if (ui.checkBox_Morph->isChecked()) {
+
+	}
+
+	if (localIntense.isActivatedFamily) {
+		localIntense.featureExtraction(psImage, pucMask, nHeight, nWidth, pixelSpacingX, pixelSpacingY);
+	}
+
 	if (intenseStat.isActivatedFamily) {
 		intenseStat.featureExtraction(psImage, pucMask, nHeight, nWidth);
 	}
 
 	if (intenseHisto.isActivatedFamily) {
 		intenseHisto.featureExtraction(psImage, pucMask, nHeight, nWidth);
-	}
-
-	if (ui.checkBox_Intensity->isChecked()) {
-		//short localIntensityPeak = calcLocalIntensityPeak(psImage, pucMask, nHeight, nWidth);
-		//localIntense.push_back(localIntensityPeak);
-	}
-
-	if (ui.checkBox_Morph->isChecked()) {
-
 	}
 
 	if (glcm.isActivatedFamily) {
@@ -1444,109 +1479,6 @@ void CPlatform::averageAllSlices() {
 
 }
 
-// [ 3.2 Local Intensity Features ]
-short CPlatform::calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask, int nHeight, int nWidth) {
-
-	// 1. get center pos of max (intensity peak in ROI)
-	pair<int, int> posOfCenter; // 현재 임시 좌표 및 center(max) 좌표 => (row, col)
-	short maxValue = 0; // 현재 임시 좌표 및 최종 peak(max) 값
-
-	for (int row = 0; row < nHeight; row++) {
-		for (int col = 0; col < nWidth; col++) {
-			int index = row * nWidth + col; // 1차원으로 접근
-			unsigned char maskValue = pucMask[index];
-			short imageValue = pusImage[index];
-
-			// ROI 내부 && 임시 최대값보다 큰 값 선택 (ROI가 없으면 계속 pass)
-			if (maskValue >(unsigned char)0 && imageValue > maxValue) {
-				maxValue = imageValue;
-				//posOfCenter = { row, col };	// c++ 11이상 (vs2012에서 안돼용 ㅜㅜ)
-				posOfCenter = make_pair(row, col);
-			}
-		}
-	}
-
-	cout << "maxValue : " << maxValue << endl; // 180
-	cout << "posOfCenter : " << posOfCenter.first << ", " << posOfCenter.second << endl; // (230, 246)
-
-	/*
-	// 2. calculateConvolutionMatrix(image)
-	// 2-1. get the size of the convolutional matrix (getConvMatrixSize) and allocate convMatrix
-	float radius = 6.2;
-	double pixelSpacing = m_ciData.getPixelSpacing(9); // 0.650391mm
-	int nPixels = 2 * floor((radius - (float)pixelSpacing / 2.0) / pixelSpacing) + 1; // floor : 버림. nPixels (19) : 원모양 컨볼루션 마스크의 지름에 포함되는 최대 픽셀 개수 (가로, 세로 길이)
-
-	unsigned char** convMatrix = new unsigned char*[nPixels]; // 2차원 convolution mask 동적 할당. nPixels개 만큼의 포인터를 행으로 갖고 있는 배열 (nPixels 행)
-
-	for (int row = 0; row < nPixels; row++) {
-	convMatrix[row] = new unsigned char[nPixels]; // 각 행의 열값들 채우기(초기화)
-	memset(convMatrix[row], 0, sizeof(unsigned char)*nPixels); // 메모리 공간을 0으로 초기화
-	}
-
-	// 2-2. fill the convolutional matrix (19 x 19)
-	pair<float, float> tempPos = { 0, 0 };
-	float distFromCenter;
-
-	for (int row = 0; row < nPixels; row++) {
-	for (int col = 0; col < nPixels; col++) {
-	tempPos.first = float(row) * pixelSpacing + pixelSpacing / 2 - (posOfCenter.first + 0.5) * pixelSpacing; // X축(row) 방향 거리(mm)
-	tempPos.second = float(col) * pixelSpacing + pixelSpacing / 2 - (posOfCenter.second + 0.5) * pixelSpacing; // Y
-	cout << "tempPos.first : " << tempPos.first << endl;
-	cout << "tempPos.second : " << tempPos.second << endl;
-
-	distFromCenter = sqrt(pow((tempPos.first - (posOfCenter.first + 0.5)*pixelSpacing), 2) + pow((tempPos.second - (posOfCenter.second + 0.5) * pixelSpacing), 2));
-	if (abs(tempPos.first) <= 6.2 && abs(tempPos.second) <= 6.2) {
-	//cout << "hi?" << endl;
-	convMatrix[row][col] = 1;
-	}
-	//cout << convMatrix[row][col] << " ";
-	}
-	//cout << endl;
-	}
-
-
-	// convMatrix 찍어보기? size -> nPixel or 512?
-	Mat img(Size(nPixels, nPixels), CV_8UC1, convMatrix);
-	imshow("img", img);
-	waitKey(0);
-
-
-	// 2-3. calculateConvolutionMatrix => getConvMatix & fillConvMatrix 호출 후 convMatrix return (nPixels x nPixels 크기)
-	*/
-
-	// 2. check distFromCenter and calculate sum (mean) 
-	float radius = 6.2;
-	double pixelSpacing = m_ciData.getPixelSpacing(9); // 0.650391mm
-	int nrPixels = floor((radius - (float)pixelSpacing / 2.0) / pixelSpacing); // 9. floor : 버림
-	int nPixels = 2 * nrPixels + 1; // 19
-
-	pair<float, float> tempDist;
-	float distFromCenter;
-	short sumIntensity = 0;
-	short meanIntensity;
-	int cnt = 0; // 279
-
-	// [230-9][246-9] center 좌표의 픽셀로부터 거리 계산 => 9 : nrPixels
-	for (int row = posOfCenter.first - nrPixels; row < posOfCenter.first + nrPixels; row++) {
-		for (int col = posOfCenter.second - nrPixels; col < posOfCenter.second + nrPixels; col++) {
-			tempDist.first = float(row) * pixelSpacing + pixelSpacing / 2 - (posOfCenter.first + 0.5) * pixelSpacing; // X축(row) 방향 중점과의 거리(mm) => X_temp - X_center
-			tempDist.second = float(col) * pixelSpacing + pixelSpacing / 2 - (posOfCenter.second + 0.5) * pixelSpacing; // Y
-			distFromCenter = sqrt(pow(tempDist.first, 2) + pow(tempDist.second, 2));
-			if (distFromCenter <= 6.2) {
-				// sum pixel
-				int index = row * nWidth + col;
-				sumIntensity += pusImage[index];
-				cnt++;
-			}
-		}
-	}
-
-	meanIntensity = sumIntensity / cnt;
-	cout << "meanIntensity : " << meanIntensity << endl;
-
-	return meanIntensity;
-}
-
 
 // preset csv file // 
 string getCurrentTime()
@@ -1566,6 +1498,16 @@ void CPlatform::presetCSVFile(string csvName) {
 	// write family name 
 	resultCSV << " " << "," << " " << "," << " " << ",";
 
+	if (morphology.isActivatedFamily) {
+		for (int i = 0; i < morphology.nCheckedFeatures; i++) {
+			resultCSV << "Morphology" << ",";
+		}
+	}
+	if (localIntense.isActivatedFamily) {
+		for (int i = 0; i < localIntense.nCheckedFeatures; i++) {
+			resultCSV << "Local Intensity" << ",";
+		}
+	}
 	if (intenseStat.isActivatedFamily) {
 		for (int i = 0; i < intenseStat.nCheckedFeatures; i++) {
 			resultCSV << "Statistics" << ",";
@@ -1586,23 +1528,25 @@ void CPlatform::presetCSVFile(string csvName) {
 			resultCSV << "GLRLM" << ",";
 		}
 	}
-	/*
-	if (localIntense.isActivatedFamily) {
-	for (int i = 0; i < localIntense.nCheckedFeatures; i++) {
-	resultCSV << "Local Intensity" << ",";
-	}
-	}
-	if (morphology.isActivatedFamily) {
-	for (int i = 0; i < morphology.nCheckedFeatures; i++) {
-	resultCSV << "Morphology" << ",";
-	}
-	}
-	*/
 
 	resultCSV << "\n";
 
 	// write feature name 
 	resultCSV << " " << "," << " " << "," << " " << ",";
+
+	if (morphology.isActivatedFamily) {
+
+	}
+
+	if (localIntense.isActivatedFamily) {
+		vector<string> featureNames(LocalIntensity::FEATURE_COUNT, "");
+		localIntense.defineFeatureNames(featureNames);
+		for (int i = 0; i < featureNames.size(); i++) {
+			if (localIntense.isCheckedFeature[i]) {
+				resultCSV << featureNames[i] << ",";
+			}
+		}
+	}
 
 	if (intenseStat.isActivatedFamily) {
 		vector<string> featureNames(IntensityStatistics::FEATURE_COUNT, "");
@@ -1622,14 +1566,6 @@ void CPlatform::presetCSVFile(string csvName) {
 				resultCSV << featureNames[i] << ",";
 			}
 		}
-	}
-
-	if (ui.checkBox_Intensity->isChecked()) {
-
-	}
-
-	if (ui.checkBox_Morph->isChecked()) {
-
 	}
 
 	if (glcm.isActivatedFamily) {
@@ -1689,20 +1625,20 @@ void CPlatform::writeCSVCaseName(int seriesIdx, string csvName) {
 }
 void CPlatform::writeCSVFeatureValue(string csvName) {
 
+	if (morphology.isActivatedFamily) {
+
+	}
+
+	if (localIntense.isActivatedFamily) {
+		writeCSVCheckedValue(localIntense.final1DVec, csvName);
+	}
+
 	if (intenseStat.isActivatedFamily) {
 		writeCSVCheckedValue(intenseStat.final1DVec, csvName);
 	}
 
 	if (intenseHisto.isActivatedFamily) {
 		writeCSVCheckedValue(intenseHisto.final1DVec, csvName);
-	}
-
-	if (ui.checkBox_Intensity->isChecked()) {
-		
-	}
-
-	if (ui.checkBox_Morph->isChecked()) {
-
 	}
 
 	if (glcm.isActivatedFamily) {
@@ -1725,15 +1661,13 @@ void CPlatform::writeCSVFile(int seriesIdx, string csvName) {
 // clear all vector //
 void CPlatform::clearAll(int seriesIdx) {
 	// for loop으로 대체 가능 (for auto, break)
+	//morphology.clear();
+	localIntense.clearVector();
 	intenseStat.clearVector();
 	intenseHisto.clearVector();
 	glcm.clearVector();
 	glrlm.clearVector();
-	/*
-	localIntense.clear();
-	morphology.clear();
-	*/
-
+	
 	cout << "clear series[" << seriesIdx << "]'s all values!" << endl;
 
 }
@@ -1906,7 +1840,7 @@ void CPlatform::run()
 				
 				// feature extraction //
 				if (!isEmptyMask(ppucMasks[j], nWidth_new, nHeight_new, nPixelsInMask)) {   // resegmentation 후의 mask 재확인
-					featureExtraction(ppsImages[j], ppucMasks[j], nHeight_new, nWidth_new); // final2DVec에 각 슬라이스들 값 누적
+					featureExtraction(ppsImages[j], ppucMasks[j], nHeight_new, nWidth_new, pixelSpacingX, pixelSpacingY); // final2DVec에 각 슬라이스들 값 누적
 				}
 			}
 		}
