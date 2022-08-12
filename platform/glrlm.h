@@ -46,10 +46,11 @@ public:
 
 	// get GLRL-matrix //
 	bool isFBN = false;
-	int nBins = -1;			// FBN (Fixed Bin Number)
-	float sBin = NAN;		// FBS (Fixed Bin Size)
-	int sizeMatrix;		// N_g == nBins == sizeMatrix == maxIntensity
-	int maxRunLength;	// N_r
+	int nBins = -1;			// FBN (Fixed Bin Number) => by. platform pop-up
+	float sBin = NAN;		// FBS (Fixed Bin Size) => by. platform pop-up
+	int maxIntensity = -1;
+	int sizeMatrix;			// sizeMatrix == maxIntensity (== N_g == nBins : FBN ¿œ∂ß∏∏)
+	int maxRunLength;		// N_r
 	int nHeight;
 	int nWidth;
 	int nPixelsInROI;

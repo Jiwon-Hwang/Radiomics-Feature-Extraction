@@ -9,7 +9,7 @@ GLCM::~GLCM() {
 
 }
 void GLCM::clearVariable() {
-
+	// 슬라이스마다, 방향마다 초기화
 	vector1DofOriPixelsInROI.clear();
 	vector<short>().swap(vector1DofOriPixelsInROI); // size & capacity 모두 0으로 초기화
 	diagonalProbabilities.clear();
@@ -20,6 +20,8 @@ void GLCM::clearVariable() {
 	vector<float>().swap(sumProbCols);
 	sumProbRows.clear();
 	vector<float>().swap(sumProbRows);
+
+	maxIntensity = -1;
 
 	jointMaximum = NAN;
 	jointAverage = NAN;
@@ -134,6 +136,9 @@ vector<vector<unsigned short>> GLCM::get2DVectorOfDiscretizedPixels_FBN(short* p
 		}
 	}
 
+	// maxIntensity(최댓값) 구하기 => for. sizeMatrix (FBN의 경우엔 nBins)
+	maxIntensity = nBins;
+
 	return vector2DofDiscretizedPixels;
 }
 vector<vector<unsigned short>> GLCM::get2DVectorOfDiscretizedPixels_FBS(short* psImage, unsigned char* pucMask) {
@@ -162,6 +167,9 @@ vector<vector<unsigned short>> GLCM::get2DVectorOfDiscretizedPixels_FBS(short* p
 
 			// ROI 밖(0)과 안(discretized) 픽셀값들 2D Vec에 할당
 			vector2DofDiscretizedPixels[row][col] = (maskValue >(unsigned char)0) ? imageValue_discretized : 0;
+
+			// maxIntensity(최댓값) 구하기 => for. sizeMatrix
+			maxIntensity = maxIntensity < (int)vector2DofDiscretizedPixels[row][col] ? (int)vector2DofDiscretizedPixels[row][col] : maxIntensity;
 		}
 	}
 
@@ -850,14 +858,14 @@ void GLCM::featureExtraction(short* psImage, unsigned char* pucMask, int nHeight
 	nHeight = nHeight_;
 	nWidth = nWidth_;
 	vector1DofOriPixels = get1DVectorOfPixels(psImage, pucMask); 
-	vector2DofDiscretizedPixels = isFBN? get2DVectorOfDiscretizedPixels_FBN(psImage, pucMask) : get2DVectorOfDiscretizedPixels_FBS(psImage, pucMask); // 슬라이스마다 초기화
-	
+	vector2DofDiscretizedPixels = isFBN? get2DVectorOfDiscretizedPixels_FBN(psImage, pucMask) : get2DVectorOfDiscretizedPixels_FBS(psImage, pucMask); // 슬라이스마다 초기화, calc maxIntensity
+
 	vector<vector<float>> temp4DirVals2DVec;	// 슬라이스마다 초기화 (for. 4방향 1d vec 평균내기)
 	vector<float> tempValues1DVec;				// 슬라이스마다 초기화 (for. final2DVec에 누적)
 
 	// calculate checked feature (4 directions)
 	int ang;
-	sizeMatrix = nBins;
+	sizeMatrix = maxIntensity; // maxIntensity만 clearVariable()을 통해 매번 초기화
 	float sumMatrElement;
 	for (int dir = 0; dir < 4; dir++) {
 

@@ -17,6 +17,8 @@ void GLRLM::clearVariable() {
 	colSums.clear();
 	vector<float>().swap(colSums);
 
+	maxIntensity = -1;
+
 	shortRunEmph = NAN;
 	longRunEmph = NAN;
 	lowGreyRunEmph = NAN;
@@ -114,6 +116,9 @@ vector<vector<unsigned short>> GLRLM::get2DVectorOfDiscretizedPixels_FBN(short* 
 		}
 	}
 
+	// maxIntensity(최댓값) 구하기 => for. sizeMatrix (FBN의 경우엔 nBins)
+	maxIntensity = nBins;
+
 	return vector2DofDiscretizedPixels;
 }
 vector<vector<unsigned short>> GLRLM::get2DVectorOfDiscretizedPixels_FBS(short* psImage, unsigned char* pucMask) {
@@ -142,6 +147,9 @@ vector<vector<unsigned short>> GLRLM::get2DVectorOfDiscretizedPixels_FBS(short* 
 
 			// ROI 밖(0)과 안(discretized) 픽셀값들 2D Vec에 할당
 			vector2DofDiscretizedPixels[row][col] = (maskValue >(unsigned char)0) ? imageValue_discretized : 0;
+
+			// maxIntensity(최댓값) 구하기 => for. sizeMatrix
+			maxIntensity = maxIntensity < (int)vector2DofDiscretizedPixels[row][col] ? (int)vector2DofDiscretizedPixels[row][col] : maxIntensity;
 		}
 	}
 
@@ -613,17 +621,16 @@ void GLRLM::featureExtraction(short* psImage, unsigned char* pucMask, int nHeigh
 	// get discretized 2D input matrix (2d vector)
 	nHeight = nHeight_;
 	nWidth = nWidth_;
-	vector1DofOriPixels = get1DVectorOfPixels(psImage, pucMask);  // 슬라이스마다 초기화, nPixelsInROI 산출)
-	vector2DofDiscretizedPixels = isFBN? get2DVectorOfDiscretizedPixels_FBN(psImage, pucMask) : get2DVectorOfDiscretizedPixels_FBS(psImage, pucMask); // 슬라이스마다 초기화
+	vector1DofOriPixels = get1DVectorOfPixels(psImage, pucMask);  // 슬라이스마다 초기화, nPixelsInROI 산출
+	vector2DofDiscretizedPixels = isFBN? get2DVectorOfDiscretizedPixels_FBN(psImage, pucMask) : get2DVectorOfDiscretizedPixels_FBS(psImage, pucMask); // 슬라이스마다 초기화, calc maxIntensity
 	
 	vector<vector<float>> temp4DirVals2DVec;	// 슬라이스마다 초기화 (for. 4방향 1d vec 평균내기)
 	vector<float> tempValues1DVec;				// 슬라이스마다 초기화 (for. final2DVec에 누적)
 
 	// calculate checked feature (4 directions)
-	sizeMatrix = nBins;
-	maxRunLength = max(nHeight, nWidth);
 	int ang;
-
+	sizeMatrix = maxIntensity; // maxIntensity만 clearVariable()을 통해 매번 초기화
+	maxRunLength = max(nHeight, nWidth);
 	for (int dir = 0; dir < 4; dir++) {
 
 		clearVariable();					// 방향마다 초기화
