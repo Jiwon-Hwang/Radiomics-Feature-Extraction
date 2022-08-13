@@ -1453,20 +1453,20 @@ void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, int nH
 
 void CPlatform::averageAllSlices() {
 	// for loop으로 대체 가능 (for auto, break)
+	if (morphology.isActivatedFamily) {
+		morphology.averageAllValues();
+	}
+
+	if (localIntense.isActivatedFamily) {
+		localIntense.averageAllValues();
+	}
+
 	if (intenseStat.isActivatedFamily) {
 		intenseStat.averageAllValues();
 	}
 
 	if (intenseHisto.isActivatedFamily) {
 		intenseHisto.averageAllValues();
-	}
-
-	if (ui.checkBox_Intensity->isChecked()) {
-		
-	}
-
-	if (ui.checkBox_Morph->isChecked()) {
-
 	}
 
 	if (glcm.isActivatedFamily) {
@@ -1597,7 +1597,6 @@ void CPlatform::presetCSVFile(string csvName) {
 void writeCSVCheckedValue(vector<float> extractedValues, string csvName) // 모든 class 공통
 {
 	ofstream resultCSV(csvName, std::ios_base::app);
-
 	for (int i = 0; i< extractedValues.size(); i++) {
 		/*
 		// 속도 문제로 사용 x

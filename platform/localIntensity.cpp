@@ -122,7 +122,7 @@ void LocalIntensity::calcLocalIntensityPeak(short* pusImage, unsigned char* pucM
 	}
 
 	localIntensityPeak = sumIntensity / cnt;
-
+	cout << localIntensityPeak << endl;
 }
 void LocalIntensity::calcGlobalIntensityPeak(short* psImage, unsigned char* pucMask) {
 
