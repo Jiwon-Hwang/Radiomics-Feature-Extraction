@@ -26,7 +26,7 @@ void LocalIntensity::clearVector() {
 
 }
 
-vector<pair<int, int>> LocalIntensity::getAllMaxIndices(short* pusImage, unsigned char* pucMask) {
+vector<pair<int, int>> LocalIntensity::getAllMaxIndices(short* psImage, unsigned char* pucMask) {
 
 	vector<pair<int, int>> allMaxIndices;
 
@@ -37,7 +37,7 @@ vector<pair<int, int>> LocalIntensity::getAllMaxIndices(short* pusImage, unsigne
 		for (int col = 0; col < nWidth; col++) {
 			int index = row * nWidth + col; // 1차원으로 접근
 			unsigned char maskValue = pucMask[index];
-			short imageValue = pusImage[index];
+			short imageValue = psImage[index];
 
 			// ROI 내부 && 임시 최대값보다 큰 값 선택 (ROI가 없으면 계속 pass)
 			if (maskValue >(unsigned char)0 && imageValue > maxValue) {
@@ -51,7 +51,7 @@ vector<pair<int, int>> LocalIntensity::getAllMaxIndices(short* pusImage, unsigne
 		for (int col = 0; col < nWidth; col++) {
 			int index = row * nWidth + col; 
 			unsigned char maskValue = pucMask[index];
-			short imageValue = pusImage[index];
+			short imageValue = psImage[index];
 
 			if (maskValue >(unsigned char)0 && imageValue == maxValue) {
 				//posOfCenter = { row, col };	// c++ 11이상 (vs2012에서 안돼용 ㅜㅜ)
@@ -62,10 +62,10 @@ vector<pair<int, int>> LocalIntensity::getAllMaxIndices(short* pusImage, unsigne
 
 	return allMaxIndices;
 }
-void LocalIntensity::calcLocalIntensityPeak(short* pusImage, unsigned char* pucMask) {
+void LocalIntensity::calcLocalIntensityPeak(short* psImage, unsigned char* pucMask) {
 
 	// 1. get center pos of max (intensity peak indices in ROI)
-	vector<pair<int, int>> allMaxIndices = getAllMaxIndices(pusImage, pucMask);
+	vector<pair<int, int>> allMaxIndices = getAllMaxIndices(psImage, pucMask);
 	
 	//cout << "maxValue : " << maxValue << endl; // 180
 	//cout << "posOfCenter : " << posOfCenter.first << ", " << posOfCenter.second << endl; // (230, 246)
@@ -136,7 +136,7 @@ void LocalIntensity::calcLocalIntensityPeak(short* pusImage, unsigned char* pucM
 				if (distFromCenter <= 6.2 && 0 <= row && row < nHeight && 0 <= col && col < nWidth) {
 					// sum pixel
 					int index = row * nWidth + col;
-					sumIntensity += pusImage[index];
+					sumIntensity += psImage[index];
 					cnt++;
 				}
 			}
@@ -152,7 +152,46 @@ void LocalIntensity::calcLocalIntensityPeak(short* pusImage, unsigned char* pucM
 }
 void LocalIntensity::calcGlobalIntensityPeak(short* psImage, unsigned char* pucMask) {
 
+	float radius = 6.2;
+	int nrPixelsX = floor((radius - (float)pixelSpacingX / 2.0) / pixelSpacingX); 
+	int nrPixelsY = floor((radius - (float)pixelSpacingY / 2.0) / pixelSpacingY); 
 
+	pair<float, float> tempDist;
+	float distFromCenter;
+	
+	for (int i = 0; i < nHeight; i++) {
+		for (int j = 0; j < nWidth; j++) {
+			int index = i * nWidth + j; 
+			unsigned char maskValue = pucMask[index];
+
+			if (maskValue > (unsigned char)0) {
+
+				float sumIntensity = 0;
+				int cnt = 0;
+
+				for (int row = i - nrPixelsY; row < i + nrPixelsY; row++) {
+					for (int col = j - nrPixelsX; col < j + nrPixelsX; col++) {
+						tempDist.first = float(row) * pixelSpacingY + pixelSpacingY / 2 - (i + 0.5) * pixelSpacingY; 
+						tempDist.second = float(col) * pixelSpacingX + pixelSpacingX / 2 - (j + 0.5) * pixelSpacingX;
+						distFromCenter = sqrt(pow(tempDist.first, 2) + pow(tempDist.second, 2));
+						if (distFromCenter <= 6.2 && 0 <= row && row < nHeight && 0 <= col && col < nWidth) {
+							// sum pixel
+							int index = row * nWidth + col;
+							sumIntensity += psImage[index];
+							cnt++;
+						}
+					}
+				}
+
+				if (isnan(globalIntensityPeak)) {
+					globalIntensityPeak = sumIntensity / cnt; // initialize
+				}
+				else {
+					globalIntensityPeak = (sumIntensity / cnt) > globalIntensityPeak ? (sumIntensity / cnt) : globalIntensityPeak;
+				}
+			}
+		}
+	}
 	
 }
 

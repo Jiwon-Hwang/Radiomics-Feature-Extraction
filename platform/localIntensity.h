@@ -48,7 +48,7 @@ class LocalIntensity
 		float globalIntensityPeak = NAN;
 
 		// calculate feature value //
-		std::vector<std::pair<int, int>> getAllMaxIndices(short* pusImage, unsigned char* pucMask);
+		std::vector<std::pair<int, int>> getAllMaxIndices(short* psImage, unsigned char* pucMask);
 		void calcLocalIntensityPeak(short* psImage, unsigned char* pucMask);
 		void calcGlobalIntensityPeak(short* psImage, unsigned char* pucMask);
 
