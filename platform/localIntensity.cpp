@@ -123,7 +123,7 @@ void LocalIntensity::calcLocalIntensityPeak(short* pusImage, unsigned char* pucM
 
 	pair<float, float> tempDist;
 	float distFromCenter;
-	short sumIntensity = 0;
+	float sumIntensity = 0; // ***short -> float!*** (범위 문제로 최종 sum값이 -(마이너스) 값으로 나옴!)
 	int cnt = 0; // 279
 
 	// [230-9][246-9] center 좌표의 픽셀로부터 거리 계산 => 9 : nrPixels
@@ -145,10 +145,9 @@ void LocalIntensity::calcLocalIntensityPeak(short* pusImage, unsigned char* pucM
 			localIntensityPeak = sumIntensity / cnt; // initialize
 		}
 		else {
-			localIntensityPeak = sumIntensity / cnt > localIntensityPeak ? sumIntensity / cnt : localIntensityPeak;
+			localIntensityPeak = (sumIntensity / cnt) > localIntensityPeak ? (sumIntensity / cnt) : localIntensityPeak;
 		}
-		cout << localIntensityPeak << endl;
-	}	
+	 }
 
 }
 void LocalIntensity::calcGlobalIntensityPeak(short* psImage, unsigned char* pucMask) {
