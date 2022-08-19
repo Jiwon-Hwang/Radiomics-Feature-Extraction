@@ -125,29 +125,31 @@ void LocalIntensity::calcLocalIntensityPeak(short* pusImage, unsigned char* pucM
 	float distFromCenter;
 	short sumIntensity = 0;
 	int cnt = 0; // 279
-	localIntensityPeak = FLT_MIN;
 
 	// [230-9][246-9] center 좌표의 픽셀로부터 거리 계산 => 9 : nrPixels
 	for (int i = 0; i < allMaxIndices.size(); i++) {
-		if (0 <= allMaxIndices[i].first - nrPixelsY && allMaxIndices[i].first - nrPixelsY < nHeight && 0 <= allMaxIndices[i].second - nrPixelsX && allMaxIndices[i].second - nrPixelsX < nWidth) {
-			for (int row = allMaxIndices[i].first - nrPixelsY; row < allMaxIndices[i].first + nrPixelsY; row++) {
-				for (int col = allMaxIndices[i].second - nrPixelsX; col < allMaxIndices[i].second + nrPixelsX; col++) {
-					tempDist.first = float(row) * pixelSpacingY + pixelSpacingY / 2 - (allMaxIndices[i].first + 0.5) * pixelSpacingY; // X축(row) 방향 중점과의 거리(mm) => X_temp - X_center
-					tempDist.second = float(col) * pixelSpacingX + pixelSpacingX / 2 - (allMaxIndices[i].second + 0.5) * pixelSpacingX; // Y
-					distFromCenter = sqrt(pow(tempDist.first, 2) + pow(tempDist.second, 2));
-					if (distFromCenter <= 6.2) {
-						// sum pixel
-						int index = row * nWidth + col;
-						sumIntensity += pusImage[index];
-						cnt++;
-					}
+		for (int row = allMaxIndices[i].first - nrPixelsY; row < allMaxIndices[i].first + nrPixelsY; row++) {
+			for (int col = allMaxIndices[i].second - nrPixelsX; col < allMaxIndices[i].second + nrPixelsX; col++) {
+				tempDist.first = float(row) * pixelSpacingY + pixelSpacingY / 2 - (allMaxIndices[i].first + 0.5) * pixelSpacingY; // X축(row) 방향 중점과의 거리(mm) => X_temp - X_center
+				tempDist.second = float(col) * pixelSpacingX + pixelSpacingX / 2 - (allMaxIndices[i].second + 0.5) * pixelSpacingX; // Y
+				distFromCenter = sqrt(pow(tempDist.first, 2) + pow(tempDist.second, 2));
+				if (distFromCenter <= 6.2 && 0 <= row && row < nHeight && 0 <= col && col < nWidth) {
+					// sum pixel
+					int index = row * nWidth + col;
+					sumIntensity += pusImage[index];
+					cnt++;
 				}
 			}
+		}	
+		if (isnan(localIntensityPeak)) {
+			localIntensityPeak = sumIntensity / cnt; // initialize
+		}
+		else {
 			localIntensityPeak = sumIntensity / cnt > localIntensityPeak ? sumIntensity / cnt : localIntensityPeak;
 		}
+		cout << localIntensityPeak << endl;
 	}	
 
-	cout << localIntensityPeak << endl;
 }
 void LocalIntensity::calcGlobalIntensityPeak(short* psImage, unsigned char* pucMask) {
 
