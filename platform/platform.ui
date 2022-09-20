@@ -444,9 +444,6 @@
               </property>
               <item>
                <widget class="QCheckBox" name="checkBox_Morph">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
                 <property name="focusPolicy">
                  <enum>Qt::NoFocus</enum>
                 </property>
@@ -457,9 +454,6 @@
               </item>
               <item>
                <widget class="QCheckBox" name="checkBox_Intensity">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
                 <property name="focusPolicy">
                  <enum>Qt::NoFocus</enum>
                 </property>
@@ -546,9 +540,6 @@
               </item>
               <item>
                <widget class="QCheckBox" name="checkBox_3">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
                 <property name="focusPolicy">
                  <enum>Qt::NoFocus</enum>
                 </property>
@@ -559,9 +550,6 @@
               </item>
               <item>
                <widget class="QCheckBox" name="checkBox_5">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
                 <property name="focusPolicy">
                  <enum>Qt::NoFocus</enum>
                 </property>
@@ -572,9 +560,6 @@
               </item>
               <item>
                <widget class="QCheckBox" name="checkBox_4">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
                 <property name="focusPolicy">
                  <enum>Qt::NoFocus</enum>
                 </property>
@@ -585,9 +570,6 @@
               </item>
               <item>
                <widget class="QCheckBox" name="checkBox">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
                 <property name="focusPolicy">
                  <enum>Qt::NoFocus</enum>
                 </property>

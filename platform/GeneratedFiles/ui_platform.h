@@ -315,14 +315,12 @@ public:
         verticalLayout_6->setContentsMargins(30, 32, 20, 10);
         checkBox_Morph = new QCheckBox(groupBox_Families);
         checkBox_Morph->setObjectName(QStringLiteral("checkBox_Morph"));
-        checkBox_Morph->setEnabled(false);
         checkBox_Morph->setFocusPolicy(Qt::NoFocus);
 
         verticalLayout_6->addWidget(checkBox_Morph);
 
         checkBox_Intensity = new QCheckBox(groupBox_Families);
         checkBox_Intensity->setObjectName(QStringLiteral("checkBox_Intensity"));
-        checkBox_Intensity->setEnabled(true);
         checkBox_Intensity->setFocusPolicy(Qt::NoFocus);
         checkBox_Intensity->setCheckable(true);
         checkBox_Intensity->setChecked(false);
@@ -365,28 +363,24 @@ public:
 
         checkBox_3 = new QCheckBox(groupBox_Families);
         checkBox_3->setObjectName(QStringLiteral("checkBox_3"));
-        checkBox_3->setEnabled(false);
         checkBox_3->setFocusPolicy(Qt::NoFocus);
 
         verticalLayout_6->addWidget(checkBox_3);
 
         checkBox_5 = new QCheckBox(groupBox_Families);
         checkBox_5->setObjectName(QStringLiteral("checkBox_5"));
-        checkBox_5->setEnabled(false);
         checkBox_5->setFocusPolicy(Qt::NoFocus);
 
         verticalLayout_6->addWidget(checkBox_5);
 
         checkBox_4 = new QCheckBox(groupBox_Families);
         checkBox_4->setObjectName(QStringLiteral("checkBox_4"));
-        checkBox_4->setEnabled(false);
         checkBox_4->setFocusPolicy(Qt::NoFocus);
 
         verticalLayout_6->addWidget(checkBox_4);
 
         checkBox = new QCheckBox(groupBox_Families);
         checkBox->setObjectName(QStringLiteral("checkBox"));
-        checkBox->setEnabled(false);
         checkBox->setFocusPolicy(Qt::NoFocus);
 
         verticalLayout_6->addWidget(checkBox);

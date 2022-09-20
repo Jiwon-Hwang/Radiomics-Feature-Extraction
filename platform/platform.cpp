@@ -211,6 +211,37 @@ void CPlatform::clear()
 		delete m_ciImage;
 		m_ciImage = NULL;
 	}
+
+	if (ppopup_Morph != NULL) { // 메모리 소멸
+		delete ppopup_Morph;
+		ppopup_Morph = NULL;
+	}
+
+	if (ppopup_Intensity != NULL) {
+		delete ppopup_Intensity;
+		ppopup_Intensity = NULL;
+	}
+
+	if (ppopup_Statistics != NULL) {
+		delete ppopup_Statistics;
+		ppopup_Statistics = NULL;
+	}
+
+	if (ppopup_Histogram != NULL) {
+		delete ppopup_Histogram;
+		ppopup_Histogram = NULL;
+	}
+
+	if (ppopup_GLCM != NULL) {
+		delete ppopup_GLCM;
+		ppopup_GLCM = NULL;
+	}
+
+	if (ppopup_GLRLM != NULL) {
+		delete ppopup_GLRLM;
+		ppopup_GLRLM = NULL;
+	}
+
 }
 
 
@@ -1842,6 +1873,10 @@ void CPlatform::run()
 					featureExtraction(ppsImages[j], ppucMasks[j], nHeight_new, nWidth_new, pixelSpacingX, pixelSpacingY); // final2DVec에 각 슬라이스들 값 누적
 				}
 			}
+			else { // ***isEmptyMask가 아닌 경우에도 메모리 소멸 (1차원 배열)***
+				SAFE_DELETE_ARRAY(ppsImages[j]);
+				SAFE_DELETE_ARRAY(ppucMasks[j]);
+			}
 		}
 		
 		// mean all ROI slices //
@@ -1853,8 +1888,11 @@ void CPlatform::run()
 		// clear all vector //
 		clearAll(i);
 
-		// 메모리 소멸 //
+		// 메모리 소멸 // 
+		//SAFE_DELETE_VOLUME(ppsImages, nImageCnt); // ***2차원 배열도 메모리 소멸!***
 		//SAFE_DELETE_VOLUME(ppucMasks, nMaskCnt);
+		SAFE_DELETE_ARRAY(ppsImages);
+		SAFE_DELETE_ARRAY(ppucMasks);
 
 		// progress bar //
 		setProgressBarValue(i, nSeriesCnt);
