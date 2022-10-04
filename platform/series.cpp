@@ -7,24 +7,7 @@ CSeries::~CSeries() {
 	clear();
 }
 void CSeries::init() {
-	m_sPatientID = "";				// (0010,0020)
-	m_sPatientName = "";			// (0010,0010)
-
-	m_sStudyInstanceUID = "";		// (0020,000D)
-	m_sStudyDescription = "";		// (0008,1030)
-	m_sStudyDate = "";				// (0008,0020)
-	m_sStudyName = "";				// none
-
-	m_sSeriesInstanceUID = "";		// (0020,000E)
-	m_sFrameOfReferenceUID = "";	// (0020,0052)
-	m_sSeriesDate = "";				// (0008,0021)
-	m_sSeriesDescription = "";		// (0008,103E)
-	m_sSeriesName = "";				// none
-	m_sModality = "";				// (0008,0060)
-
-	m_sSeriesPath = "";
-
-	m_images.clear();
+	clear();
 }
 void CSeries::clear() {
 	for(int i=0, ni=m_images.size(); i<ni; i++) {
@@ -32,18 +15,18 @@ void CSeries::clear() {
 	}
 
 	m_sPatientID = "";				// (0010,0020)
-	m_sPatientName = "";			// (0010,0010)
+	m_sPatientName = "";			// (0010,0010) (규칙에 의해 변경될 수 있음)
 
 	m_sStudyInstanceUID = "";		// (0020,000D)
 	m_sStudyDescription = "";		// (0008,1030)
 	m_sStudyDate = "";				// (0008,0020)
-	m_sStudyName = "";				// none
+	m_sStudyName = "";				// custom tag (규칙에 의해 결정됨)
 
 	m_sSeriesInstanceUID = "";		// (0020,000E)
 	m_sFrameOfReferenceUID = "";	// (0020,0052)
 	m_sSeriesDate = "";				// (0008,0021)
 	m_sSeriesDescription = "";		// (0008,103E)
-	m_sSeriesName = "";				// none
+	m_sSeriesName = "";				// custom tag (규칙에 의해 결정됨)
 	m_sModality = "";				// (0008,0060)
 
 	m_sSeriesPath = "";

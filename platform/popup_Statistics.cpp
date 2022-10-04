@@ -34,5 +34,9 @@ popup_Statistics::popup_Statistics(QWidget *parent) :
 
 popup_Statistics::~popup_Statistics()
 {
+	if (filterGroup) {
+		delete filterGroup;
+		filterGroup = NULL;
+	}
 	delete ui;
 }

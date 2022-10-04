@@ -30,12 +30,15 @@ popup_GLRLM::popup_GLRLM(QWidget *parent) :
 
 
 	// QLineEdit 입력 제약조건 - "int"만 허용
-	QIntValidator *intValidator = new QIntValidator(0, 999999); //최소수, 최대수
-	ui->lineEdit_sBin->setValidator(intValidator);
-
+	QIntValidator intValidator(0, 999999); //최소수, 최대수
+	ui->lineEdit_sBin->setValidator(&intValidator);
 }
 
 popup_GLRLM::~popup_GLRLM()
 {
+	if (filterGroup) {
+		delete filterGroup;
+		filterGroup = NULL;
+	}
 	delete ui;
 }

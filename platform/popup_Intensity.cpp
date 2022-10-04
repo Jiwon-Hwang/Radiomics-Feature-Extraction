@@ -18,5 +18,10 @@ popup_Intensity::popup_Intensity(QWidget *parent) :
 
 popup_Intensity::~popup_Intensity()
 {
+	if (filterGroup) {
+		delete filterGroup;
+		filterGroup = NULL;
+	}
+
 	delete ui;
 }

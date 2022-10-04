@@ -36,7 +36,17 @@
 #include <opencv2\core\core.hpp>
 #include <opencv2\highgui\highgui.hpp>
 #include <iostream>
+#include <cv.h>
+#include <cxcore.h>
+#include <highgui.h>
+#include "dcmtk/dcmimgle/dcmimage.h"
+#include "dcmtk/config/osconfig.h" 
+#include "dcmtk/dcmdata/dctk.h"
 
+
+#define SAFE_DELETE(p) {if(p) delete(p); p=NULL;} // NULL이 아니면 메모리 해제 (일반 포인터)
+#define SAFE_DELETE_ARRAY(p)	{ if(p) delete[](p); p = NULL;}
+#define SAFE_DELETE_VOLUME(p, depth)	{ if(p) {for (int i=0;i<depth;i++)	if(p[i]) delete[](p[i]); } delete[] p; p=NULL;};
 
 #include "ui_platform.h"
 #include "ui_popup_Histogram.h"
@@ -50,16 +60,6 @@
 #include "ui_popup_Intensity.h"
 #include "popup_Intensity.h"
 
-
-#include "dcmtk/dcmimgle/dcmimage.h"
-#include "dcmtk/config/osconfig.h" 
-#include "dcmtk/dcmdata/dctk.h"
-
-#include <cv.h>
-#include <cxcore.h>
-#include <highgui.h>
-
-
 #include "imageView.h"
 #include "data.h"
 #include "intensityHistogram.h"
@@ -70,9 +70,6 @@
 
 
 #define MAX_FILE_LENGTH 64
-#define SAFE_DELETE_ARRAY(p)	{ if(p) delete[](p); p = NULL;}
-#define SAFE_DELETE_VOLUME(p, depth)	{ if(p) {for (int i=0;i<depth;i++)	if(p[i]) delete[](p[i]); } delete[] p; p=NULL;};
-
 #define FILTER_NONE 0
 #define FILTER_GAUSSIAN 1 
 #define FILTER_LAPLACIAN 2
@@ -175,6 +172,7 @@ public slots:
 	void slotDataProgress(int nCurrentIdx, int nMaximumIdx);
 
 	// load + fileDirectory (tree widget) //
+	void createFileDirectoryItem();
 	void addFileDirectoryItem(int seriesIdx);	// tree widget
 	void showImage(int nSliceIdx);
 	void showImage(QTreeWidgetItem* item, int column);

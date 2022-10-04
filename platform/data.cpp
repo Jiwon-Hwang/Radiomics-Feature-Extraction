@@ -11,8 +11,8 @@ void CData::setQThread(QThread* pThread) {
 	m_pThread = pThread;
 }
 void CData::slotReadImage(void) {
-	readImage(readFileList, true, true, CLEAR_PREV_DATAS_CONDITIONAL, NULL);
-	readFileList.clear();
+	readImage(m_sReadFileList, true, true, CLEAR_PREV_DATAS_CONDITIONAL, NULL);
+	m_sReadFileList.clear();
 
 	if(m_pThread) {
 		m_pThread->exit();
@@ -33,14 +33,15 @@ CData::~CData() {
 #endif
 
 void CData::init() {
-	// preference
-	m_sLogPath = "";
+	// [preference]
+	m_sReadRootDir = "";
+	m_sSaveRootDir = "";
 
-#if PROGRESS_BAR
-	std::freopen("nul", "w", stderr); // vfprintf() error 중단점! (debug) / ucrtbase.dll error (release) 
-#endif
+	// -- data struct
+	m_pInputDataStruct = NULL;
 
-	// readable extensions
+	// -- readable extensions
+	m_sReadableExtensions.clear();
 	m_sReadableExtensions.push_back("dcm");
 	m_sReadableExtensions.push_back("bmp");
 	m_sReadableExtensions.push_back("jpg");
@@ -48,16 +49,29 @@ void CData::init() {
 	m_sReadableExtensions.push_back("nii");
 	m_sReadableExtensions.push_back("tiff");
 
-	// mask keywords
+	// -- mask keywords (default)
+	m_sMaskKeywords.clear();
 	m_sMaskKeywords.push_back("mask");
 	m_sMaskKeywords.push_back("label");
 	m_sMaskKeywords.push_back("seg");
 	m_sMaskKeywords.push_back("segmentation");
 	m_sMaskKeywords.push_back("_m_");
+	m_sMaskKeywords.push_back("m_");
 
-	// except keywords
+	// -- except keywords (default)
+	m_sExceptKeywords.clear();
 	m_sExceptKeywords.push_back("img");
 	m_sExceptKeywords.push_back("overlay");
+	m_sExceptKeywords.push_back("transformed");
+
+	// [log]
+	m_sLogPath = "";
+	m_sLog.clear();
+
+
+#if PROGRESS_BAR
+	std::freopen("nul", "w", stderr); // vfprintf() error 중단점! (debug) / ucrtbase.dll error (release) 
+#endif
 
 #if QT
 	m_pThread = NULL;
@@ -100,6 +114,42 @@ std::ostream& operator<<(std::ostream& stream, const CData& obj) {
 	}
 
 	return stream;
+}
+
+void CData::readConfig(std::string sConfigFilePath) {
+	// todo
+	/*
+	YAML::Node config = YAML::LoadFile(sConfigFilePath);
+	if(!config) {
+		return;
+	}
+
+	// read yaml file
+	if (config["readRootDir"]) {
+		const std::string sReadRootDir = config["readRootDir"].as<std::string>();
+		m_sReadRootDir = sSaveRootDir;
+	}
+	if (config["saveRootDir"]) {
+		const std::string sSaveRootDir = config["saveRootDir"].as<std::string>();
+		m_sSaveRootDir = sSaveDirPath;
+	}
+	if (config["maskKeywords"]) {
+		YAML::Node c = config["maskKeywords"];
+		for(YAML::const_iterator it=c.begin(); it!=c.end(); ++it) {
+			m_sMaskKeywords.push_back(it->as<std::string>());
+		}
+	}
+	if (config["exceptKeywords"]) {
+		YAML::Node c = config["exceptKeywords"];
+		for(YAML::const_iterator it=c.begin(); it!=c.end(): ++it) {
+			m_sExceptKeywords.push_Back(it->as<std::string>());
+		}
+	}
+	if (config["logPath"]) {
+		const std::string sLogPath = config["logPath"].as<std::string>();
+		m_sLog = sLogPath;
+	}
+	*/
 }
 
 void CData::readImage(std::string sPath, bool bReadRecursive, bool bScanOnly, int nClearOption, std::function<void(int, int)>* pCallback) {	
@@ -158,7 +208,7 @@ void CData::readImage(std::vector<std::string> sPaths, bool bReadRecursive, bool
 			m_scan[i]->sFileName = getFileName(m_scan[i]->sFilePath);
 			m_scan[i]->sFileExtension = getFileExtension(m_scan[i]->sFilePath);
 			m_scan[i]->isLoad = isExcludeFile(m_scan[i]->sFilePath)? EXCEPT_FILE: false;
-			m_scan[i]->isMask = isMask_namingRule(m_scan[i]->sFilePath);
+			m_scan[i]->isMask = isMask(m_scan[i]->sFilePath);
 		}
 
 		// 3. clear prev images
@@ -281,9 +331,10 @@ void CData::scanImage(ScanContainer* psc, int &nFileCount, int nTotal, std::func
 		
 		if(psc->sFileExtension == "nii" || psc->sFileExtension == "tiff") {
 			// 한 파일에 여러 이미지가 들어있을 수 있어서, 파일 열어서 확인 필요함
+			// DCM Header 값으로 구분해야 하는 경우도 있어서, 파일을 반드시 읽도록 수정 (20221003)
 			std::vector<CImage<short>*> pCiImages;
 
-			if(loadImage(psc->sFilePath, pCiSeries, pCiImages, true) == false) {
+			if(loadImage(psc->sFilePath, pCiSeries, pCiImages, true) < 0) {
 				for(int i=0, ni=pCiImages.size(); i<ni; i++) {
 					SAFE_DELETE(pCiImages[i]);
 				}
@@ -362,8 +413,6 @@ void CData::scanImage(ScanContainer* psc, int &nFileCount, int nTotal, std::func
 						if(m_sLog.is_open()) {
 							m_sLog << "파일 중복 ==> " << pCiImage->getImagePath() << "\n";
 						}
-
-						SAFE_DELETE(pCiImage);
 						psc->isLoad = DUPLICATE_FILE;
 					}
 					else {
@@ -1075,37 +1124,63 @@ int CData::loadImages_lazyLoading_thread(CSeries* pCiSeries, bool isMask, std::f
 	return nReturn;
 }
 
-int CData::loadDICOM_dcmtk(const char* pcImagePath, DcmDataset* &dataSet, std::vector<short*> &images, bool bReadHeaderOnly) {
+int CData::loadDICOM_dcmtk(const char* pcImagePath, DcmDataset* &dcmData, std::vector<short*> &images, bool bReadHeaderOnly) {
 	// const
 	int USHORT_MAX_VALUE = 65535;
 	int SHORT_MIN_VALUE = -32768;
 	int SHORT_MAX_VALUE = 32767;
 	int DATA_MIN_HU_O = -3027;
 	int DATA_MIN_HU_DEFAULT = -1024;
-
+	
 	// load dicom file
 	DcmFileFormat* fileformat = NULL;
 	try {
+		// dcmtk option setting
+		//dcmEnableAutomaticInputDataCorrection.set(OFTrue); //default: OFTrue
+		//dcmReplaceWrongDelimitationItem.set(OFTrue); //default: falsec
+
 		// file format check
 		fileformat = new DcmFileFormat();
+		//OFCondition status = fileformat->loadFile(pcImagePath, EXS_Unknown, EGL_noChange, DCM_MaxReadLength, ERM_autoDetect);
 		OFCondition status = fileformat->loadFile(pcImagePath);
-		if (!status.good()) 
+		if (status.bad()) 
 		{
 			throw DCM_FILE_FORMAT_ERR;
 		}
+
+		// dataset check
+		dcmData = fileformat->getAndRemoveDataset();
+		if (dcmData == NULL) {
+			throw DCM_FILE_DATASET_ERR;
+		}
+
+		/*
+		// representation check
+		E_TransferSyntax transferSyntax = dcmData->getCurrentXfer();
+		if (transferSyntax == E_TransferSyntax::EXS_LittleEndianExplicit)
+			dcmData->chooseRepresentation(EXS_LittleEndianExplicit, NULL);
+		else {
+			// do decompress
+			DJDecoderRegistration::registerCodecs();
+			status = dcmData->chooseRepresentation(EXS_LittleEndianExplicit, NULL);
+			DJDecoderRegistration::cleanup();
+			E_TransferSyntax transferSyntax = dcmData->getCurrentXfer();
+			if (status.bad()) {
+				throw DCM_FILE_DECOMPRESS_FAIL;
+			}
+		}
+		*/
 	}
 	catch(int nErrCode) {
 		SAFE_DELETE(fileformat);
+		SAFE_DELETE(dcmData);
 		return nErrCode;
 	}
-	
-	// load dicom image 준비
-	dataSet = fileformat->getAndRemoveDataset();
 
 	OFString OFStrNumberOfFrames, OFStrRows, OFStrColumns;
-	dataSet->findAndGetOFString(DcmTagKey(0x0028, 0x0008), OFStrNumberOfFrames);
-	dataSet->findAndGetOFString(DcmTagKey(0x0028, 0x0010), OFStrRows);
-	dataSet->findAndGetOFString(DcmTagKey(0x0028, 0x0011), OFStrColumns);
+	dcmData->findAndGetOFString(DcmTagKey(0x0028, 0x0008), OFStrNumberOfFrames);
+	dcmData->findAndGetOFString(DcmTagKey(0x0028, 0x0010), OFStrRows);
+	dcmData->findAndGetOFString(DcmTagKey(0x0028, 0x0011), OFStrColumns);
 
 	int nImageCnt = atoi(OFStrNumberOfFrames.c_str());
 	if(nImageCnt == 0) {
@@ -1126,7 +1201,7 @@ int CData::loadDICOM_dcmtk(const char* pcImagePath, DcmDataset* &dataSet, std::v
 		}
 		catch(std::bad_alloc& ba) {
 			SAFE_DELETE(fileformat);
-			SAFE_DELETE(dataSet);
+			SAFE_DELETE(dcmData);
 			return BAD_ALLOC;
 		}
 	}
@@ -1319,7 +1394,7 @@ int CData::loadDICOM_dcmtk(const char* pcImagePath, DcmDataset* &dataSet, std::v
 			}
 			catch(int nErrCode) {
 				SAFE_DELETE(fileformat);
-				SAFE_DELETE(dataSet);
+				SAFE_DELETE(dcmData);
 				SAFE_DELETE(dcmImage);
 				SAFE_DELETE_ARRAY(psDCMImage);
 
@@ -1327,7 +1402,7 @@ int CData::loadDICOM_dcmtk(const char* pcImagePath, DcmDataset* &dataSet, std::v
 			}
 			catch(std::bad_alloc& ba) {
 				SAFE_DELETE(fileformat);
-				SAFE_DELETE(dataSet);
+				SAFE_DELETE(dcmData);
 				SAFE_DELETE(dcmImage);
 				SAFE_DELETE_ARRAY(psDCMImage);
 
@@ -2626,6 +2701,7 @@ int CData::getInstanceNumber(int nSeriesIdx, int nImageIdx) {
 }
 
 ////////////////////////////////////////////////////////////////////
+// [file util]
 bool CData::isFile(std::string sPath) {
 	struct _finddata_t fd;
 	intptr_t handle;
@@ -2784,6 +2860,39 @@ int CData::rfind(std::string string, std::string value, int n) {
 }
 
 ////////////////////////////////////////////////////////////////////
+// [inputDataStruct parser]
+bool CData::findTag(int nTagType, std::vector<std::string>& sResults) {
+	// todo
+
+	/*
+	// check input param
+	if(m_pInputDataStruct == false) {
+		return false;
+	}
+
+	std::vector<InputDataStruct*> stack;
+	stack.push_back(m_pInputDataStruct);
+
+	do {
+		InputDataStruct* current = stack.pop_back();
+		if(current->nType == nTagType) {
+			sResults.push_back(current);
+		}
+
+		if(current->pChildren.size() > 0) {
+			for(int i=0, ni=current->pChildren.size(); i<ni; i++) {
+				stack.push_back(current->pChildren[i]);
+			}
+		}
+	} while(stack.size() == 0)
+
+	return true;
+	*/
+	return true;
+}
+
+////////////////////////////////////////////////////////////////////
+// [convertImage]
 template<typename T>
 bool CData::convertDefaultImage (T* &pImage, int nWidth, int nHeight) {
 	if(pImage == NULL) {
@@ -2847,8 +2956,47 @@ bool CData::convertWindowImage (T* &pImage, int nWidth, int nHeight, int nWL, in
 	}
 	return true;
 }
+std::string CData::convertImageSavePath(int nSeriesIdx, int nImageIdx, const char* pcSaveDir, const char* pcExtension, int nSaveType, int nSaveOption) {
+	CSeries* pCiSeries = getSeries(nSeriesIdx);
+
+	if(pCiSeries) {
+		std::string sSeriesName = pCiSeries->m_sSeriesName;
+		std::string sStudyName = pCiSeries->m_sStudyName;
+		std::string sPatientName = pCiSeries->m_sPatientName;
+
+		if(nSaveType == SAVE_IMAGE_ONLY || nSaveType == SAVE_OVERLAY) {
+			std::string sImageName = pCiSeries->getImage(nImageIdx)->getImageName();
+			std::string sImagePath = pcSaveDir + std::string("\\") + sStudyName + std::string("\\") + sImageName + std::string(".") + pcExtension;
+
+			return sImagePath;
+		}
+		else if(nSaveType == SAVE_MASK_ONLY) {
+			std::string sMaskName = pCiSeries->getImage(nImageIdx)->getMaskName();
+			std::string sMaskPath = "";
+
+			// maskName에 조건이 이미 들어있는 경우
+			// 1. 파일명의 첫 두글자가 "m_"으로 시작하는 경우
+			if(sMaskName.substr(0, 2).compare("m_") == 0) {
+				sMaskPath = pcSaveDir + std::string("\\") + sMaskName + std::string(".") + pcExtension;
+			}
+			// 2. 파일명에 "_m_" 문자열이 포함된 경우
+			else if(sMaskName.find("_m_") != std::string::npos) {
+				sMaskPath = pcSaveDir + std::string("\\") + sMaskName + std::string(".") + pcExtension;
+			}
+			else {
+				// 아무것도 없는 경우
+				sMaskPath = pcSaveDir + std::string("\\") + sStudyName + std::string("\\m_") + sMaskName + std::string(".") + pcExtension;
+			}
+			
+			return sMaskPath;
+		}
+	}
+
+	return "";
+}
 
 ////////////////////////////////////////////////////////////////////
+// [progress bar]
 void CData::progressBar(int step, int total) {
 	//progress width
 	//const int pwidth = 72;
@@ -2891,6 +3039,35 @@ void CData::progressBar(int step, int total) {
 }
 
 ////////////////////////////////////////////////////////////////////
+// [sorting]
+template <typename T>
+bool CData::sorting(CImage<T>* &pCiImage1, CImage<T>* &pCiImage2) {
+	float fImagePositionX1, fImagePositionY1, fImagePositionZ1;
+	float fImagePositionX2, fImagePositionY2, fImagePositionZ2;
+
+	pCiImage1->getImagePosition(fImagePositionX1, fImagePositionY1, fImagePositionZ1);
+	pCiImage2->getImagePosition(fImagePositionX2, fImagePositionY2, fImagePositionZ2);
+
+	if(fImagePositionZ1 != 0 && fImagePositionZ2 != 0) {
+		return fImagePositionZ1 > fImagePositionZ2;
+	}
+	else {
+		return sorting_fileName(pCiImage1, pCiImage2);
+	}
+}
+template <typename T>
+bool CData::sorting_fileName(CImage<T>* &pCiImage1, CImage<T>* &pCiImage2) {
+	// 문자열 비교 //
+	std::string s1 = pCiImage1->getImageName();
+	std::string s2 = pCiImage2->getImageName();
+
+	int n = strcmp(s1.c_str(), s2.c_str()); 
+
+	return n< 0? true : false;
+}
+
+////////////////////////////////////////////////////////////////////
+// [matching, compare, rename rule]
 template<typename T1, typename T2>
 bool CData::isSameImage(CImage<T1>* pCiImage1, CImage<T2>* pCiImage2) {
 	if(pCiImage1 != NULL && pCiImage2 != NULL) {
@@ -2977,75 +3154,53 @@ bool CData::isExcludeFile(std::string sPath) {
 
 	return false;
 }
-bool CData::isMask_namingRule(std::string sPath) {
+bool CData::isMask(std::string sPath) {
 	std::string sFileName = getFileName(sPath);
 	transform(sFileName.begin(), sFileName.end(), sFileName.begin(), ::tolower);	// 파일명 소문자로
 
-	// 1. 파일명의 첫 두글자가 "m_"으로 시작하는 경우
-	if(sFileName.substr(0, 2).compare("m_") == 0) {
-		return true;
-	}
-	// 2. 파일명이 특정 키워드를 포함된 경우
+	// 1. 파일명이 특정 키워드를 포함된 경우
 	for(int i=0, ni=m_sMaskKeywords.size(); i<ni; i++) {
 		if(sFileName.find(m_sMaskKeywords[i]) != std::string::npos) {
 			return true;
 		}
 	}
 
-	// 3. 상위 디렉토리 명이 특정 키워드를 포함하는 경우
-	std::vector<std::string> paths = splitPath(sPath);
-	int nPathTokens = paths.size();
+	// 2. data struct를 입력받은 경우
+	if(m_pInputDataStruct) {
+		// todo
+		//std::vector<InputDataStruct*> result;
+		//findTag(DATATYPE::MASK, result);
+	}
+	else {
+		// 상위 디렉토리 명이 특정 키워드를 포함하는 경우
+		std::vector<std::string> paths = splitPath(sPath);
+		int nPathTokens = paths.size();
 
-	if(nPathTokens >= 2) {
-		// case/mask/dcm
-		std::string sParentFolderName = paths[nPathTokens-2];
-		for(int i=0, ni=m_sMaskKeywords.size(); i<ni; i++) {
-			if(sParentFolderName.find(m_sMaskKeywords[i]) != std::string::npos) {
-				return true;
+		if (nPathTokens >= 2) {
+			// case/mask/dcm
+			std::string sParentFolderName = paths[nPathTokens - 2];
+			for (int i = 0, ni = m_sMaskKeywords.size(); i<ni; i++) {
+				if (sParentFolderName.find(m_sMaskKeywords[i]) != std::string::npos) {
+					return true;
+				}
+			}
+		}
+		if (nPathTokens >= 3) {
+			// mask/case/dcm
+			std::string sParentFolderName = paths[nPathTokens - 3];
+			for (int i = 0, ni = m_sMaskKeywords.size(); i<ni; i++) {
+				if (sParentFolderName.find(m_sMaskKeywords[i]) != std::string::npos) {
+					return true;
+				}
 			}
 		}
 	}
-	if(nPathTokens >= 3) {
-		// mask/case/dcm
-		std::string sParentFolderName = paths[nPathTokens-3];
-		for(int i=0, ni=m_sMaskKeywords.size(); i<ni; i++) {
-			if(sParentFolderName.find(m_sMaskKeywords[i]) != std::string::npos) {
-				return true;
-			}
-		}
-	}
+
+	
 
 	return false;
 }
 
-////////////////////////////////////////////////////////////////////
-template <typename T>
-bool CData::sorting(CImage<T>* &pCiImage1, CImage<T>* &pCiImage2) {
-	float fImagePositionX1, fImagePositionY1, fImagePositionZ1;
-	float fImagePositionX2, fImagePositionY2, fImagePositionZ2;
-
-	pCiImage1->getImagePosition(fImagePositionX1, fImagePositionY1, fImagePositionZ1);
-	pCiImage2->getImagePosition(fImagePositionX2, fImagePositionY2, fImagePositionZ2);
-
-	if(fImagePositionZ1 != 0 && fImagePositionZ2 != 0) {
-		return fImagePositionZ1 > fImagePositionZ2;
-	}
-	else {
-		return sorting_fileName(pCiImage1, pCiImage2);
-	}
-}
-template <typename T>
-bool CData::sorting_fileName(CImage<T>* &pCiImage1, CImage<T>* &pCiImage2) {
-	// 문자열 비교 //
-	std::string s1 = pCiImage1->getImageName();
-	std::string s2 = pCiImage2->getImageName();
-
-	int n = strcmp(s1.c_str(), s2.c_str()); 
-
-	return n< 0? true : false;
-}
-
-////////////////////////////////////////////////////////////////////
 bool CData::modifySeries(CSeries* pCiSeries) {
 	if(pCiSeries) {
 		int nImageCnt = pCiSeries->getImageCount();
@@ -3056,57 +3211,128 @@ bool CData::modifySeries(CSeries* pCiSeries) {
 		std::vector<std::string> paths = splitPath(sImagePath);
 		int nPathTokens = paths.size();
 
-		if(true) // patient name /////////////////////////////////////////////////
-		{
-			// 1. imagePath 기준으로 상위 n단계 폴더명
-			if(nImageCnt == 1) {
-				// 한 파일에 이미지가 1개 들어있을 때
-				if(nPathTokens-4 >= 0) {
-					pCiSeries->m_sPatientName = paths[nPathTokens-4];
-				}
-			}
-			else if(nImageCnt > 1) {
-				// 한 파일에 이미지가 n개 들어있을 때
-				if(nPathTokens-3 >= 0) {
-					pCiSeries->m_sPatientName = paths[nPathTokens-3];
-				}
-			}
+		if(m_pInputDataStruct) {
+			// todo
 		}
-		if(true) // study name /////////////////////////////////////////////////
-		{
-			if(nImageCnt == 1) {
+		else {
+			// 20221003 임시
+			std::string studyName = "";
+			std::string patientName = "";
+
+			// studyName, patientName //////////////////////////
+			if (nImageCnt == 1) {
 				// 한 파일에 이미지가 1개 들어있을 때
-				if(nPathTokens-3 >= 0) {
-					pCiSeries->m_sStudyName = paths[nPathTokens-3];
+				if (nPathTokens - 3 >= 0) {
+					studyName = paths[nPathTokens - 3];
 				}
 			}
-			else if(nImageCnt > 1) {
+			else if (nImageCnt > 1) {
 				// 한 파일에 이미지가 n개 들어있을 때
-				if(nPathTokens-2 >= 0) {
-					pCiSeries->m_sStudyName = paths[nPathTokens-2];
+				if (nPathTokens - 2 >= 0) {
+					studyName = paths[nPathTokens - 2];
 				}
 			}
-		}
-		if(true) // series name /////////////////////////////////////////////////
-		{
+
+			if (studyName != "CT") {
+				// StudyName이 CT가 아닌경우, StudyName 폴더가 빠진 경우임
+				pCiSeries->m_sStudyName = "CT";
+
+				// patientName
+				if (nImageCnt == 1) {
+					// 한 파일에 이미지가 1개 들어있을 때
+					if (nPathTokens - 3 >= 0) {
+						pCiSeries->m_sPatientName = paths[nPathTokens - 3];
+					}
+				}
+				else if (nImageCnt > 1) {
+					// 한 파일에 이미지가 n개 들어있을 때
+					if (nPathTokens - 2 >= 0) {
+						pCiSeries->m_sPatientName = paths[nPathTokens - 2];
+					}
+				}
+			}
+			else {
+				pCiSeries->m_sStudyName = studyName;
+
+				// patientName
+				if (nImageCnt == 1) {
+					// 한 파일에 이미지가 1개 들어있을 때
+					if (nPathTokens - 4 >= 0) {
+						pCiSeries->m_sPatientName = paths[nPathTokens - 4];
+					}
+				}
+				else if (nImageCnt > 1) {
+					// 한 파일에 이미지가 n개 들어있을 때
+					if (nPathTokens - 3 >= 0) {
+						pCiSeries->m_sPatientName = paths[nPathTokens - 3];
+					}
+				}
+				
+				if (nImageCnt == 1) {
+					// 한 파일에 이미지가 1개 들어있을 때
+					if (nPathTokens - 2 >= 0) {
+						std::string seriesName = paths[nPathTokens - 2];
+
+						if (seriesName.compare("dcm") == 0 || seriesName.compare("mask") == 0) {
+							// Series 밑에 dcm,mask등으로 더 세분화 되어 있는 경우
+							pCiSeries->m_sSeriesName = renameSeries(paths[nPathTokens - 3]);
+
+							int nFindFileNameIdx = rfind(sImagePath, "\\", 2) + 1;
+							std::string sSeriesPath = sImagePath.substr(0, nFindFileNameIdx - 1);
+							pCiSeries->m_sSeriesPath = sSeriesPath;
+						}
+						else {
+							pCiSeries->m_sSeriesName = renameSeries(seriesName);
+
+							int nFindFileNameIdx = rfind(sImagePath, "\\", 1) + 1;
+							std::string sSeriesPath = sImagePath.substr(0, nFindFileNameIdx - 1);
+							pCiSeries->m_sSeriesPath = sSeriesPath;
+						}
+					}
+				}
+				else if (nImageCnt > 1) {
+					// 한 파일에 이미지가 n개 들어있을 때
+					if (nPathTokens - 1 >= 0) {
+						std::string seriesName = paths[nPathTokens - 1]; // "Portal_Ax_Mask"
+
+						if (seriesName.compare("dcm") == 0 || seriesName.compare("mask") == 0) {
+							// Series 밑에 dcm,mask등으로 더 세분화 되어 있는 경우
+							pCiSeries->m_sSeriesName = renameSeries(paths[nPathTokens - 2]);
+
+							int nFindFileNameIdx = rfind(sImagePath, "\\", 1) + 1;
+							std::string sSeriesPath = sImagePath.substr(0, nFindFileNameIdx - 1);
+							pCiSeries->m_sSeriesPath = sSeriesPath;
+						}
+						else {
+							pCiSeries->m_sSeriesName = renameSeries(seriesName);
+
+							int nFindFileNameIdx = rfind(sImagePath, "\\", 1) + 1;
+							std::string sSeriesPath = sImagePath.substr(0, nFindFileNameIdx - 1);
+							pCiSeries->m_sSeriesPath = sSeriesPath;
+						}
+					}
+				}
+			}
+
+			// seriesName //////////////////////////
 			if (nImageCnt == 1) {
 				// 한 파일에 이미지가 1개 들어있을 때
 				if (nPathTokens - 2 >= 0) {
-					std::string seriesName = paths[nPathTokens-2];
-					
-					if(seriesName.compare("dcm") == 0 || seriesName.compare("mask") == 0) {
+					std::string seriesName = paths[nPathTokens - 2];
+
+					if (seriesName.compare("dcm") == 0 || seriesName.compare("mask") == 0) {
 						// Series 밑에 dcm,mask등으로 더 세분화 되어 있는 경우
-						pCiSeries->m_sSeriesName = renameSeries(paths[nPathTokens-3]);
-						
+						pCiSeries->m_sSeriesName = renameSeries(paths[nPathTokens - 3]);
+
 						int nFindFileNameIdx = rfind(sImagePath, "\\", 2) + 1;
-						std::string sSeriesPath = sImagePath.substr(0, nFindFileNameIdx-1);
+						std::string sSeriesPath = sImagePath.substr(0, nFindFileNameIdx - 1);
 						pCiSeries->m_sSeriesPath = sSeriesPath;
 					}
 					else {
 						pCiSeries->m_sSeriesName = renameSeries(seriesName);
-						
+
 						int nFindFileNameIdx = rfind(sImagePath, "\\", 1) + 1;
-						std::string sSeriesPath = sImagePath.substr(0, nFindFileNameIdx-1);
+						std::string sSeriesPath = sImagePath.substr(0, nFindFileNameIdx - 1);
 						pCiSeries->m_sSeriesPath = sSeriesPath;
 					}
 				}
@@ -3115,24 +3341,105 @@ bool CData::modifySeries(CSeries* pCiSeries) {
 				// 한 파일에 이미지가 n개 들어있을 때
 				if (nPathTokens - 1 >= 0) {
 					std::string seriesName = paths[nPathTokens - 1]; // "Portal_Ax_Mask"
-					
-					if(seriesName.compare("dcm") == 0 || seriesName.compare("mask") == 0) {
+
+					if (seriesName.compare("dcm") == 0 || seriesName.compare("mask") == 0) {
 						// Series 밑에 dcm,mask등으로 더 세분화 되어 있는 경우
 						pCiSeries->m_sSeriesName = renameSeries(paths[nPathTokens - 2]);
 
 						int nFindFileNameIdx = rfind(sImagePath, "\\", 1) + 1;
-						std::string sSeriesPath = sImagePath.substr(0, nFindFileNameIdx-1);
+						std::string sSeriesPath = sImagePath.substr(0, nFindFileNameIdx - 1);
 						pCiSeries->m_sSeriesPath = sSeriesPath;
 					}
 					else {
 						pCiSeries->m_sSeriesName = renameSeries(seriesName);
 
 						int nFindFileNameIdx = rfind(sImagePath, "\\", 1) + 1;
-						std::string sSeriesPath = sImagePath.substr(0, nFindFileNameIdx-1);
+						std::string sSeriesPath = sImagePath.substr(0, nFindFileNameIdx - 1);
 						pCiSeries->m_sSeriesPath = sSeriesPath;
 					}
 				}
 			}
+
+			/* 20221003 backup
+			if(true) // patient name /////////////////////////////////////////////////
+			{
+				// 1. imagePath 기준으로 상위 n단계 폴더명
+				if(nImageCnt == 1) {
+					// 한 파일에 이미지가 1개 들어있을 때
+					if(nPathTokens-4 >= 0) {
+						pCiSeries->m_sPatientName = paths[nPathTokens-4];
+					}
+				}
+				else if(nImageCnt > 1) {
+					// 한 파일에 이미지가 n개 들어있을 때
+					if(nPathTokens-3 >= 0) {
+						pCiSeries->m_sPatientName = paths[nPathTokens-3];
+					}
+				}
+			}
+			if(true) // study name /////////////////////////////////////////////////
+			{
+				if(nImageCnt == 1) {
+					// 한 파일에 이미지가 1개 들어있을 때
+					if(nPathTokens-3 >= 0) {
+						pCiSeries->m_sStudyName = paths[nPathTokens-3];
+					}
+				}
+				else if(nImageCnt > 1) {
+					// 한 파일에 이미지가 n개 들어있을 때
+					if(nPathTokens-2 >= 0) {
+						pCiSeries->m_sStudyName = paths[nPathTokens-2];
+					}
+				}
+			}
+			if(true) // series name /////////////////////////////////////////////////
+			{
+				if (nImageCnt == 1) {
+					// 한 파일에 이미지가 1개 들어있을 때
+					if (nPathTokens - 2 >= 0) {
+						std::string seriesName = paths[nPathTokens-2];
+						
+						if(seriesName.compare("dcm") == 0 || seriesName.compare("mask") == 0) {
+							// Series 밑에 dcm,mask등으로 더 세분화 되어 있는 경우
+							pCiSeries->m_sSeriesName = renameSeries(paths[nPathTokens-3]);
+							
+							int nFindFileNameIdx = rfind(sImagePath, "\\", 2) + 1;
+							std::string sSeriesPath = sImagePath.substr(0, nFindFileNameIdx-1);
+							pCiSeries->m_sSeriesPath = sSeriesPath;
+						}
+						else {
+							pCiSeries->m_sSeriesName = renameSeries(seriesName);
+							
+							int nFindFileNameIdx = rfind(sImagePath, "\\", 1) + 1;
+							std::string sSeriesPath = sImagePath.substr(0, nFindFileNameIdx-1);
+							pCiSeries->m_sSeriesPath = sSeriesPath;
+						}
+					}
+				}
+				else if (nImageCnt > 1) {
+					// 한 파일에 이미지가 n개 들어있을 때
+					if (nPathTokens - 1 >= 0) {
+						std::string seriesName = paths[nPathTokens - 1]; // "Portal_Ax_Mask"
+						
+						if(seriesName.compare("dcm") == 0 || seriesName.compare("mask") == 0) {
+							// Series 밑에 dcm,mask등으로 더 세분화 되어 있는 경우
+							pCiSeries->m_sSeriesName = renameSeries(paths[nPathTokens - 2]);
+
+							int nFindFileNameIdx = rfind(sImagePath, "\\", 1) + 1;
+							std::string sSeriesPath = sImagePath.substr(0, nFindFileNameIdx-1);
+							pCiSeries->m_sSeriesPath = sSeriesPath;
+						}
+						else {
+							pCiSeries->m_sSeriesName = renameSeries(seriesName);
+
+							int nFindFileNameIdx = rfind(sImagePath, "\\", 1) + 1;
+							std::string sSeriesPath = sImagePath.substr(0, nFindFileNameIdx-1);
+							pCiSeries->m_sSeriesPath = sSeriesPath;
+						}
+					}
+				}
+			}
+			*/
 		}
 	}
 
@@ -3165,43 +3472,4 @@ std::string CData::renameSeries(std::string sSeriesName) {
 	}
 
 	return sRemovedTag;
-}
-
-std::string CData::convertImageSavePath(int nSeriesIdx, int nImageIdx, const char* pcSaveDir, const char* pcExtension, int nSaveType, int nSaveOption) {
-	CSeries* pCiSeries = getSeries(nSeriesIdx);
-
-	if(pCiSeries) {
-		std::string sSeriesName = pCiSeries->m_sSeriesName;
-		std::string sStudyName = pCiSeries->m_sStudyName;
-		std::string sPatientName = pCiSeries->m_sPatientName;
-
-		if(nSaveType == SAVE_IMAGE_ONLY || nSaveType == SAVE_OVERLAY) {
-			std::string sImageName = pCiSeries->getImage(nImageIdx)->getImageName();
-			std::string sImagePath = pcSaveDir + std::string("\\") + sStudyName + std::string("\\") + sImageName + std::string(".") + pcExtension;
-
-			return sImagePath;
-		}
-		else if(nSaveType == SAVE_MASK_ONLY) {
-			std::string sMaskName = pCiSeries->getImage(nImageIdx)->getMaskName();
-			std::string sMaskPath = "";
-
-			// maskName에 조건이 이미 들어있는 경우
-			// 1. 파일명의 첫 두글자가 "m_"으로 시작하는 경우
-			if(sMaskName.substr(0, 2).compare("m_") == 0) {
-				sMaskPath = pcSaveDir + std::string("\\") + sMaskName + std::string(".") + pcExtension;
-			}
-			// 2. 파일명에 "_m_" 문자열이 포함된 경우
-			else if(sMaskName.find("_m_") != std::string::npos) {
-				sMaskPath = pcSaveDir + std::string("\\") + sMaskName + std::string(".") + pcExtension;
-			}
-			else {
-				// 아무것도 없는 경우
-				sMaskPath = pcSaveDir + std::string("\\") + sStudyName + std::string("\\m_") + sMaskName + std::string(".") + pcExtension;
-			}
-			
-			return sMaskPath;
-		}
-	}
-
-	return "";
 }

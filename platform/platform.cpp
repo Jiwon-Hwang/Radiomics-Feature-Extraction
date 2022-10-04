@@ -189,10 +189,9 @@ void BorderlessMainWindow::resizeEvent(QResizeEvent* event)
 void CPlatform::setStyles() {
 
 	// QLineEdit 입력 제약조건 - "int"만 허용
-	QIntValidator *intValidator = new QIntValidator(0, 999999); //최소수, 최대수
-	ui.lineEdit_x->setValidator(intValidator);
-	ui.lineEdit_y->setValidator(intValidator);
-
+	QIntValidator intValidator(0, 999999); //최소수, 최대수
+	ui.lineEdit_x->setValidator(&intValidator);
+	ui.lineEdit_y->setValidator(&intValidator);
 }
 
 // 초기화 //
@@ -204,44 +203,34 @@ void CPlatform::init()
 	// mouse
 	m_bLMouseDown = false;
 
+	// popup
+	// init 시 NULL로 초기화 해주지 않으면 이후 clear에서 메모리해제 시 죽음 (메모리 누수) => 초기화되지 않은 포인터를 해제...
+	// createPopup 에서 동적할당 해줘도 소멸자 1회 더 호출됨, 늘 포인터 NULL로 초기화하는 습관!
+	ppopup_Morph = NULL;
+	ppopup_Intensity = NULL;
+	ppopup_Statistics = NULL;
+	ppopup_Histogram = NULL;
+	ppopup_GLCM = NULL;
+	ppopup_GLRLM = NULL;
+
 }
 void CPlatform::clear()
 {
-	if(m_ciImage != NULL) {
-		delete m_ciImage;
-		m_ciImage = NULL;
-	}
+	SAFE_DELETE(m_ciImage);
 
+	/*
 	if (ppopup_Morph != NULL) { // 메모리 소멸
 		delete ppopup_Morph;
 		ppopup_Morph = NULL;
 	}
+	*/
 
-	if (ppopup_Intensity != NULL) {
-		delete ppopup_Intensity;
-		ppopup_Intensity = NULL;
-	}
-
-	if (ppopup_Statistics != NULL) {
-		delete ppopup_Statistics;
-		ppopup_Statistics = NULL;
-	}
-
-	if (ppopup_Histogram != NULL) {
-		delete ppopup_Histogram;
-		ppopup_Histogram = NULL;
-	}
-
-	if (ppopup_GLCM != NULL) {
-		delete ppopup_GLCM;
-		ppopup_GLCM = NULL;
-	}
-
-	if (ppopup_GLRLM != NULL) {
-		delete ppopup_GLRLM;
-		ppopup_GLRLM = NULL;
-	}
-
+	SAFE_DELETE(ppopup_Morph);
+	SAFE_DELETE(ppopup_Intensity);
+	SAFE_DELETE(ppopup_Statistics);
+	SAFE_DELETE(ppopup_Histogram);
+	SAFE_DELETE(ppopup_GLCM);
+	SAFE_DELETE(ppopup_GLRLM);
 }
 
 
@@ -989,10 +978,15 @@ void CPlatform::slotDataScanFinish() {
 
 	// add items in tree widget (receiveTreeState())
 	ui.treeWidget_FileDirectory->clear(); // clear tree widget
+
+	createFileDirectoryItem(); // 좀 더 빠른 버전으로 수정
+
+	/*
 	int nSeriesCnt = m_ciData.getSeriesCount();
 	for (int i = 0; i < nSeriesCnt; i++) {
-		addFileDirectoryItem(i);
+		addFileDirectoryItem(i); // ***fileDirectory->finditems 는 너무 느림***
 	}
+	*/
 
 }
 void CPlatform::slotDataProgress(int nCurrentIdx, int nMaximumIdx) {
@@ -1039,10 +1033,84 @@ void CPlatform::readImage(QStringList list)
 		convertedFileList.push_back(cInputPath);
 	}
 
-	m_ciData.readFileList = convertedFileList;
+	//m_ciData.readFileList = convertedFileList; // dataLoader(v1.48)
+	m_ciData.m_sReadFileList = convertedFileList; // dataLoader(v1.5.0)
 	m_thread.start();
 }
-void CPlatform::addFileDirectoryItem(int seriesIdx) {
+void CPlatform::createFileDirectoryItem() { // tree widget 생성 속도 개선 ver
+
+	std::vector<QTreeWidgetItem*> row_patients;
+
+	for (int s = 0, ns = m_ciData.getSeriesCount(); s < ns; s++) { // ***findItems보다 더 빠름***
+		CSeries* pCiSeries = m_ciData.getSeries(s);
+
+		// patients
+		QString patientName = pCiSeries->m_sPatientName.c_str();
+		QTreeWidgetItem* row_patient = NULL;
+		for (auto it = row_patients.begin(); it != row_patients.end(); it++) {
+			if ((*it)->text(0) == patientName) {
+				row_patient = (*it);
+			}
+		}
+		if (row_patient == NULL) {
+			row_patient = new QTreeWidgetItem(ui.treeWidget_FileDirectory);
+			row_patient->setText(0, patientName);
+			row_patient->setIcon(0, QIcon(QPixmap("Resources/folder.png")));
+		}
+
+		// studies
+		QString studyName = pCiSeries->m_sStudyName.c_str();
+		QTreeWidgetItem* row_study = NULL;
+		for (int i = 0, ni = row_patient->childCount(); i < ni; i++) {
+			if (row_patient->child(i)->text(0) == studyName) {
+				row_study = row_patient->child(i);
+			}
+		}
+		if (row_study == NULL) {
+			row_study = new QTreeWidgetItem(row_patient); // "CT"
+			row_study->setText(0, studyName);
+			row_study->setIcon(0, QIcon(QPixmap("Resources/folder.png")));
+		}
+
+		// series
+		QString seriesName = pCiSeries->m_sSeriesName.c_str();
+		QTreeWidgetItem* row_series = NULL;
+		for (int i = 0, ni = row_study->childCount(); i < ni; i++) {
+			if (row_study->child(i)->text(0) == seriesName) {
+				row_series = row_study->child(i);
+			}
+		}
+		if (row_series == NULL) {
+			row_series = new QTreeWidgetItem(row_study); // "ap"
+			row_series->setText(0, seriesName);
+			row_series->setIcon(0, QIcon(QPixmap("Resources/folder.png")));
+		}
+
+		// images
+		int nImages = pCiSeries->getImageCount();
+		for (int i = 0; i < nImages; i++) {
+			QTreeWidgetItem* row_image = new QTreeWidgetItem(row_series);
+			row_image->setIcon(0, QIcon(QPixmap("Resources/dcm.png")));
+
+			QString imageName = pCiSeries->getImage(i)->getImageName().c_str();
+			row_image->setText(0, imageName);
+			row_image->setText(1, QString::number(s));
+			row_image->setText(2, QString::number(i));
+		}
+	}
+
+	// 제일 첫번째 Series, 첫번째 image 선택
+	if (row_patients.size() > 0) {
+		QTreeWidgetItem* row_patient = row_patients[0];
+		QTreeWidgetItem* row_study = row_patient->child(0);
+		QTreeWidgetItem* row_series = row_study->child(0);
+		QTreeWidgetItem* row_image = row_series->child(0);
+
+		ui.treeWidget_FileDirectory->setCurrentItem(row_image);
+	}
+	
+}
+void CPlatform::addFileDirectoryItem(int seriesIdx) { // 사용 x
 
 	CSeries* pCiSeries = m_ciData.getSeries(seriesIdx);
 
@@ -1050,7 +1118,7 @@ void CPlatform::addFileDirectoryItem(int seriesIdx) {
 	QString studyName = pCiSeries->m_sStudyName.c_str();
 	QString seriesName = pCiSeries->m_sSeriesName.c_str();
 
-	QList<QTreeWidgetItem*> list = ui.treeWidget_FileDirectory->findItems(patientName, Qt::MatchExactly | Qt::MatchRecursive, 0);
+	QList<QTreeWidgetItem*> list = ui.treeWidget_FileDirectory->findItems(patientName, Qt::MatchExactly | Qt::MatchRecursive, 0); // ***느림***
 
 	if (list.size() == 0) {
 		// 이전에 중복되는 환자가 없었을 경우 ("100") => patient, study, series, image 새로 추가
@@ -1845,7 +1913,6 @@ void CPlatform::run()
 			// ROI slice check //
 			float nPixelsInMask = 0;
 			if (!isEmptyMask(ppucMasks[j], nWidth, nHeight, nPixelsInMask)) {
-
 				// filtering //
 				Mat img_filtered;
 				filtering(ppsImages[j], img_filtered, nWidth, nHeight, FILTER_MODE);
@@ -1880,10 +1947,10 @@ void CPlatform::run()
 		}
 		
 		// mean all ROI slices //
-		averageAllSlices(); // final1DVec에 각 슬라이스 평균값 넣기
+		//averageAllSlices(); // final1DVec에 각 슬라이스 평균값 넣기
 
 		// write csv file //
-		writeCSVFile(i, csvName);
+		//writeCSVFile(i, csvName);
 		
 		// clear all vector //
 		clearAll(i);

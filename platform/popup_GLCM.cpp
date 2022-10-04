@@ -38,12 +38,16 @@ popup_GLCM::popup_GLCM(QWidget *parent) :
 	filterGroup->addButton(ui->checkBox_All, GLCM::FEATURE_COUNT);
 
 	// QLineEdit 입력 제약조건 - "int"만 허용
-	QIntValidator *intValidator = new QIntValidator(0, 999999); //최소수, 최대수
-	ui->lineEdit_sBin->setValidator(intValidator);
-
+	QIntValidator intValidator(0, 999999); //최소수, 최대수 설정 이후엔 QT 내부적으로 필요 없음 (new 필요 X) => 메모리 누수
+	ui->lineEdit_sBin->setValidator(&intValidator);
 }
 
 popup_GLCM::~popup_GLCM()
 {
+	// new로 선언한 것은 항상 사용 후 delete (동적 할당 후 해제 필수 => 메모리 누수)
+	if (filterGroup) {
+		delete filterGroup;
+		filterGroup = NULL;
+	}
 	delete ui;
 }
