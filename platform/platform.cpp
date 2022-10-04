@@ -1945,7 +1945,7 @@ void CPlatform::run()
 				SAFE_DELETE_ARRAY(ppucMasks[j]);
 			}
 		}
-		
+		// ***아래 두 함수 실행 시 도중에 프로그램 죽음...***
 		// mean all ROI slices //
 		//averageAllSlices(); // final1DVec에 각 슬라이스 평균값 넣기
 
