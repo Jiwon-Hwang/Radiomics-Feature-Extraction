@@ -1696,7 +1696,7 @@ void CPlatform::presetCSVFile(string csvName) {
 void writeCSVCheckedValue(vector<float> extractedValues, string csvName) // 모든 class 공통
 {
 	ofstream resultCSV(csvName, std::ios_base::app);
-	for (int i = 0; i< extractedValues.size(); i++) {
+	for (int i = 0, nValues = extractedValues.size(); i< nValues; i++) {
 		/*
 		// 속도 문제로 사용 x
 		if (!isnan(extractedValues[i])) {
@@ -1947,10 +1947,10 @@ void CPlatform::run()
 		}
 		// ***아래 두 함수 실행 시 도중에 프로그램 죽음...***
 		// mean all ROI slices //
-		//averageAllSlices(); // final1DVec에 각 슬라이스 평균값 넣기
+		averageAllSlices(); // final1DVec에 각 슬라이스 평균값 넣기
 
 		// write csv file //
-		//writeCSVFile(i, csvName);
+		writeCSVFile(i, csvName);
 		
 		// clear all vector //
 		clearAll(i);

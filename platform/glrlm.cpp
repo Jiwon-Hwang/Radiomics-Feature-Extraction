@@ -667,11 +667,11 @@ void GLRLM::featureExtraction(short* psImage, unsigned char* pucMask, int nHeigh
 void GLRLM::averageAllValues() {
 
 	// get final mean vector
-	for (int col = 0; col < final2DVec[0].size(); col++) {
+	for (int col = 0, nCols = final2DVec[0].size(); col < nCols; col++) {
 		float colSum = 0;
 		float colMean;
 
-		for (int row = 0; row < final2DVec.size(); row++) {
+		for (int row = 0, nRows = final2DVec.size(); row < nRows; row++) {
 			colSum += final2DVec[row][col];
 		}
 		colMean = colSum / final2DVec.size();
