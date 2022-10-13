@@ -908,17 +908,18 @@ void GLCM::featureExtraction(short* psImage, unsigned char* pucMask, int nHeight
 void GLCM::averageAllValues() {
 
 	// get final mean vector
-	for (int col = 0, nCols = final2DVec[0].size(); col < nCols; col++) {
-		float colSum = 0;
-		float colMean;
+	if (!final2DVec.empty()) { 
+		for (int col = 0, nCols = final2DVec[0].size(); col < nCols; col++) {
+			float colSum = 0;
+			float colMean;
 
-		for (int row = 0, nRows = final2DVec.size(); row < nRows; row++) {
-			colSum += final2DVec[row][col];
+			for (int row = 0, nRows = final2DVec.size(); row < nRows; row++) {
+				colSum += final2DVec[row][col];
+			}
+			colMean = colSum / final2DVec.size();
+			final1DVec.push_back(colMean);
 		}
-		colMean = colSum / final2DVec.size();
-		final1DVec.push_back(colMean);
 	}
-
 }
 
 void GLCM::defineFeatureNames(vector<string> &features) {
