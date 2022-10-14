@@ -1888,78 +1888,119 @@ void CPlatform::run()
 	string currentTime = getCurrentTime();
 	string csvName = outputFolder + currentTime + ".csv";
 	presetCSVFile(csvName);
-	
-	
+
+
 	// filtering and feature extraction by series //
 	int nSeriesCnt = m_ciData.getSeriesCount();
 	cout << "*** total number of Series : " << nSeriesCnt << " ***" << endl;
 
 	for (int i = 0; i < nSeriesCnt; i++) {
-		int nWidth = 0;		
-		int nHeight = 0;	
-		int nImageCnt = 0;	
-		int nMaskCnt = 0;	
+		int nWidth = 0;
+		int nHeight = 0;
+		int nImageCnt = 0;
+		int nMaskCnt = 0;
 		short** ppsImages = NULL;
 		unsigned char** ppucMasks = NULL;
-		
+
 		// copy series //
-		m_ciData.copyImages(i, ppsImages, nImageCnt, nWidth, nHeight);
+		m_ciData.copyImages(i, ppsImages, nImageCnt, nWidth, nHeight); // 실패 시 false 반환으로 수정 (ppsImages에는 NULL 반환)
 		m_ciData.copyMasks(i, ppucMasks, nMaskCnt, nWidth, nHeight);
+
 		m_ciData.clearImages(i); // clear ori m_ciData (images, masks)
 
-		// slice by slice //
-		for (int j = 0; j < nImageCnt; j++) {
+		try {
+			// excpetion handling //
+			if (ppsImages == NULL || nImageCnt == 0) { // copy 실패 시 예외처리
+				throw std::exception("copy images fail");
+			}
+			if (ppucMasks == NULL || nMaskCnt == 0) {
+				throw std::exception("copy masks fail");
+			}
 
-			// ROI slice check //
-			float nPixelsInMask = 0;
-			if (!isEmptyMask(ppucMasks[j], nWidth, nHeight, nPixelsInMask)) {
-				// filtering //
-				Mat img_filtered;
-				filtering(ppsImages[j], img_filtered, nWidth, nHeight, FILTER_MODE);
-				SAFE_DELETE_ARRAY(ppsImages[j]); // psImage 포인터가 가리키고 있던 메모리 데이터들 해제 => ***이후엔 Mat 데이터를 가리키므로, 또 해제해주지 않아야 함!***
-				ppsImages[j] = (short*)img_filtered.data; // 주소 변경
-				
-				// Resampling (Interpolation) //
-				Mat img_resampled, mask_resampled;
-				int nWidth_new = nWidth; // 원본값(nWidth, nHeight)는 한 시리즈 내에서 유지해야 함! 갱신 X! (for. 첫 ROI check)
-				int nHeight_new = nHeight;
-				float pixelSpacingX, pixelSpacingY;
-				m_ciData.getPixelSpacing(i, j, pixelSpacingX, pixelSpacingY);
-				resampling(ppsImages[j], ppucMasks[j], nWidth_new, nHeight_new, nPixelsInMask, pixelSpacingX, pixelSpacingY, img_resampled, mask_resampled); // new nWidth, nHeight 
-				SAFE_DELETE_ARRAY(ppucMasks[j]);
-				ppsImages[j] = (short*)img_resampled.data;
-				ppucMasks[j] = (unsigned char*)mask_resampled.data;
-				
-				// Resegmentation (Outlier Filteration) //
-				Mat mask_resegmented;
-				resegmentation(ppsImages[j], ppucMasks[j], nWidth_new, nHeight_new, mask_resegmented);
-				ppucMasks[j] = (unsigned char*)mask_resegmented.data;
-				
-				// feature extraction //
-				if (!isEmptyMask(ppucMasks[j], nWidth_new, nHeight_new, nPixelsInMask)) {   // resegmentation 후의 mask 재확인
-					featureExtraction(ppsImages[j], ppucMasks[j], nHeight_new, nWidth_new, pixelSpacingX, pixelSpacingY); // final2DVec에 각 슬라이스들 값 누적
+			// slice by slice //
+			for (int j = 0; j < nImageCnt; j++) {
+				// ROI slice check //
+				float nPixelsInMask = 0;
+				if (!isEmptyMask(ppucMasks[j], nWidth, nHeight, nPixelsInMask)) {
+					// filtering //
+					Mat img_filtered;
+					filtering(ppsImages[j], img_filtered, nWidth, nHeight, FILTER_MODE);
+					SAFE_DELETE_ARRAY(ppsImages[j]); // psImage 포인터가 가리키고 있던 메모리 데이터들 해제 => ***이후엔 Mat 데이터를 가리키므로, 또 해제해주지 않아야 함!***
+					ppsImages[j] = (short*)img_filtered.data; // 주소 변경
+
+															  // Resampling (Interpolation) //
+					Mat img_resampled, mask_resampled;
+					int nWidth_new = nWidth; // 원본값(nWidth, nHeight)는 한 시리즈 내에서 유지해야 함! 갱신 X! (for. 첫 ROI check)
+					int nHeight_new = nHeight;
+					float pixelSpacingX, pixelSpacingY;
+					m_ciData.getPixelSpacing(i, j, pixelSpacingX, pixelSpacingY);
+					resampling(ppsImages[j], ppucMasks[j], nWidth_new, nHeight_new, nPixelsInMask, pixelSpacingX, pixelSpacingY, img_resampled, mask_resampled); // new nWidth, nHeight 
+					SAFE_DELETE_ARRAY(ppucMasks[j]);
+					ppsImages[j] = (short*)img_resampled.data;
+					ppucMasks[j] = (unsigned char*)mask_resampled.data;
+
+					// Resegmentation (Outlier Filteration) //
+					Mat mask_resegmented;
+					resegmentation(ppsImages[j], ppucMasks[j], nWidth_new, nHeight_new, mask_resegmented);
+					ppucMasks[j] = (unsigned char*)mask_resegmented.data;
+
+					// feature extraction //
+					if (!isEmptyMask(ppucMasks[j], nWidth_new, nHeight_new, nPixelsInMask)) {   // resegmentation 후의 mask 재확인
+						featureExtraction(ppsImages[j], ppucMasks[j], nHeight_new, nWidth_new, pixelSpacingX, pixelSpacingY); // final2DVec에 각 슬라이스들 값 누적
+					}
+				}
+				else { // ***isEmptyMask가 아닌 경우에도 메모리 소멸 (1차원 배열)***
+					SAFE_DELETE_ARRAY(ppsImages[j]);
+					SAFE_DELETE_ARRAY(ppucMasks[j]);
 				}
 			}
-			else { // ***isEmptyMask가 아닌 경우에도 메모리 소멸 (1차원 배열)***
-				SAFE_DELETE_ARRAY(ppsImages[j]);
-				SAFE_DELETE_ARRAY(ppucMasks[j]);
+
+			SAFE_DELETE_ARRAY(ppsImages);
+			SAFE_DELETE_ARRAY(ppucMasks);
+		}
+		catch (std::exception &e) {
+			if (std::string(e.what()) == "copy masks fail") { // Image만 있고 Mask 파일은 없는 경우는 platform에서 예외처리(dataLoader에선 정상 경우)
+				std::ofstream sLog;
+				sLog.open(outputFolder + "tempLog.txt", std::ofstream::out | std::ofstream::app);
+
+				if (sLog.is_open()) {
+					CSeries* pCiSeries = m_ciData.getSeries(i);
+					std::string seriesPath = pCiSeries->m_sSeriesPath;
+					sLog << "dcm과 대응되는 mask가 없음 ==> " << seriesPath << std::endl;
+					sLog.close();
+				}
+			}
+			else {
+				std::cout << e.what() << std::endl;
+			}
+
+			// try 구문 실행 중 error로 죽은 경우, 메모리 해제가 어디까지 됐는지 알 수 없어서 순회하면서 전부 해제
+			if (ppsImages) {
+				for (int m = 0; m < nImageCnt; m++) {
+					if (ppsImages[m]) {
+						SAFE_DELETE_ARRAY(ppsImages[m]);
+					}
+				}
+				SAFE_DELETE_ARRAY(ppsImages);
+			}
+			if (ppucMasks) {
+				for (int m = 0; m < nMaskCnt; m++) {
+					if (ppucMasks[m]) {
+						SAFE_DELETE_ARRAY(ppucMasks[m]);
+					}
+				}
+				SAFE_DELETE_ARRAY(ppucMasks);
 			}
 		}
-		// ***아래 두 함수 실행 시 도중에 프로그램 죽음...***
+
 		// mean all ROI slices //
 		averageAllSlices(); // final1DVec에 각 슬라이스 평균값 넣기
 
 		// write csv file //
 		writeCSVFile(i, csvName);
-		
+
 		// clear all vector //
 		clearAll(i);
-
-		// 메모리 소멸 // 
-		//SAFE_DELETE_VOLUME(ppsImages, nImageCnt); // ***2차원 배열도 메모리 소멸!***
-		//SAFE_DELETE_VOLUME(ppucMasks, nMaskCnt);
-		SAFE_DELETE_ARRAY(ppsImages);
-		SAFE_DELETE_ARRAY(ppucMasks);
 
 		// progress bar //
 		setProgressBarValue(i, nSeriesCnt);
@@ -1969,12 +2010,11 @@ void CPlatform::run()
 	// remove if isEmpty or change log file name
 	string txtName = outputFolder + currentTime + ".txt";
 	m_ciData.checkIsEmptyLog(txtName);
-	
+
 
 	// finish pop-up and exit		
 	if (QMessageBox(QMessageBox::Information, " ", "extraction finished!", QMessageBox::Close).exec() == QMessageBox::Close) {
 		QApplication::quit();
 	}
-	
-}
 
+}
