@@ -1,10 +1,10 @@
 #pragma once
 
-// v 1.5.0.1 (20221003)
+// v 1.5.0.2 (20221014)
 
 // config
 #define DEBUG 0		   // 0: false, 1: true (VLD)
-#define THREAD 1  // 0: false, 1: true (Thread on/off)
+#define THREAD 0  // 0: false, 1: true (Thread on/off)
 #define QT 1		   // 0: false, 1: true (QT에서 사용하는 경우)
 #define PROGRESS_BAR 1 // 0: hide, 1: show (console)
 

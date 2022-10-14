@@ -248,8 +248,8 @@ void CData::readImage(std::vector<std::string> sPaths, bool bReadRecursive, bool
 					v_async.emplace_back(std::async(std::launch::async, &CData::scanImage, this, m_scan[i], std::ref(nFileCount), nTotal, pCallback));
 				}
 			}
-			for(int i=0, ni=v_async.size(); i<ni; i++) {
-				v_async[i].wait();
+			for (auto& f : v_async) {
+				f.wait();
 			}
 			v_async.clear();
 
@@ -259,8 +259,8 @@ void CData::readImage(std::vector<std::string> sPaths, bool bReadRecursive, bool
 					v_async.emplace_back(std::async(std::launch::async, &CData::scanImage, this, m_scan[i], std::ref(nFileCount), nTotal, pCallback));
 				}
 			}
-			for(int i=0, ni=v_async.size(); i<ni; i++) {
-				v_async[i].wait();
+			for (auto& f : v_async) {
+				f.wait();
 			}
 			v_async.clear();
 		#else
@@ -375,7 +375,7 @@ void CData::scanImage(ScanContainer* psc, int &nFileCount, int nTotal, std::func
 			}
 		}
 		// 이미지인 경우, Series에 추가
-		if(!psc->isMask) {
+		if(psc->isMask == false) {
 			if(pCiMatchedSeries == NULL) {
 				// Series가 중복되지 않는 경우 (= 새로운 Series인 경우 Series를 추가)
 				addSeries(pCiSeries);
@@ -387,7 +387,7 @@ void CData::scanImage(ScanContainer* psc, int &nFileCount, int nTotal, std::func
 
 
 		// 이미지, 마스크에 따라 다르게 처리
-		if(!psc->isMask) {
+		if(psc->isMask == false) {
 			if(pCiMatchedSeries != NULL) {
 				#if THREAD
 					mutex_addImage.lock();
@@ -411,7 +411,7 @@ void CData::scanImage(ScanContainer* psc, int &nFileCount, int nTotal, std::func
 					if(isDup) {
 						// 중복되면 버림
 						if(m_sLog.is_open()) {
-							m_sLog << "파일 중복 ==> " << pCiImage->getImagePath() << "\n";
+							m_sLog << "dcm 파일 중복 ==> " << pCiImage->getImagePath() << "\n";
 						}
 						psc->isLoad = DUPLICATE_FILE;
 					}
@@ -472,7 +472,7 @@ void CData::scanImage(ScanContainer* psc, int &nFileCount, int nTotal, std::func
 						else {
 							// 매칭되는 Image가 없는 경우, 버림
 							if(m_sLog.is_open()) {
-								m_sLog << "mask 파일만 존재 ==> " << pCiImage->getImagePath() << "\n";
+								m_sLog << "mask와 대응되는 dcm을 찾을 수 없음 ==> " << pCiImage->getImagePath() << "\n";
 							}
 						}
 					}
@@ -867,7 +867,7 @@ int CData::loadImage_lazyLoading(CImage<T>* &pCiImage, bool isMask) {
 	if(pCiImage == NULL) {
 		return nReturn;
 	}
-	if(!isMask && pCiImage->getImage() != NULL) {
+	if(isMask == false && pCiImage->getImage() != NULL) {
 		return SUCCESS;
 	}
 	else if (isMask && pCiImage->getMask() != NULL) {
@@ -875,7 +875,7 @@ int CData::loadImage_lazyLoading(CImage<T>* &pCiImage, bool isMask) {
 	}
 
 	CSeries* pCiSeries = pCiImage->getSeries();
-	if(!isMask) {
+	if(isMask == false) {
 		bool isMultiple = pCiImage->getIsMultipleImages();
 		if(isMultiple) {
 			nReturn = loadImages_lazyLoading_thread(pCiSeries, isMask);
@@ -1044,7 +1044,7 @@ int CData::loadImages_lazyLoading_thread(CSeries* pCiSeries, bool isMask, std::f
 	for(int i=0, ni=pCiSeries->getImageCount(); i<ni; i++) {
 		CImage<short>* pCiImage = pCiSeries->getImage(i);
 
-		if(!isMask) {
+		if(isMask == false) {
 			if(pCiImage->getImage() == NULL) {
 				isLoadedAll = false;
 				break;
@@ -1061,7 +1061,7 @@ int CData::loadImages_lazyLoading_thread(CSeries* pCiSeries, bool isMask, std::f
 		return SUCCESS;
 	}
 
-	if(!isMask) {
+	if(isMask == false) {
 		printf("[Series] -- %s_%s\n", pCiSeries->m_sPatientName.c_str(), pCiSeries->m_sSeriesName.c_str());
 	}
 
@@ -1073,7 +1073,7 @@ int CData::loadImages_lazyLoading_thread(CSeries* pCiSeries, bool isMask, std::f
 	for(int i=0, ni=pCiSeries->getImageCount(); i<ni; i++) {
 		CImage<short>* pCiImage = pCiSeries->getImage(i);
 
-		if(!isMask) {
+		if(isMask == false) {
 			// images
 			if(pCiImage->getImagePath() != "") {
 				v_async.emplace_back(std::async(std::launch::async, &CData::loadImage_lazyLoading_image_thread, this, pCiSeries, i, std::ref(nFileCount), pCallback));
@@ -1092,14 +1092,16 @@ int CData::loadImages_lazyLoading_thread(CSeries* pCiSeries, bool isMask, std::f
 			}
 		}
 	}
-	for(int i=0, ni=v_async.size(); i<ni; i++) {
-		v_async[i].wait();
+
+	// run thread
+	for (auto& f: v_async) {
+		f.wait();
 	}
 	v_async.clear();
 #else
 	for(int i=0, ni=pCiSeries->getImageCount(); i<ni; i++) {
 		CImage<short>* pCiImage = pCiSeries->getImage(i);
-		if(!isMask) {
+		if(isMask == false) {
 			// images
 			if(pCiImage->getImagePath() != "") {
 				loadImage_lazyLoading_image_thread(pCiSeries, i, nFileCount, pCallback);
@@ -2174,19 +2176,8 @@ bool CData::setImages(int nSeriesIdx, short** ppsImages, int nImageCnt, int nWid
 }
 
 bool CData::copyImage(int nSliceIdx, short* &psImage, int &nWidth, int &nHeight) {
-	bool isCopy = false;
-	CImage<short>* pTargetImage = getCImage(nSliceIdx);
-
-	if(pTargetImage) {
-		isCopy = pTargetImage->copyImage(psImage, nWidth, nHeight);
-		if(!isCopy) {
-			if(loadImage_lazyLoading(pTargetImage, false)) {
-				isCopy = pTargetImage->copyImage(psImage, nWidth, nHeight);
-			}
-		}
-	}
-
-	return isCopy;
+	int nChannelTemp = 0;	// not use
+	return copyImage(nSliceIdx, psImage, nWidth, nHeight, nChannelTemp);
 }
 bool CData::copyImage(int nSliceIdx, short* &psImage, int &nWidth, int &nHeight, int &nChannel) {
 	bool isCopy = false;
@@ -2194,7 +2185,7 @@ bool CData::copyImage(int nSliceIdx, short* &psImage, int &nWidth, int &nHeight,
 
 	if(pTargetImage) {
 		isCopy = pTargetImage->copyImage(psImage, nWidth, nHeight, nChannel);
-		if(!isCopy) {
+		if(isCopy == false) {
 			if(loadImage_lazyLoading(pTargetImage, false)) {
 				isCopy = pTargetImage->copyImage(psImage, nWidth, nHeight, nChannel);
 			}
@@ -2204,19 +2195,8 @@ bool CData::copyImage(int nSliceIdx, short* &psImage, int &nWidth, int &nHeight,
 	return isCopy;
 }
 bool CData::copyImage(int nSeriesIdx, int nImageIdx, short* &psImage, int &nWidth, int &nHeight) {
-	bool isCopy = false;
-	CImage<short>* pTargetImage = getCImage(nSeriesIdx, nImageIdx);
-
-	if(pTargetImage) {
-		isCopy = pTargetImage->copyImage(psImage, nWidth, nHeight);
-		if(!isCopy) {
-			if(loadImage_lazyLoading(pTargetImage, false)) {
-				isCopy = pTargetImage->copyImage(psImage, nWidth, nHeight);
-			}
-		}
-	}
-
-	return isCopy;
+	int nChannelTemp = 0;	// not use
+	return copyImage(nSeriesIdx, nImageIdx, psImage, nWidth, nHeight, nChannelTemp);
 }
 bool CData::copyImage(int nSeriesIdx, int nImageIdx, short* &psImage, int &nWidth, int &nHeight, int &nChannel) {
 	bool isCopy = false;
@@ -2224,7 +2204,7 @@ bool CData::copyImage(int nSeriesIdx, int nImageIdx, short* &psImage, int &nWidt
 
 	if(pTargetImage) {
 		isCopy = pTargetImage->copyImage(psImage, nWidth, nHeight, nChannel);
-		if(!isCopy) {
+		if(isCopy == false) {
 			if(loadImage_lazyLoading(pTargetImage, false)) {
 				isCopy = pTargetImage->copyImage(psImage, nWidth, nHeight, nChannel);
 			}
@@ -2234,50 +2214,56 @@ bool CData::copyImage(int nSeriesIdx, int nImageIdx, short* &psImage, int &nWidt
 	return isCopy;
 }
 bool CData::copyImages(int nSeriesIdx, short** &ppsImages, int &nImageCnt, int &nWidth, int &nHeight) {
-	bool isCopy = false;
-
-	CSeries* pTargetSeries = getSeries(nSeriesIdx);
-
-	if(ppsImages == NULL && pTargetSeries) {
-		nImageCnt = pTargetSeries->getImageCount();
-		ppsImages = new short* [nImageCnt];
-		memset(ppsImages, 0, sizeof(short*)*nImageCnt);
-
-		// load
-		loadImages_lazyLoading_thread(pTargetSeries, false);
-
-		// copy
-		for(int i=0; i< nImageCnt; i++) {
-			copyImage(nSeriesIdx, i, ppsImages[i], nWidth, nHeight);
-		}
-
-		isCopy = true;
-	}
-
-	return isCopy;
+	int nChannelTemp = 0;	// not use
+	return copyImages(nSeriesIdx, ppsImages, nImageCnt, nWidth, nHeight, nChannelTemp);
 }
 bool CData::copyImages(int nSeriesIdx, short** &ppsImages, int &nImageCnt, int &nWidth, int &nHeight, int &nChannel) {
-	bool isCopy = false;
+	bool isCopyAll = false;
 
 	CSeries* pTargetSeries = getSeries(nSeriesIdx);
 
-	if(ppsImages == NULL && pTargetSeries) {
-		nImageCnt = pTargetSeries->getImageCount();
-		ppsImages = new short* [nImageCnt];
-		memset(ppsImages, 0, sizeof(short*)*nImageCnt);
+	try {
+		if (ppsImages == NULL && pTargetSeries) {
+			nImageCnt = pTargetSeries->getImageCount();
 
-		// load
-		loadImages_lazyLoading_thread(pTargetSeries, false);
+			if (nImageCnt > 0) {
+				ppsImages = new short*[nImageCnt];
+				memset(ppsImages, 0, sizeof(short*)*nImageCnt);
 
-		// copy
-		for(int i=0; i< nImageCnt; i++) {
-			copyImage(nSeriesIdx, i, ppsImages[i], nWidth, nHeight, nChannel);
+				// load
+				loadImages_lazyLoading_thread(pTargetSeries, false);
+
+				// copy
+				for (int i = 0; i< nImageCnt; i++) {
+					bool isCopy = copyImage(nSeriesIdx, i, ppsImages[i], nWidth, nHeight, nChannel);
+					if (isCopy == false) {
+						throw std::exception("copy images fail");
+					}
+				}
+
+				// 모든 image 복사에 성공할 경우 true
+				isCopyAll = true;
+			}
+			
 		}
+	}
+	catch (std::exception &e) {
+		std::cout << e.what() << std::endl;
 
-		isCopy = true;
+		for (int i = 0; i < nImageCnt; i++) {
+			if (ppsImages[i]) {
+				SAFE_DELETE_ARRAY(ppsImages[i]);
+			}
+		}
+		SAFE_DELETE_ARRAY(ppsImages);
+		ppsImages = NULL;
+		nImageCnt = 0;
+		nWidth = 0;
+		nHeight = 0;
+		nChannel = 0;
 	}
 
-	return isCopy;
+	return isCopyAll;
 }
 
 unsigned char* CData::getMask(int nSliceIdx) {
@@ -2354,19 +2340,8 @@ bool CData::setMasks(int nSeriesIdx, unsigned char** ppucMasks, int nMaskCnt, in
 }
 
 bool CData::copyMask(int nSliceIdx, unsigned char* &pucMask, int &nWidth, int &nHeight) {
-	bool isCopy = false;
-	CImage<short>* pTargetImage = getCImage(nSliceIdx);
-
-	if(pTargetImage) {
-		isCopy = pTargetImage->copyMask(pucMask, nWidth, nHeight);
-		if(!isCopy) {
-			if(loadImage_lazyLoading(pTargetImage, true)) {
-				isCopy = pTargetImage->copyMask(pucMask, nWidth, nHeight);
-			}
-		}
-	}
-
-	return isCopy;
+	int nChannelTemp = 0;	// not use
+	return copyMask(nSliceIdx, pucMask, nWidth, nHeight, nChannelTemp);
 }
 bool CData::copyMask(int nSliceIdx, unsigned char* &pucMask, int &nWidth, int &nHeight, int &nChannel) {
 	bool isCopy = false;
@@ -2384,19 +2359,8 @@ bool CData::copyMask(int nSliceIdx, unsigned char* &pucMask, int &nWidth, int &n
 	return isCopy;
 }
 bool CData::copyMask(int nSeriesIdx, int nImageIdx, unsigned char* &pucMask, int &nWidth, int &nHeight) {
-	bool isCopy = false;
-	CImage<short>* pTargetImage = getCImage(nSeriesIdx, nImageIdx);
-
-	if(pTargetImage) {
-		isCopy = pTargetImage->copyMask(pucMask, nWidth, nHeight);
-		if(!isCopy) {
-			if(loadImage_lazyLoading(pTargetImage, true)) {
-				isCopy = pTargetImage->copyMask(pucMask, nWidth, nHeight);
-			}
-		}
-	}
-
-	return isCopy;
+	int nChannelTemp = 0;	// not use
+	return copyMask(nSeriesIdx, nImageIdx, pucMask, nWidth, nHeight, nChannelTemp);
 }
 bool CData::copyMask(int nSeriesIdx, int nImageIdx, unsigned char* &pucMask, int &nWidth, int &nHeight, int &nChannel) {
 	bool isCopy = false;
@@ -2414,48 +2378,52 @@ bool CData::copyMask(int nSeriesIdx, int nImageIdx, unsigned char* &pucMask, int
 	return isCopy;
 }
 bool CData::copyMasks(int nSeriesIdx, unsigned char** &ppucMasks, int &nMaskCnt, int &nWidth, int &nHeight) {
-	bool isCopy = false;
-	CSeries* pTargetSeries = getSeries(nSeriesIdx);
-
-	if(ppucMasks == NULL && pTargetSeries) {
-		nMaskCnt = pTargetSeries->getImageCount();
-		ppucMasks = new unsigned char* [nMaskCnt];
-		memset(ppucMasks, 0, sizeof(unsigned char*)*nMaskCnt);
-
-		// load
-		loadImages_lazyLoading_thread(pTargetSeries, true);
-
-		// copy
-		for(int i=0; i< nMaskCnt; i++) {
-			copyMask(nSeriesIdx, i, ppucMasks[i], nWidth, nHeight);
-		}
-
-		isCopy = true;
-	}
-
-	return isCopy;
+	int nChannelTemp = 0;	// not use
+	return copyMasks(nSeriesIdx, ppucMasks, nMaskCnt, nWidth, nHeight, nChannelTemp);
 }
 bool CData::copyMasks(int nSeriesIdx, unsigned char** &ppucMasks, int &nMaskCnt, int &nWidth, int &nHeight, int &nChannel) {
-	bool isCopy = false;
+	bool isCopyAll = false;
+
 	CSeries* pTargetSeries = getSeries(nSeriesIdx);
 
-	if(ppucMasks == NULL && pTargetSeries) {
-		nMaskCnt = pTargetSeries->getImageCount();
-		ppucMasks = new unsigned char* [nMaskCnt];
-		memset(ppucMasks, 0, sizeof(unsigned char*)*nMaskCnt);
+	try {
+		if (ppucMasks == NULL && pTargetSeries) {
+			nMaskCnt = pTargetSeries->getImageCount();
+			ppucMasks = new unsigned char*[nMaskCnt];
+			memset(ppucMasks, 0, sizeof(unsigned char*)*nMaskCnt);
 
-		// load
-		loadImages_lazyLoading_thread(pTargetSeries, true);
+			// load
+			loadImages_lazyLoading_thread(pTargetSeries, true);
 
-		// copy
-		for(int i=0; i< nMaskCnt; i++) {
-			copyMask(nSeriesIdx, i, ppucMasks[i], nWidth, nHeight);
+			// copy
+			for (int i = 0; i< nMaskCnt; i++) {
+				bool isCopy = copyMask(nSeriesIdx, i, ppucMasks[i], nWidth, nHeight);
+				if (isCopy == false) {
+					throw std::exception("copy masks fail");
+				}
+			}
+
+			// 모든 image 복사에 성공할 경우 true
+			isCopyAll = true;
 		}
+	}
+	catch (std::exception &e) {
+		std::cout << e.what() << std::endl;
 
-		isCopy = true;
+		for (int i = 0; i < nMaskCnt; i++) {
+			if (ppucMasks[i]) {
+				SAFE_DELETE_ARRAY(ppucMasks[i]);
+			}
+		}
+		SAFE_DELETE_ARRAY(ppucMasks);
+		ppucMasks = NULL;
+		nMaskCnt = 0;
+		nWidth = 0;
+		nHeight = 0;
+		nChannel = 0;
 	}
 
-	return isCopy;
+	return isCopyAll;
 }
 
 std::string CData::getImagePath(int nSliceIdx) {

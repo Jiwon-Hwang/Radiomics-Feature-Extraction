@@ -1052,10 +1052,11 @@ void CPlatform::createFileDirectoryItem() { // tree widget 생성 속도 개선 ver
 				row_patient = (*it);
 			}
 		}
-		if (row_patient == NULL) {
-			row_patient = new QTreeWidgetItem(ui.treeWidget_FileDirectory);
+		if (row_patient == NULL) { // 이전에 같은 환자가 없었다면 (새로운 환자명)
+			row_patient = new QTreeWidgetItem(ui.treeWidget_FileDirectory); // "100"
 			row_patient->setText(0, patientName);
 			row_patient->setIcon(0, QIcon(QPixmap("Resources/folder.png")));
+			row_patients.push_back(row_patient); // for문 바깥의 vector (row_patients)에 한 폴더씩(환자) 담으면 포인터로 쭈루룩 연결됨
 		}
 
 		// studies
@@ -1894,7 +1895,6 @@ void CPlatform::run()
 	cout << "*** total number of Series : " << nSeriesCnt << " ***" << endl;
 
 	for (int i = 0; i < nSeriesCnt; i++) {
-
 		int nWidth = 0;		
 		int nHeight = 0;	
 		int nImageCnt = 0;	
