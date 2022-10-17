@@ -44,7 +44,7 @@
 #include "dcmtk/dcmdata/dctk.h"
 
 
-#define SAFE_DELETE(p) {if(p) delete(p); p=NULL;} // NULL이 아니면 메모리 해제 (일반 포인터)
+#define SAFE_DELETE(p) {if(p) delete(p); p=NULL;}
 #define SAFE_DELETE_ARRAY(p)	{ if(p) delete[](p); p = NULL;}
 #define SAFE_DELETE_VOLUME(p, depth)	{ if(p) {for (int i=0;i<depth;i++)	if(p[i]) delete[](p[i]); } delete[] p; p=NULL;};
 

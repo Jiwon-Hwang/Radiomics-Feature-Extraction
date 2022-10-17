@@ -981,6 +981,8 @@ void CPlatform::slotDataScanFinish() {
 
 	createFileDirectoryItem(); // 좀 더 빠른 버전으로 수정
 
+	std::cout << m_ciData;
+
 	/*
 	int nSeriesCnt = m_ciData.getSeriesCount();
 	for (int i = 0; i < nSeriesCnt; i++) {
@@ -996,8 +998,6 @@ void CPlatform::slotDataProgress(int nCurrentIdx, int nMaximumIdx) {
 // open, load, Image (tree widget) //
 void CPlatform::readImage(QStringList list)
 {
-	//m_ciData.clear(); // image, mask 따로 load 시 죽는 error
-
 	// QThread로 병렬 처리 (2가지 thread) //
 	QStringList fileList;
 	for (int i = 0, ni = list.size(); i<ni; i++) {
@@ -1052,11 +1052,11 @@ void CPlatform::createFileDirectoryItem() { // tree widget 생성 속도 개선 ver
 				row_patient = (*it);
 			}
 		}
-		if (row_patient == NULL) { // 이전에 같은 환자가 없었다면 (새로운 환자명)
-			row_patient = new QTreeWidgetItem(ui.treeWidget_FileDirectory); // "100"
+		if (row_patient == NULL) {
+			row_patient = new QTreeWidgetItem(ui.treeWidget_FileDirectory);
 			row_patient->setText(0, patientName);
 			row_patient->setIcon(0, QIcon(QPixmap("Resources/folder.png")));
-			row_patients.push_back(row_patient); // for문 바깥의 vector (row_patients)에 한 폴더씩(환자) 담으면 포인터로 쭈루룩 연결됨
+			row_patients.push_back(row_patient);
 		}
 
 		// studies
@@ -1305,12 +1305,14 @@ void CPlatform::scrollChangeImage(int nValue)
 
 // ROI slice check //
 bool isEmptyMask(unsigned char* pucMask, int nWidth, int nHeight, float &nPixelsInMask) {
+	if (pucMask) {
+		Mat mask(nWidth, nHeight, CV_8UC1, pucMask);
+		nPixelsInMask = countNonZero(mask);
 
-	Mat mask(nWidth, nHeight, CV_8UC1, pucMask);
-
-	nPixelsInMask = countNonZero(mask);
-
-	return nPixelsInMask < 1 ? true : false;
+		return nPixelsInMask < 1 ? true : false;
+	}
+	
+	return false;
 }
 
 
@@ -1890,27 +1892,32 @@ void CPlatform::run()
 	presetCSVFile(csvName);
 
 
+	// remove if isEmpty or change log file name
+	string txtName = outputFolder + currentTime + ".txt";
+	m_ciData.checkIsEmptyLog(txtName);
+
+	
 	// filtering and feature extraction by series //
 	int nSeriesCnt = m_ciData.getSeriesCount();
 	cout << "*** total number of Series : " << nSeriesCnt << " ***" << endl;
 
 	for (int i = 0; i < nSeriesCnt; i++) {
-		int nWidth = 0;
-		int nHeight = 0;
-		int nImageCnt = 0;
-		int nMaskCnt = 0;
+		int nWidth = 0;		
+		int nHeight = 0;	
+		int nImageCnt = 0;	
+		int nMaskCnt = 0;	
 		short** ppsImages = NULL;
 		unsigned char** ppucMasks = NULL;
-
+		
 		// copy series //
-		m_ciData.copyImages(i, ppsImages, nImageCnt, nWidth, nHeight); // 실패 시 false 반환으로 수정 (ppsImages에는 NULL 반환)
+		m_ciData.copyImages(i, ppsImages, nImageCnt, nWidth, nHeight);
 		m_ciData.copyMasks(i, ppucMasks, nMaskCnt, nWidth, nHeight);
 
 		m_ciData.clearImages(i); // clear ori m_ciData (images, masks)
 
 		try {
 			// excpetion handling //
-			if (ppsImages == NULL || nImageCnt == 0) { // copy 실패 시 예외처리
+			if (ppsImages == NULL || nImageCnt == 0) {
 				throw std::exception("copy images fail");
 			}
 			if (ppucMasks == NULL || nMaskCnt == 0) {
@@ -1959,20 +1966,7 @@ void CPlatform::run()
 			SAFE_DELETE_ARRAY(ppucMasks);
 		}
 		catch (std::exception &e) {
-			if (std::string(e.what()) == "copy masks fail") { // Image만 있고 Mask 파일은 없는 경우는 platform에서 예외처리(dataLoader에선 정상 경우)
-				std::ofstream sLog;
-				sLog.open(outputFolder + "tempLog.txt", std::ofstream::out | std::ofstream::app);
-
-				if (sLog.is_open()) {
-					CSeries* pCiSeries = m_ciData.getSeries(i);
-					std::string seriesPath = pCiSeries->m_sSeriesPath;
-					sLog << "dcm과 대응되는 mask가 없음 ==> " << seriesPath << std::endl;
-					sLog.close();
-				}
-			}
-			else {
-				std::cout << e.what() << std::endl;
-			}
+			std::cout << e.what() << std::endl;
 
 			// try 구문 실행 중 error로 죽은 경우, 메모리 해제가 어디까지 됐는지 알 수 없어서 순회하면서 전부 해제
 			if (ppsImages) {
@@ -1998,7 +1992,7 @@ void CPlatform::run()
 
 		// write csv file //
 		writeCSVFile(i, csvName);
-
+		
 		// clear all vector //
 		clearAll(i);
 
@@ -2006,15 +2000,10 @@ void CPlatform::run()
 		setProgressBarValue(i, nSeriesCnt);
 	}
 
-
-	// remove if isEmpty or change log file name
-	string txtName = outputFolder + currentTime + ".txt";
-	m_ciData.checkIsEmptyLog(txtName);
-
-
 	// finish pop-up and exit		
 	if (QMessageBox(QMessageBox::Information, " ", "extraction finished!", QMessageBox::Close).exec() == QMessageBox::Close) {
 		QApplication::quit();
 	}
-
+	
 }
+

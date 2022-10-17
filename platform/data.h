@@ -1,12 +1,12 @@
 #pragma once
 
-// v 1.5.0.2 (20221014)
+// v 1.5.0.3 (20221016)
 
 // config
-#define DEBUG 0		   // 0: false, 1: true (VLD)
-#define THREAD 0  // 0: false, 1: true (Thread on/off)
-#define QT 1		   // 0: false, 1: true (QT에서 사용하는 경우)
-#define PROGRESS_BAR 1 // 0: hide, 1: show (console)
+#define DEBUG 0			// 0: false, 1: true (VLD)
+#define THREAD 1		// 0: false, 1: true (Thread on/off)
+#define QT 1			// 0: false, 1: true (QT에서 사용하는 경우)
+#define PROGRESS_BAR 1	// 0: hide, 1: show (console)
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -89,6 +89,11 @@ public:
 		CLEAR_PREV_DATAS_CONDITIONAL,
 		CLEAR_PREV_DATAS_FORCE
 	};
+	enum READIMAGE_LOG_OPTION
+	{
+		CONSIDER_LATER,
+		DO_NOT_CONSIDER_LATER
+	};
 	enum SAVE_TYPE
 	{
 		SAVE_IMAGE_ONLY,
@@ -117,11 +122,10 @@ public:
 		BAD_ALLOC = -999
 	};
 
-	// variable
-public:
+private:
+	// status
 	bool m_isLoading;
 
-private:
 	// preference
 	std::string m_sReadRootDir;
 	std::string m_sSaveRootDir;
@@ -134,6 +138,7 @@ private:
 	// log
 	std::string m_sLogPath;
 	std::ofstream m_sLog;
+	bool m_nLogOption;
 
 #if THREAD
 	Concurrency::concurrent_vector<CSeries *> m_seriesList;
@@ -162,13 +167,11 @@ private:
 	// Scan
 	struct ScanContainer
 	{
-		int isLoad;
 		bool isMask;
 		std::string sFilePath;
 		std::string sFileName;
 		std::string sFileExtension;
 	};
-	std::vector<ScanContainer *> m_scan;
 
 	// function
 
@@ -194,7 +197,6 @@ public:
 public:
 	void init(void);
 	void clear(void);
-	void clearImages(int nSeriesIdx = -1);
 
 	// operator
 	friend std::ostream &operator<<(std::ostream &stream, const CData &obj);
@@ -207,30 +209,26 @@ public:
 	void readImage(std::vector<std::string> sPaths, bool bReadRecursive = true, bool bScanOnly = true, int nClearOption = KEEP_PREV_DATAS, std::function<void(int, int)> *pCallback = NULL);
 
 private:
-	void scanImage(ScanContainer *psc, int &nFileCount, int nTotal, std::function<void(int, int)> *pCallback = NULL);
+	void scanImage(ScanContainer *psc, int &nFileCount, int nTotal);
 
 	// load
 public:
-	int loadImages(int nSliceIdx);
-
+	bool isLoading();
 private:
+	void loadStart();
+	void loadFinish();
+
 	template <typename T>
 	int loadImage(std::string sImagePath, CSeries *&pCiSeries, std::vector<CImage<T> *> &pCiImages, bool bReadHeaderOnly = false);
-	template <typename T>
-	int loadImage_lazyLoading(CImage<T> *&pCiImage, bool isMask);
-	int loadImage_lazyLoading_image_thread(CSeries *pCiSeries, int nImageIdx, int &nFileCount, std::function<void(int, int)> *pCallback = NULL);
-	int loadImage_lazyLoading_mask_thread(CSeries *pCiSeries, int nImageIdx, int &nFileCount, std::function<void(int, int)> *pCallback = NULL);
-	int loadImages_lazyLoading_thread(CSeries *pCiSeries, bool isMask, std::function<void(int, int)> *pCallback = NULL);
+	int loadImage_lazyLoading(int nSeriesIdx, int nImageIdx);
+	int loadImage_lazyLoading_thread(int nSeriesIdx, int nImageIdx, int& nFileCount, int nTotal);
+	int loadImages_lazyLoading(int nSeriesIdx);
 
 public:
 	static int loadDICOM_dcmtk(const char *pcFilePath, DcmDataset *&dataSet, std::vector<short *> &images, bool bReadHeaderOnly = false);
 	static int loadImage_opencv(const char *pcFilePath, bool isColor, unsigned char *&pucImage, int &nWidth, int &nHeight, int &nChannel, bool bReadHeaderOnly = false);
 	static int loadNII_libnii(const char *pcImagePath, nifti_1_header &nhdr, std::vector<short *> &images, bool bReadHeaderOnly = false);
 	static int loadTIFF_libtiff(const char *pcImagePath, TIFF *&pTiff, std::vector<unsigned char *> &images, bool bReadHeaderOnly = false);
-
-private:
-	void loadStart();
-	void loadFinish();
 
 	// save
 public:
@@ -257,6 +255,10 @@ public:
 	// 아래 함수는 개발 편의성을 위해서 제공
 	// nSliceIdx: image를 Series와 관계없이 순서대로 나열했을 때, image의 순서
 	int convertToSliceIdx(int nSeriesIdx, int nImageIdx);
+	void convertToSeriesImageIdx(int nSliceIdx, int &nSeriesIdx, int &nImageIdx);
+
+	int loadImages(int nSliceIdx);
+	void clearImages(int nSeriesIdx = -1);
 
 	CImage<short> *getCImage(int nSliceIdx);
 	CImage<short> *getCImage(int nSeriesIdx, int nImageIdx);
