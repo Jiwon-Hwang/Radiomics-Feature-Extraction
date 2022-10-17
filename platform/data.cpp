@@ -2011,25 +2011,34 @@ void CData::setLogPath(std::string sPath) {
 	m_sLogPath = sPath;
 }
 void CData::checkIsEmptyLog(std::string sFinalLogPath) {
+	// ifstream, ofstream 모두 remove, rename 가능
 
-	std::ifstream in(m_sLogPath); // 
-	if (in.is_open()) { // 열려 있는거 확인 했으면 remove 및 rename 전 무조건 파일 미리 닫고 처리해야 됨!
-		in.seekg(0, std::ios::end);
-		size_t size = in.tellg();
-		if (size == 0) {
-			// 삭제
-			std::cout << "error log file is empty" << std::endl;
-			in.close();
-			remove(m_sLogPath.c_str()); // 먼저 닫고 삭제해야 함 (파일 처리 전 반드시 닫아야 함)
-			std::cout << "deleted empty file" << std::endl;
-		}
-		else {
-			// 파일명 변경
-			std::cout << "there are some error logs" << std::endl;
-			in.close();
-			int result = rename(m_sLogPath.c_str(), sFinalLogPath.c_str());
-		}
+	if (m_sLogPath != "") { // 파일 size 구하기 위해 열기
+		m_sLog.open(m_sLogPath.c_str(), std::ofstream::out | std::ofstream::app);
 	}
+
+	m_sLog.seekp(0, std::ios::end);
+	size_t size = m_sLog.tellp();
+
+	if (m_sLog.is_open()) {
+		m_sLog.close(); // remove, rename 전 반드시 닫기!
+	}
+
+	if (size == 0) {
+		// 파일 삭제
+		std::cout << "error log file is empty" << std::endl;
+		//m_sLog.close();
+		remove(m_sLogPath.c_str()); 
+		std::cout << "deleted empty file" << std::endl;
+	}
+	else {
+		// 파일명 변경
+		std::cout << "there are some error logs" << std::endl;
+		//m_sLog.close();
+		int result = rename(m_sLogPath.c_str(), sFinalLogPath.c_str());
+		std::cout << "renamed log file" << std::endl;
+	}
+
 }
 
 ////////////////////////////////////////////////////////////////////
