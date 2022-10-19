@@ -59,6 +59,8 @@
 #include "popup_GLRLM.h"
 #include "ui_popup_Intensity.h"
 #include "popup_Intensity.h"
+#include "ui_popup_Morph.h"
+#include "popup_Morph.h"
 
 #include "imageView.h"
 #include "data.h"
@@ -67,6 +69,7 @@
 #include "intensityStatistics.h"
 #include "glrlm.h"
 #include "localIntensity.h"
+#include "morphology.h"
 
 
 #define MAX_FILE_LENGTH 64
@@ -104,7 +107,7 @@ public:
 	enum FAMILY { E_MORPHOLOGY, E_LOCALINTENSE, E_INTENSESTAT, E_INTENSEHISTO, E_GLCM, E_GLRLM, FAMILY_COUNT };
 
 	// Feature Family objects
-	IntensityHistogram morphology;
+	Morphology morphology;
 	LocalIntensity localIntense;
 	IntensityStatistics intenseStat;
 	IntensityHistogram intenseHisto;
@@ -112,7 +115,7 @@ public:
 	GLRLM glrlm;
 
 	// pop-up objects
-	popup_Histogram *ppopup_Morph;
+	popup_Morph *ppopup_Morph;
 	popup_Intensity *ppopup_Intensity;
 	popup_Statistics *ppopup_Statistics;
 	popup_Histogram *ppopup_Histogram;

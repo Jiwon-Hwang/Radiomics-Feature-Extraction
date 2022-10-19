@@ -131,6 +131,18 @@
     <ClCompile Include="GeneratedFiles\Release\moc_popup_Intensity.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_popup_morph.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_popup_morph.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="morphology.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="popup_Morph.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="platform.h">
@@ -181,6 +193,12 @@
     <CustomBuild Include="popup_Intensity.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="popup_morph.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="popup_Morph.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_platform.h">
@@ -217,6 +235,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_popup_Intensity.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="morphology.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_popup_Morph.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

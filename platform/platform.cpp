@@ -253,6 +253,9 @@ void CPlatform::createPopup() {
 	ppopup_Intensity = new popup_Intensity;
 	ppopup_Intensity->setModal(true);
 
+	ppopup_Morph = new popup_Morph;
+	ppopup_Morph->setModal(true);
+
 }
 void CPlatform::createProgressBar()
 {
@@ -291,9 +294,18 @@ void CPlatform::setSignalSlot()
 
 	// pop-up
 	
+	// Morphological (popup)
+	connect(ppopup_Morph->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool))); // 'All' btn 눌렀을 때 나머지 체크박스 선택/해제
+	QList<QCheckBox *> featureBox = ppopup_Morph->ui->groupBox_Features->findChildren<QCheckBox *>(); // 나머지 체크박스들 눌렀을 때 'All' 선택/해제
+	for (int i = 0; i < featureBox.size(); i++) {
+		if (featureBox[i]->objectName() == "checkBox_All") continue;
+		connect(featureBox[i], SIGNAL(clicked()), this, SLOT(checkFeatureBoxState()));
+	}
+	featureBox.clear();
+
 	// Local Intensity (popup)
-	connect(ppopup_Intensity->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool))); // 'All' btn 눌렀을 때 나머지 체크박스 선택/해제
-	QList<QCheckBox *> featureBox = ppopup_Intensity->ui->groupBox_Features->findChildren<QCheckBox *>(); // 나머지 체크박스들 눌렀을 때 'All' 선택/해제
+	connect(ppopup_Intensity->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool))); 
+	featureBox = ppopup_Intensity->ui->groupBox_Features->findChildren<QCheckBox *>(); 
 	for (int i = 0; i < featureBox.size(); i++) {
 		if (featureBox[i]->objectName() == "checkBox_All") continue;
 		connect(featureBox[i], SIGNAL(clicked()), this, SLOT(checkFeatureBoxState()));
@@ -346,7 +358,7 @@ void CPlatform::setSignalSlot()
 void CPlatform::showPopUp(QObject* sender) {
 	// for loop으로 대체 가능 (for auto, break)
 	if (sender == ui.checkBox_Morph) {
-		//ppopup_Histogram->show();
+		ppopup_Morph->show();
 	}
 
 	if (sender == ui.checkBox_Intensity) {
@@ -419,6 +431,15 @@ void CPlatform::loadSettings() {
 		settings.endGroup();
 
 		
+		// Morphological (popup) 
+		settings.beginGroup("popup_Morph");
+		int nfeatures_Morph = Morphology::FEATURE_COUNT;
+		for (int i = 0; i < nfeatures_Morph + 1; i++) {
+			ppopup_Morph->filterGroup->button(i)->setChecked(settings.value(ppopup_Morph->filterGroup->button(i)->objectName(), false).toBool());
+		}
+		settings.endGroup();
+
+
 		// Local Intensity (popup) 
 		settings.beginGroup("popup_Intensity");
 		int nfeatures_Intensity = LocalIntensity::FEATURE_COUNT;
@@ -518,6 +539,20 @@ void CPlatform::saveSettings() {
 
 
 	// popup - save settings to config and to object's member variable
+
+	// Morphological (popup)
+	settings.beginGroup("popup_Morph");
+	morphology.isCheckedFeature.assign(Morphology::FEATURE_COUNT, false);
+	morphology.nCheckedFeatures = 0;
+	int nfeatures_Morph = Morphology::FEATURE_COUNT;
+	for (int i = 0; i < nfeatures_Morph + 1; i++) {
+		settings.setValue(ppopup_Morph->filterGroup->button(i)->objectName(), QVariant(ppopup_Morph->filterGroup->button(i)->isChecked()));
+		if (i == nfeatures_Morph) break;
+		morphology.isCheckedFeature[i] = ppopup_Morph->filterGroup->button(i)->isChecked();
+		if (morphology.isCheckedFeature[i] == true) morphology.nCheckedFeatures++;
+	}
+	settings.endGroup();
+
 
 	// Local Intensity (popup)
 	settings.beginGroup("popup_Intensity");
@@ -1482,7 +1517,11 @@ void CPlatform::setCheckedFamilyState() { // check box 클릭될 때마다(시그널) 호�
 	QObject* obj = sender();
 
 	if (obj == ui.checkBox_Morph) {
+		morphology.isActivatedFamily = !morphology.isActivatedFamily;
 
+		if (morphology.isActivatedFamily == true) {
+			showPopUp(obj); // pop-up
+		}
 	}
 
 	if (obj == ui.checkBox_Intensity) {
@@ -1528,8 +1567,8 @@ void CPlatform::setCheckedFamilyState() { // check box 클릭될 때마다(시그널) 호�
 }
 void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth, float pixelSpacingX, float pixelSpacingY) {
 	// for loop으로 대체 가능 (for auto, break)
-	if (ui.checkBox_Morph->isChecked()) {
-
+	if (morphology.isActivatedFamily) {
+		morphology.featureExtraction(psImage, pucMask, nHeight, nWidth, pixelSpacingX, pixelSpacingY);
 	}
 
 	if (localIntense.isActivatedFamily) {
@@ -1637,7 +1676,13 @@ void CPlatform::presetCSVFile(string csvName) {
 	resultCSV << " " << "," << " " << "," << " " << ",";
 
 	if (morphology.isActivatedFamily) {
-
+		vector<string> featureNames(Morphology::FEATURE_COUNT, "");
+		morphology.defineFeatureNames(featureNames);
+		for (int i = 0; i < featureNames.size(); i++) {
+			if (morphology.isCheckedFeature[i]) {
+				resultCSV << featureNames[i] << ",";
+			}
+		}
 	}
 
 	if (localIntense.isActivatedFamily) {
@@ -1727,7 +1772,7 @@ void CPlatform::writeCSVCaseName(int seriesIdx, string csvName) {
 void CPlatform::writeCSVFeatureValue(string csvName) {
 
 	if (morphology.isActivatedFamily) {
-
+		writeCSVCheckedValue(morphology.final1DVec, csvName);
 	}
 
 	if (localIntense.isActivatedFamily) {
@@ -1762,7 +1807,7 @@ void CPlatform::writeCSVFile(int seriesIdx, string csvName) {
 // clear all vector //
 void CPlatform::clearAll(int seriesIdx) {
 	// for loop으로 대체 가능 (for auto, break)
-	//morphology.clear();
+	morphology.clearVector();
 	localIntense.clearVector();
 	intenseStat.clearVector();
 	intenseHisto.clearVector();
@@ -1924,6 +1969,17 @@ void CPlatform::run()
 				throw std::exception("copy masks fail");
 			}
 
+
+			// 3D Morphological Feature Family - [3.1] Morphology, [3.9] GLDZM(?) //
+			// [3.9]는 2d slice 단위 추출 가능!
+			/*
+			if (morph){
+				
+				continue;
+			}
+			*/
+
+
 			// slice by slice //
 			for (int j = 0; j < nImageCnt; j++) {
 				// ROI slice check //
@@ -1935,7 +1991,7 @@ void CPlatform::run()
 					SAFE_DELETE_ARRAY(ppsImages[j]); // psImage 포인터가 가리키고 있던 메모리 데이터들 해제 => ***이후엔 Mat 데이터를 가리키므로, 또 해제해주지 않아야 함!***
 					ppsImages[j] = (short*)img_filtered.data; // 주소 변경
 
-															  // Resampling (Interpolation) //
+					// Resampling (Interpolation) //
 					Mat img_resampled, mask_resampled;
 					int nWidth_new = nWidth; // 원본값(nWidth, nHeight)는 한 시리즈 내에서 유지해야 함! 갱신 X! (for. 첫 ROI check)
 					int nHeight_new = nHeight;
@@ -2002,7 +2058,7 @@ void CPlatform::run()
 
 	// finish pop-up and exit		
 	if (QMessageBox(QMessageBox::Information, " ", "extraction finished!", QMessageBox::Close).exec() == QMessageBox::Close) {
-		QApplication::quit();
+		//QApplication::quit(); // ok 버튼 눌러도 꺼지지 않도록
 	}
 	
 }
