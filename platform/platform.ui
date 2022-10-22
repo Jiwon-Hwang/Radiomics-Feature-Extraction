@@ -545,7 +545,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QCheckBox" name="checkBox_3">
+               <widget class="QCheckBox" name="checkBox_GLSZM">
                 <property name="focusPolicy">
                  <enum>Qt::NoFocus</enum>
                 </property>
@@ -558,7 +558,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QCheckBox" name="checkBox_5">
+               <widget class="QCheckBox" name="checkBox_GLDZM">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -574,7 +574,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QCheckBox" name="checkBox_4">
+               <widget class="QCheckBox" name="checkBox_NGTDM">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
@@ -590,7 +590,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QCheckBox" name="checkBox">
+               <widget class="QCheckBox" name="checkBox_NGLDM">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>

@@ -4,38 +4,37 @@
 #include <string>
 #include <algorithm>
 #include <functional>
-#include <iterator>
 
 
-class GLRLM
+class GLSZM
 {
 public:
 	enum FEATURE
 	{
-		SRE,
-		LRE,
-		LGRE,
-		HGRE,
-		SRLE,
-		SRHE,
-		LRLE,
-		LRHE,
+		SZE,
+		LZE,
+		LGZE,
+		HGZE,
+		SZLGE,
+		SZHGE,
+		LZLGE,
+		LZHGE,
 		GNU,
 		GNUN,
-		RLNU,
-		RLNUN,
-		RP,
+		ZSNU,
+		ZSNUN,
+		ZP,
 		GLV,
-		RLV,
-		RE,
+		ZSV,
+		ZSE,
 
 		FEATURE_COUNT
 
 	};
 
 public:
-	GLRLM();
-	~GLRLM();
+	GLSZM();
+	~GLSZM();
 
 	void clearVariable();
 	void clearVector();
@@ -45,13 +44,13 @@ public:
 	std::vector<bool> isCheckedFeature;		// by. platform pop-up
 	int nCheckedFeatures;
 
-	// get GLRL-matrix //
+	// get GLSZ-matrix //
 	bool isFBN = false;
 	int nBins = -1;			// FBN (Fixed Bin Number) => by. platform pop-up
 	float sBin = NAN;		// FBS (Fixed Bin Size) => by. platform pop-up
 	int maxIntensity = -1;
 	int sizeMatrix;			// sizeMatrix == maxIntensity (== N_g == nBins : FBN ¿œ∂ß∏∏)
-	int maxRunLength;		// N_r
+	int maxZoneSize;		
 	int nHeight;
 	int nWidth;
 	int nPixelsInROI;
@@ -71,8 +70,8 @@ public:
 	std::vector<std::vector<unsigned short>> get2DVectorOfDiscretizedPixels_FBS(short* psImage, unsigned char* pucMask);
 	void getXYDirections(int &directionX, int &directionY, int angle);
 	int findIndex(std::vector<unsigned short> diffGreyLevels, int size, unsigned short target);
-	void fill2DGLRLMatrix(std::vector<std::vector<unsigned short>> vector2DofDiscretizedPixels, std::vector<std::vector<float>> &GLRLMatrix, int angle);
-	void fill2DprobMatrix(std::vector<std::vector<float>> GLRLMatrix, std::vector<std::vector<float>> &probMatrix);
+	void fill2DGLSZMatrix(std::vector<std::vector<unsigned short>> vector2DofDiscretizedPixels, std::vector<std::vector<float>> &GLSZMatrix);
+	void fill2DprobMatrix(std::vector<std::vector<float>> GLSZMatrix, std::vector<std::vector<float>> &probMatrix);
 	void average4DirValues(std::vector<std::vector<float>> temp4DirVals2DVec, std::vector<float> &tempValues1DVec);
 
 	// common calculation functions
@@ -109,10 +108,10 @@ public:
 	void calcLongRunEmph();
 	void calcLowGreyRunEmph();
 	void calcHighGreyRunEmph();
-	void calcShortRunLowEmph(std::vector<std::vector<float>> GLRLMatrix);
-	void calcShortRunHighEmph(std::vector<std::vector<float>> GLRLMatrix);
-	void calcLongRunLowEmph(std::vector<std::vector<float>> GLRLMatrix);
-	void calcLongRunHighEmph(std::vector<std::vector<float>> GLRLMatrix);
+	void calcShortRunLowEmph(std::vector<std::vector<float>> GLSZMatrix);
+	void calcShortRunHighEmph(std::vector<std::vector<float>> GLSZMatrix);
+	void calcLongRunLowEmph(std::vector<std::vector<float>> GLSZMatrix);
+	void calcLongRunHighEmph(std::vector<std::vector<float>> GLSZMatrix);
 	void calcGreyNonUnimformity();
 	void calcGreyNonUnimformityNorm();
 	void calcRunLengthNonUniformity();
@@ -123,7 +122,7 @@ public:
 	void calcRunEntropy(std::vector<std::vector<float>> probMatrix);
 
 	// feature extraction - slice by slice //
-	void calcFeature(int FEATURE_IDX, std::vector<float> &temp1DirVals1DVec, std::vector<std::vector<float>> GLRLMatrix, std::vector<std::vector<float>> probMatrix);
+	void calcFeature(int FEATURE_IDX, std::vector<float> &temp1DirVals1DVec, std::vector<std::vector<float>> GLSZMatrix, std::vector<std::vector<float>> probMatrix);
 	void featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth);
 
 	// mean all slices - get final feature value //

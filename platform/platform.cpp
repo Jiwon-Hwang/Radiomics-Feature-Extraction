@@ -212,6 +212,7 @@ void CPlatform::init()
 	ppopup_Histogram = NULL;
 	ppopup_GLCM = NULL;
 	ppopup_GLRLM = NULL;
+	ppopup_GLSZM = NULL;
 
 }
 void CPlatform::clear()
@@ -231,6 +232,7 @@ void CPlatform::clear()
 	SAFE_DELETE(ppopup_Histogram);
 	SAFE_DELETE(ppopup_GLCM);
 	SAFE_DELETE(ppopup_GLRLM);
+	SAFE_DELETE(ppopup_GLSZM);
 }
 
 
@@ -255,6 +257,9 @@ void CPlatform::createPopup() {
 
 	ppopup_Morph = new popup_Morph;
 	ppopup_Morph->setModal(true);
+
+	ppopup_GLSZM = new popup_GLSZM;
+	ppopup_GLSZM->setModal(true);
 
 }
 void CPlatform::createProgressBar()
@@ -354,6 +359,17 @@ void CPlatform::setSignalSlot()
 	connect(ppopup_GLRLM->ui->radioButton_FBN, SIGNAL(clicked()), this, SLOT(checkBinOption()));
 	connect(ppopup_GLRLM->ui->radioButton_FBS, SIGNAL(clicked()), this, SLOT(checkBinOption()));
 
+	// GLSZM (popup)
+	connect(ppopup_GLSZM->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool)));
+	featureBox = ppopup_GLSZM->ui->groupBox_Features->findChildren<QCheckBox *>();
+	for (int i = 0; i < featureBox.size(); i++) {
+		if (featureBox[i]->objectName() == "checkBox_All") continue;
+		connect(featureBox[i], SIGNAL(clicked()), this, SLOT(checkFeatureBoxState()));
+	}
+	featureBox.clear();
+	connect(ppopup_GLSZM->ui->radioButton_FBN, SIGNAL(clicked()), this, SLOT(checkBinOption()));
+	connect(ppopup_GLSZM->ui->radioButton_FBS, SIGNAL(clicked()), this, SLOT(checkBinOption()));
+
 }
 void CPlatform::showPopUp(QObject* sender) {
 	// for loop으로 대체 가능 (for auto, break)
@@ -379,6 +395,10 @@ void CPlatform::showPopUp(QObject* sender) {
 
 	if (sender == ui.checkBox_GLRLM) {
 		ppopup_GLRLM->show();
+	}
+
+	if (sender == ui.checkBox_GLSZM) {
+		ppopup_GLSZM->show();
 	}
 
 }
@@ -489,7 +509,7 @@ void CPlatform::loadSettings() {
 		settings.endGroup();
 
 
-		// GLCM (popup) 
+		// GLRLM (popup) 
 		settings.beginGroup("popup_GLRLM");
 		int nfeatures_GLRLM = GLRLM::FEATURE_COUNT;
 		for (int i = 0; i < nfeatures_GLRLM + 1; i++) {
@@ -501,6 +521,21 @@ void CPlatform::loadSettings() {
 		ppopup_GLRLM->ui->radioButton_FBS->setChecked(settings.value(ppopup_GLRLM->ui->radioButton_FBS->objectName(), false).toBool());
 		ppopup_GLRLM->ui->lineEdit_sBin->setText(settings.value(ppopup_GLRLM->ui->lineEdit_sBin->objectName()).toString());
 		ppopup_GLRLM->ui->lineEdit_sBin->setEnabled(settings.value(ppopup_GLRLM->ui->radioButton_FBS->objectName()).toBool());
+		settings.endGroup();
+
+
+		// GLSZM (popup) 
+		settings.beginGroup("popup_GLSZM");
+		int nfeatures_GLSZM = GLSZM::FEATURE_COUNT;
+		for (int i = 0; i < nfeatures_GLSZM + 1; i++) {
+			ppopup_GLSZM->filterGroup->button(i)->setChecked(settings.value(ppopup_GLSZM->filterGroup->button(i)->objectName(), false).toBool());
+		}
+		ppopup_GLSZM->ui->radioButton_FBN->setChecked(settings.value(ppopup_GLSZM->ui->radioButton_FBN->objectName(), false).toBool());
+		ppopup_GLSZM->ui->comboBox_nBins->setCurrentText(settings.value(ppopup_GLSZM->ui->comboBox_nBins->objectName(), "32").toString());
+		ppopup_GLSZM->ui->comboBox_nBins->setEnabled(settings.value(ppopup_GLSZM->ui->radioButton_FBN->objectName()).toBool());
+		ppopup_GLSZM->ui->radioButton_FBS->setChecked(settings.value(ppopup_GLSZM->ui->radioButton_FBS->objectName(), false).toBool());
+		ppopup_GLSZM->ui->lineEdit_sBin->setText(settings.value(ppopup_GLSZM->ui->lineEdit_sBin->objectName()).toString());
+		ppopup_GLSZM->ui->lineEdit_sBin->setEnabled(settings.value(ppopup_GLSZM->ui->radioButton_FBS->objectName()).toBool());
 		settings.endGroup();
 
 
@@ -658,6 +693,31 @@ void CPlatform::saveSettings() {
 	settings.endGroup();
 
 
+	// GLSZM (popup)
+	settings.beginGroup("popup_GLSZM");
+	glszm.isCheckedFeature.assign(GLSZM::FEATURE_COUNT, false);
+	glszm.nCheckedFeatures = 0;
+	int nfeatures_GLSZM = GLSZM::FEATURE_COUNT;
+	for (int i = 0; i < nfeatures_GLSZM + 1; i++) {
+		settings.setValue(ppopup_GLSZM->filterGroup->button(i)->objectName(), QVariant(ppopup_GLSZM->filterGroup->button(i)->isChecked()));
+		if (i == nfeatures_GLSZM) break; // exclude 'All' btn
+		glszm.isCheckedFeature[i] = ppopup_GLSZM->filterGroup->button(i)->isChecked();
+		if (glszm.isCheckedFeature[i] == true) glszm.nCheckedFeatures++;
+	}
+	settings.setValue(ppopup_GLSZM->ui->radioButton_FBN->objectName(), QVariant(ppopup_GLSZM->ui->radioButton_FBN->isChecked()));
+	settings.setValue(ppopup_GLSZM->ui->comboBox_nBins->objectName(), ppopup_GLSZM->ui->comboBox_nBins->currentText());
+	settings.setValue(ppopup_GLSZM->ui->radioButton_FBS->objectName(), QVariant(ppopup_GLSZM->ui->radioButton_FBS->isChecked()));
+	settings.setValue(ppopup_GLSZM->ui->lineEdit_sBin->objectName(), ppopup_GLSZM->ui->lineEdit_sBin->text());
+	glszm.isFBN = ppopup_GLSZM->ui->radioButton_FBN->isChecked() ? true : false;
+	if (glszm.isFBN) {
+		glszm.nBins = ppopup_GLSZM->ui->comboBox_nBins->currentText().toInt();
+	}
+	else {
+		glszm.sBin = ppopup_GLSZM->ui->lineEdit_sBin->text().toInt();
+	}
+	settings.endGroup();
+
+
 }
 void CPlatform::initIsActivatedFamily(int FAMILY_IDX)
 {
@@ -700,6 +760,12 @@ void CPlatform::initIsActivatedFamily(int FAMILY_IDX)
 		case E_GLRLM:
 			if (settings.value(ui.checkBox_GLRLM->objectName()).toBool() == true) {
 				glrlm.isActivatedFamily = true;
+			}
+			break;
+
+		case E_GLSZM:
+			if (settings.value(ui.checkBox_GLSZM->objectName()).toBool() == true) {
+				glszm.isActivatedFamily = true;
 			}
 			break;
 
@@ -995,9 +1061,9 @@ void CPlatform::setThread() {
 	m_ciData.moveToThread(&m_thread);
 	m_ciData.setQThread(&m_thread);
 
-	connect(&m_thread, SIGNAL(started()), &m_ciData, SLOT(slotReadImage()));
-	connect(&m_ciData, SIGNAL(signalDataScanFinish()), this, SLOT(slotDataScanFinish()));
-	connect(&m_ciData, SIGNAL(signalDataProgress(int, int)), this, SLOT(slotDataProgress(int, int)));
+	connect(&m_thread, SIGNAL(started()), &m_ciData, SLOT(slotReadImage())); // 1
+	connect(&m_ciData, SIGNAL(signalDataProgress(int, int)), this, SLOT(slotDataProgress(int, int))); // 2
+	connect(&m_ciData, SIGNAL(signalDataScanFinish()), this, SLOT(slotDataScanFinish())); // 3
 }
 void CPlatform::slotDataScanFinish() {
 
@@ -1564,6 +1630,14 @@ void CPlatform::setCheckedFamilyState() { // check box 클릭될 때마다(시그널) 호�
 		}
 	}
 
+	if (obj == ui.checkBox_GLSZM) {
+		glszm.isActivatedFamily = !glszm.isActivatedFamily;
+
+		if (glszm.isActivatedFamily == true) {
+			showPopUp(obj); // pop-up
+		}
+	}
+
 }
 void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth, float pixelSpacingX, float pixelSpacingY) {
 	// for loop으로 대체 가능 (for auto, break)
@@ -1589,6 +1663,10 @@ void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, int nH
 
 	if (glrlm.isActivatedFamily) {
 		glrlm.featureExtraction(psImage, pucMask, nHeight, nWidth);
+	}
+
+	if (glszm.isActivatedFamily) {
+		glszm.featureExtraction(psImage, pucMask, nHeight, nWidth);
 	}
 }
 
@@ -1616,6 +1694,10 @@ void CPlatform::averageAllSlices() {
 
 	if (glrlm.isActivatedFamily) {
 		glrlm.averageAllValues();
+	}
+
+	if (glszm.isActivatedFamily) {
+		glszm.averageAllValues();
 	}
 
 }
@@ -1667,6 +1749,11 @@ void CPlatform::presetCSVFile(string csvName) {
 	if (glrlm.isActivatedFamily) {
 		for (int i = 0; i < glrlm.nCheckedFeatures; i++) {
 			resultCSV << "GLRLM" << ",";
+		}
+	}
+	if (glszm.isActivatedFamily) {
+		for (int i = 0; i < glszm.nCheckedFeatures; i++) {
+			resultCSV << "GLSZM" << ",";
 		}
 	}
 
@@ -1735,6 +1822,16 @@ void CPlatform::presetCSVFile(string csvName) {
 		}
 	}
 
+	if (glszm.isActivatedFamily) {
+		vector<string> featureNames(GLSZM::FEATURE_COUNT, "");
+		glszm.defineFeatureNames(featureNames); // 일단 전체 feature name들 get
+		for (int i = 0; i < featureNames.size(); i++) {
+			if (glszm.isCheckedFeature[i]) {
+				resultCSV << featureNames[i] << ",";
+			}
+		}
+	}
+
 	resultCSV.close();
 
 }
@@ -1795,6 +1892,10 @@ void CPlatform::writeCSVFeatureValue(string csvName) {
 		writeCSVCheckedValue(glrlm.final1DVec, csvName);
 	}
 
+	if (glszm.isActivatedFamily) {
+		writeCSVCheckedValue(glszm.final1DVec, csvName);
+	}
+
 }
 void CPlatform::writeCSVFile(int seriesIdx, string csvName) {
 
@@ -1813,6 +1914,7 @@ void CPlatform::clearAll(int seriesIdx) {
 	intenseHisto.clearVector();
 	glcm.clearVector();
 	glrlm.clearVector();
+	glszm.clearVector();
 	
 	cout << "clear series[" << seriesIdx << "]'s all values!" << endl;
 

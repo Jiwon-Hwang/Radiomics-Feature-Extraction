@@ -143,6 +143,18 @@
     <ClCompile Include="popup_Morph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_popup_GLSZM.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_popup_GLSZM.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="glszm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="popup_GLSZM.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="platform.h">
@@ -199,6 +211,12 @@
     <CustomBuild Include="popup_Morph.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="popup_GLSZM.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="popup_GLSZM.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_platform.h">
@@ -242,6 +260,12 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_popup_Morph.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_popup_GLSZM.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="glszm.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

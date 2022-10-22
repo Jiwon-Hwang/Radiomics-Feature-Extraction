@@ -61,6 +61,8 @@
 #include "popup_Intensity.h"
 #include "ui_popup_Morph.h"
 #include "popup_Morph.h"
+#include "ui_popup_GLSZM.h"
+#include "popup_GLSZM.h"
 
 #include "imageView.h"
 #include "data.h"
@@ -70,6 +72,7 @@
 #include "glrlm.h"
 #include "localIntensity.h"
 #include "morphology.h"
+#include "glszm.h"
 
 
 #define MAX_FILE_LENGTH 64
@@ -104,7 +107,7 @@ public:
 	void setThread();
 
 public:	
-	enum FAMILY { E_MORPHOLOGY, E_LOCALINTENSE, E_INTENSESTAT, E_INTENSEHISTO, E_GLCM, E_GLRLM, FAMILY_COUNT };
+	enum FAMILY { E_MORPHOLOGY, E_LOCALINTENSE, E_INTENSESTAT, E_INTENSEHISTO, E_GLCM, E_GLRLM, E_GLSZM, FAMILY_COUNT };
 
 	// Feature Family objects
 	Morphology morphology;
@@ -113,6 +116,7 @@ public:
 	IntensityHistogram intenseHisto;
 	GLCM glcm;
 	GLRLM glrlm;
+	GLSZM glszm;
 
 	// pop-up objects
 	popup_Morph *ppopup_Morph;
@@ -121,7 +125,8 @@ public:
 	popup_Histogram *ppopup_Histogram;
 	popup_GLCM *ppopup_GLCM;
 	popup_GLRLM *ppopup_GLRLM;
-		
+	popup_GLSZM *ppopup_GLSZM;
+
 
 // QT layout, action º¯¼ö
 public:

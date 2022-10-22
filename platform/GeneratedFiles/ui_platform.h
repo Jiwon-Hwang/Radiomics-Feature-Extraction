@@ -76,10 +76,10 @@ public:
     QCheckBox *checkBox_Histogram;
     QCheckBox *checkBox_GLCM;
     QCheckBox *checkBox_GLRLM;
-    QCheckBox *checkBox_3;
-    QCheckBox *checkBox_5;
-    QCheckBox *checkBox_4;
-    QCheckBox *checkBox;
+    QCheckBox *checkBox_GLSZM;
+    QCheckBox *checkBox_GLDZM;
+    QCheckBox *checkBox_NGTDM;
+    QCheckBox *checkBox_NGLDM;
     QPushButton *pushButton_run;
     QMenuBar *menuBar;
     QStatusBar *statusBar;
@@ -363,36 +363,36 @@ public:
 
         verticalLayout_6->addWidget(checkBox_GLRLM);
 
-        checkBox_3 = new QCheckBox(groupBox_Families);
-        checkBox_3->setObjectName(QStringLiteral("checkBox_3"));
-        checkBox_3->setFocusPolicy(Qt::NoFocus);
-        checkBox_3->setCheckable(true);
+        checkBox_GLSZM = new QCheckBox(groupBox_Families);
+        checkBox_GLSZM->setObjectName(QStringLiteral("checkBox_GLSZM"));
+        checkBox_GLSZM->setFocusPolicy(Qt::NoFocus);
+        checkBox_GLSZM->setCheckable(true);
 
-        verticalLayout_6->addWidget(checkBox_3);
+        verticalLayout_6->addWidget(checkBox_GLSZM);
 
-        checkBox_5 = new QCheckBox(groupBox_Families);
-        checkBox_5->setObjectName(QStringLiteral("checkBox_5"));
-        checkBox_5->setEnabled(false);
-        checkBox_5->setFocusPolicy(Qt::NoFocus);
-        checkBox_5->setCheckable(true);
+        checkBox_GLDZM = new QCheckBox(groupBox_Families);
+        checkBox_GLDZM->setObjectName(QStringLiteral("checkBox_GLDZM"));
+        checkBox_GLDZM->setEnabled(false);
+        checkBox_GLDZM->setFocusPolicy(Qt::NoFocus);
+        checkBox_GLDZM->setCheckable(true);
 
-        verticalLayout_6->addWidget(checkBox_5);
+        verticalLayout_6->addWidget(checkBox_GLDZM);
 
-        checkBox_4 = new QCheckBox(groupBox_Families);
-        checkBox_4->setObjectName(QStringLiteral("checkBox_4"));
-        checkBox_4->setEnabled(false);
-        checkBox_4->setFocusPolicy(Qt::NoFocus);
-        checkBox_4->setCheckable(true);
+        checkBox_NGTDM = new QCheckBox(groupBox_Families);
+        checkBox_NGTDM->setObjectName(QStringLiteral("checkBox_NGTDM"));
+        checkBox_NGTDM->setEnabled(false);
+        checkBox_NGTDM->setFocusPolicy(Qt::NoFocus);
+        checkBox_NGTDM->setCheckable(true);
 
-        verticalLayout_6->addWidget(checkBox_4);
+        verticalLayout_6->addWidget(checkBox_NGTDM);
 
-        checkBox = new QCheckBox(groupBox_Families);
-        checkBox->setObjectName(QStringLiteral("checkBox"));
-        checkBox->setEnabled(false);
-        checkBox->setFocusPolicy(Qt::NoFocus);
-        checkBox->setCheckable(true);
+        checkBox_NGLDM = new QCheckBox(groupBox_Families);
+        checkBox_NGLDM->setObjectName(QStringLiteral("checkBox_NGLDM"));
+        checkBox_NGLDM->setEnabled(false);
+        checkBox_NGLDM->setFocusPolicy(Qt::NoFocus);
+        checkBox_NGLDM->setCheckable(true);
 
-        verticalLayout_6->addWidget(checkBox);
+        verticalLayout_6->addWidget(checkBox_NGLDM);
 
 
         verticalLayout_4->addWidget(groupBox_Families);
@@ -457,10 +457,10 @@ public:
         checkBox_Histogram->setText(QApplication::translate("platformClass", "Intensity Histogram", Q_NULLPTR));
         checkBox_GLCM->setText(QApplication::translate("platformClass", "GLCM ", Q_NULLPTR));
         checkBox_GLRLM->setText(QApplication::translate("platformClass", "GLRLM ", Q_NULLPTR));
-        checkBox_3->setText(QApplication::translate("platformClass", "GLSZM ", Q_NULLPTR));
-        checkBox_5->setText(QApplication::translate("platformClass", "GLDZM", Q_NULLPTR));
-        checkBox_4->setText(QApplication::translate("platformClass", "NGTDM", Q_NULLPTR));
-        checkBox->setText(QApplication::translate("platformClass", "NGLDM", Q_NULLPTR));
+        checkBox_GLSZM->setText(QApplication::translate("platformClass", "GLSZM ", Q_NULLPTR));
+        checkBox_GLDZM->setText(QApplication::translate("platformClass", "GLDZM", Q_NULLPTR));
+        checkBox_NGTDM->setText(QApplication::translate("platformClass", "NGTDM", Q_NULLPTR));
+        checkBox_NGLDM->setText(QApplication::translate("platformClass", "NGLDM", Q_NULLPTR));
         pushButton_run->setText(QApplication::translate("platformClass", "Run", Q_NULLPTR));
     } // retranslateUi
 
