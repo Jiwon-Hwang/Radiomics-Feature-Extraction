@@ -279,13 +279,15 @@ void GLSZM::fill2DGLSZMatrix(vector<vector<unsigned short>> vector2DofDiscretize
 
 	//go element by element through the image
 	//look at the neighbors of every element and check if they have the same grey value
-	//set every element already seen to NAN
+	//set every element already seen to NAN (->0으로!)
 	for (int row = 0; row < nHeight; row++) {
 		for (int col = 0; col < nWidth; col++) {
 			actualElement = vector2DofDiscretizedPixels[row][col];
-			if (!isnan((float)actualElement)) {
+			//if the actual matrix element is not 0(NAN) (=is in ROI)
+			if (actualElement) {
 				actualGreyIndex = findIndex(diffGreyLevels, diffGreyLevels.size(), actualElement);
-				vector2DofDiscretizedPixels[row][col] = NAN;
+				//to avoid to take an element more than once, set the element to 0 => 다시 체크 안하도록 ROI 밖 픽셀처럼 0으로 바꾸기
+				vector2DofDiscretizedPixels[row][col] = 0;
 				actualIndex.push_back(row);
 				actualIndex.push_back(col);
 				matrixIndices.push_back(actualIndex);
