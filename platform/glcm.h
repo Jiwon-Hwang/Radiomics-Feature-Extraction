@@ -58,7 +58,7 @@ public:
 	int nBins = -1;			// FBN (Fixed Bin Number) => by. platform pop-up
 	float sBin = NAN;		// FBS (Fixed Bin Size) => by. platform pop-up
 	int maxIntensity = -1;
-	int sizeMatrix;			// sizeMatrix == maxIntensity (== nBins : FBN 일때만)
+	int sizeMatrix;			// sizeMatrix == maxIntensity (== nBins : FBN 일때만 / GLCM만)
 	int nHeight;
 	int nWidth;
 	std::vector<short> vector1DofOriPixelsInROI;							// ROI 안에 있는 픽셀들만

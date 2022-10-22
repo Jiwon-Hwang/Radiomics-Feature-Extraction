@@ -17,8 +17,6 @@ void GLRLM::clearVariable() {
 	colSums.clear();
 	vector<float>().swap(colSums);
 
-	maxIntensity = -1;
-
 	shortRunEmph = NAN;
 	longRunEmph = NAN;
 	lowGreyRunEmph = NAN;
@@ -127,9 +125,6 @@ vector<vector<unsigned short>> GLRLM::get2DVectorOfDiscretizedPixels_FBN(short* 
 		}
 	}
 
-	// maxIntensity(최댓값) 구하기 => for. sizeMatrix (FBN의 경우엔 nBins)
-	maxIntensity = nBins;
-
 	// get diffGreyLevels (vector containing the different grey levels of the matrix -> extract every element only once)
 	sort(diffGreyLevels.begin(), diffGreyLevels.end());
 	diffGreyLevels.erase(unique(diffGreyLevels.begin(), diffGreyLevels.end()), diffGreyLevels.end()); // 중복 제거
@@ -173,9 +168,6 @@ vector<vector<unsigned short>> GLRLM::get2DVectorOfDiscretizedPixels_FBS(short* 
 			else {
 				vector2DofDiscretizedPixels[row][col] = 0;
 			}
-
-			// maxIntensity(최댓값) 구하기 => for. sizeMatrix
-			maxIntensity = maxIntensity < (int)vector2DofDiscretizedPixels[row][col] ? (int)vector2DofDiscretizedPixels[row][col] : maxIntensity;
 		}
 	}
 
@@ -273,7 +265,6 @@ void GLRLM::fill2DGLRLMatrix(vector<vector<unsigned short>> vector2DofDiscretize
 void GLRLM::fill2DprobMatrix(vector<vector<float>> GLRLMatrix, vector<vector<float>> &probMatrix) {
 	
 	probMatrix = GLRLMatrix; // 깊은 복사
-	
 	for (int i = 0; i < probMatrix.size(); i++) {
 		transform(probMatrix[i].begin(), probMatrix[i].end(), probMatrix[i].begin(), bind2nd(divides<float>(), int(totalSum)));
 	}
@@ -654,14 +645,14 @@ void GLRLM::featureExtraction(short* psImage, unsigned char* pucMask, int nHeigh
 	nHeight = nHeight_;
 	nWidth = nWidth_;
 	vector1DofOriPixels = get1DVectorOfPixels(psImage, pucMask);  // 슬라이스마다 초기화, nPixelsInROI 산출
-	vector2DofDiscretizedPixels = isFBN? get2DVectorOfDiscretizedPixels_FBN(psImage, pucMask) : get2DVectorOfDiscretizedPixels_FBS(psImage, pucMask); // 슬라이스마다 초기화, calc maxIntensity
+	vector2DofDiscretizedPixels = isFBN? get2DVectorOfDiscretizedPixels_FBN(psImage, pucMask) : get2DVectorOfDiscretizedPixels_FBS(psImage, pucMask); // 슬라이스마다 초기화
 	
 	vector<vector<float>> temp4DirVals2DVec;	// 슬라이스마다 초기화 (for. 4방향 1d vec 평균내기)
 	vector<float> tempValues1DVec;				// 슬라이스마다 초기화 (for. final2DVec에 누적)
 
 	// calculate checked feature (4 directions)
 	int ang;
-	sizeMatrix = maxIntensity; // maxIntensity만 clearVariable()을 통해 매번 초기화
+	sizeMatrix = diffGreyLevels.size(); // ***GLRLM에서는 Matrix의 row 크기인 sizeMatrix가 maxIntensity가 아닌 diffGreyLevels의 size가 정확!!***
 	maxRunLength = max(nHeight, nWidth);
 	for (int dir = 0; dir < 4; dir++) {
 

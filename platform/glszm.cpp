@@ -21,8 +21,6 @@ void GLSZM::clearVariable() {
 	vector2DofDiscretizedPixels.clear();
 	vector<vector<unsigned short>>().swap(vector2DofDiscretizedPixels);
 
-	maxIntensity = -1;
-
 	smallZoneEmph = NAN;
 	largeZoneEmph = NAN;
 	lowGreyZoneEmph = NAN;
@@ -131,9 +129,6 @@ vector<vector<unsigned short>> GLSZM::get2DVectorOfDiscretizedPixels_FBN(short* 
 		}
 	}
 
-	// maxIntensity(최댓값) 구하기 => for. sizeMatrix (FBN의 경우엔 nBins)
-	maxIntensity = nBins;
-
 	// get diffGreyLevels (vector containing the different grey levels of the matrix -> extract every element only once)
 	sort(diffGreyLevels.begin(), diffGreyLevels.end());
 	diffGreyLevels.erase(unique(diffGreyLevels.begin(), diffGreyLevels.end()), diffGreyLevels.end()); // 중복 제거
@@ -156,7 +151,7 @@ vector<vector<unsigned short>> GLSZM::get2DVectorOfDiscretizedPixels_FBS(short* 
 	}
 	transform(tempFloatVec.begin(), tempFloatVec.end(), tempFloatVec.begin(), bind2nd(divides<float>(), sBin));
 
-	/// clear diffGreyLevels (슬라이스마다 초기화)
+	// clear diffGreyLevels (슬라이스마다 초기화)
 	diffGreyLevels.clear();
 	vector<unsigned short>().swap(diffGreyLevels);
 
@@ -177,9 +172,6 @@ vector<vector<unsigned short>> GLSZM::get2DVectorOfDiscretizedPixels_FBS(short* 
 			else {
 				vector2DofDiscretizedPixels[row][col] = 0;
 			}
-
-			// maxIntensity(최댓값) 구하기 => for. sizeMatrix
-			maxIntensity = maxIntensity < (int)vector2DofDiscretizedPixels[row][col] ? (int)vector2DofDiscretizedPixels[row][col] : maxIntensity;
 		}
 	}
 
@@ -685,10 +677,10 @@ void GLSZM::featureExtraction(short* psImage, unsigned char* pucMask, int nHeigh
 	nHeight = nHeight_;
 	nWidth = nWidth_;
 	vector1DofOriPixels = get1DVectorOfPixels(psImage, pucMask);  // 슬라이스마다 초기화, nPixelsInROI 산출
-	vector2DofDiscretizedPixels = isFBN? get2DVectorOfDiscretizedPixels_FBN(psImage, pucMask) : get2DVectorOfDiscretizedPixels_FBS(psImage, pucMask); // 슬라이스마다 초기화, calc maxIntensity
+	vector2DofDiscretizedPixels = isFBN? get2DVectorOfDiscretizedPixels_FBN(psImage, pucMask) : get2DVectorOfDiscretizedPixels_FBS(psImage, pucMask); // 슬라이스마다 초기화
 
 	// calculate checked feature
-	sizeMatrix = maxIntensity; // maxIntensity만 clearVariable()을 통해 매번 초기화
+	sizeMatrix = diffGreyLevels.size(); // ***GLSZM에서는 Matrix의 row 크기인 sizeMatrix가 maxIntensity가 아닌 diffGreyLevels의 size가 정확!!***
 	maxZoneSize = nHeight * nWidth;
 		
 	// calculate GLSZM matrix

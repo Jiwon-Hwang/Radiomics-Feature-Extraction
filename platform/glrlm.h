@@ -49,8 +49,7 @@ public:
 	bool isFBN = false;
 	int nBins = -1;			// FBN (Fixed Bin Number) => by. platform pop-up
 	float sBin = NAN;		// FBS (Fixed Bin Size) => by. platform pop-up
-	int maxIntensity = -1;
-	int sizeMatrix;			// sizeMatrix == maxIntensity (== N_g == nBins : FBN ¿œ∂ß∏∏)
+	int sizeMatrix;			// sizeMatrix == diffGreyLevels.size() (maxIntensity X)
 	int maxRunLength;		// N_r
 	int nHeight;
 	int nWidth;
