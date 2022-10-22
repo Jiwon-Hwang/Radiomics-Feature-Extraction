@@ -58,7 +58,7 @@ public:
 	std::vector<short> vector1DofOriPixels;									// psImage 전체 픽셀들
 	std::vector<std::vector<unsigned short>> vector2DofDiscretizedPixels;	// 양자화한 psImage 전체 픽셀들(0 & 1~nBins) == inputMatrix(2d vector)
 	std::vector<unsigned short> diffGreyLevels;
-	// 방향마다 초기화
+	
 	float totalSum;
 	std::vector<float> rowSums; 
 	std::vector<float> colSums; 
@@ -68,11 +68,11 @@ public:
 	std::vector<short> get1DVectorOfPixels(short* psImage, unsigned char* pucMask);
 	std::vector<std::vector<unsigned short>> get2DVectorOfDiscretizedPixels_FBN(short* psImage, unsigned char* pucMask);
 	std::vector<std::vector<unsigned short>> get2DVectorOfDiscretizedPixels_FBS(short* psImage, unsigned char* pucMask);
-	void getXYDirections(int &directionX, int &directionY, int angle);
 	int findIndex(std::vector<unsigned short> diffGreyLevels, int size, unsigned short target);
+	void get360XYDirections(int &directionX, int &directionY, int angle);
+	void getNeighbours(std::vector<std::vector<unsigned short>> &vector2DofDiscretizedPixels, unsigned short actElement, std::vector<std::vector<int>> &matrixIndices);
 	void fill2DGLSZMatrix(std::vector<std::vector<unsigned short>> vector2DofDiscretizedPixels, std::vector<std::vector<float>> &GLSZMatrix);
 	void fill2DprobMatrix(std::vector<std::vector<float>> GLSZMatrix, std::vector<std::vector<float>> &probMatrix);
-	void average4DirValues(std::vector<std::vector<float>> temp4DirVals2DVec, std::vector<float> &tempValues1DVec);
 
 	// common calculation functions
 	float getTotalSum(std::vector<std::vector<float>> matrix);
@@ -86,40 +86,40 @@ public:
 	std::vector<float> final1DVec;					// series by series (average)
 
 	// final feature value //
-	float shortRunEmph = NAN;
-	float longRunEmph = NAN;
-	float lowGreyRunEmph = NAN;
-	float highGreyRunEmph = NAN;
-	float shortRunLowEmph = NAN;
-	float shortRunHighEmph = NAN;
-	float longRunLowEmph = NAN;
-	float longRunHighEmph = NAN;
-	float greyNonUnimformity = NAN;
-	float greyNonUnimformityNorm = NAN;
-	float runLengthNonUniformity = NAN;
-	float runLengthNonUniformityNorm = NAN;
-	float runPercentage = NAN;
+	float smallZoneEmph = NAN;
+	float largeZoneEmph = NAN;
+	float lowGreyZoneEmph = NAN;
+	float highGreyZoneEmph = NAN;
+	float smallZoneLowGreyEmph = NAN;
+	float smallZoneHighGreyEmph = NAN;
+	float largeZoneLowGreyEmph = NAN;
+	float largeZoneHighGreyEmph = NAN;
+	float greyNonUniformity = NAN;
+	float greyNonUniformityNorm = NAN;
+	float zoneSizeNonUniformity = NAN;
+	float zoneSizeNonUniformityNorm = NAN;
+	float zonePercentage = NAN;
 	float greyLevelVar = NAN;
-	float runLengthVar = NAN;
-	float runEntropy = NAN;
+	float zoneSizeVar = NAN;
+	float zoneSizeEntropy = NAN;
 
 	// calculate feature value //
-	void calcShortRunEmph();
-	void calcLongRunEmph();
-	void calcLowGreyRunEmph();
-	void calcHighGreyRunEmph();
-	void calcShortRunLowEmph(std::vector<std::vector<float>> GLSZMatrix);
-	void calcShortRunHighEmph(std::vector<std::vector<float>> GLSZMatrix);
-	void calcLongRunLowEmph(std::vector<std::vector<float>> GLSZMatrix);
-	void calcLongRunHighEmph(std::vector<std::vector<float>> GLSZMatrix);
-	void calcGreyNonUnimformity();
-	void calcGreyNonUnimformityNorm();
-	void calcRunLengthNonUniformity();
-	void calcRunLengthNonUniformityNorm();
-	void calcRunPercentage();
+	void calcSmallZoneEmph();
+	void calcLargeZoneEmph();
+	void calcLowGreyZoneEmph();
+	void calcHighGreyZoneEmph();
+	void calcSmallZoneLowGreyEmph(std::vector<std::vector<float>> GLSZMatrix);
+	void calcSmallZoneHighGreyEmph(std::vector<std::vector<float>> GLSZMatrix);
+	void calcLargeZoneLowGreyEmph(std::vector<std::vector<float>> GLSZMatrix);
+	void calcLargeZoneHighGreyEmph(std::vector<std::vector<float>> GLSZMatrix);
+	void calcGreyNonUniformity();
+	void calcGreyNonUniformityNorm();
+	void calcZoneSizeNonUniformity();
+	void calcZoneSizeNonUniformityNorm();
+	void calcZonePercentage();
 	void calcGreyLevelVar(std::vector<std::vector<float>> probMatrix);
-	void calcRunLengthVar(std::vector<std::vector<float>> probMatrix);
-	void calcRunEntropy(std::vector<std::vector<float>> probMatrix);
+	void calcZoneSizeVar(std::vector<std::vector<float>> probMatrix);
+	void calcZoneSizeEntropy(std::vector<std::vector<float>> probMatrix);
 
 	// feature extraction - slice by slice //
 	void calcFeature(int FEATURE_IDX, std::vector<float> &temp1DirVals1DVec, std::vector<std::vector<float>> GLSZMatrix, std::vector<std::vector<float>> probMatrix);

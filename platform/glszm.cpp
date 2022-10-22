@@ -9,32 +9,36 @@ GLSZM::~GLSZM() {
 
 }
 void GLSZM::clearVariable() {
-	// 슬라이스마다, 방향마다 초기화
+	// 슬라이스마다 초기화
 	vector1DofOriPixelsInROI.clear();
 	vector<short>().swap(vector1DofOriPixelsInROI); // size & capacity 모두 0으로 초기화
 	rowSums.clear();
 	vector<float>().swap(rowSums);
 	colSums.clear();
 	vector<float>().swap(colSums);
+	vector1DofOriPixels.clear();
+	vector<short>().swap(vector1DofOriPixels);
+	vector2DofDiscretizedPixels.clear();
+	vector<vector<unsigned short>>().swap(vector2DofDiscretizedPixels);
 
 	maxIntensity = -1;
 
-	shortRunEmph = NAN;
-	longRunEmph = NAN;
-	lowGreyRunEmph = NAN;
-	highGreyRunEmph = NAN;
-	shortRunLowEmph = NAN;
-	shortRunHighEmph = NAN;
-	longRunLowEmph = NAN;
-	longRunHighEmph = NAN;
-	greyNonUnimformity = NAN;
-	greyNonUnimformityNorm = NAN;
-	runLengthNonUniformity = NAN;
-	runLengthNonUniformityNorm = NAN;
-	runPercentage = NAN;
+	smallZoneEmph = NAN;
+	largeZoneEmph = NAN;
+	lowGreyZoneEmph = NAN;
+	highGreyZoneEmph = NAN;
+	smallZoneLowGreyEmph = NAN;
+	smallZoneHighGreyEmph = NAN;
+	largeZoneLowGreyEmph = NAN;
+	largeZoneHighGreyEmph = NAN;
+	greyNonUniformity = NAN;
+	greyNonUniformityNorm = NAN;
+	zoneSizeNonUniformity = NAN;
+	zoneSizeNonUniformityNorm = NAN;
+	zonePercentage = NAN;
 	greyLevelVar = NAN;
-	runLengthVar = NAN;
-	runEntropy = NAN;
+	zoneSizeVar = NAN;
+	zoneSizeEntropy = NAN;
 
 }
 void GLSZM::clearVector() {
@@ -132,6 +136,7 @@ vector<vector<unsigned short>> GLSZM::get2DVectorOfDiscretizedPixels_FBN(short* 
 
 	// get diffGreyLevels (vector containing the different grey levels of the matrix -> extract every element only once)
 	sort(diffGreyLevels.begin(), diffGreyLevels.end());
+	diffGreyLevels.erase(unique(diffGreyLevels.begin(), diffGreyLevels.end()), diffGreyLevels.end()); // 중복 제거
 
 	return vector2DofDiscretizedPixels;
 }
@@ -180,45 +185,99 @@ vector<vector<unsigned short>> GLSZM::get2DVectorOfDiscretizedPixels_FBS(short* 
 
 	// get diffGreyLevels (vector containing the different grey levels of the matrix -> extract every element only once)
 	sort(diffGreyLevels.begin(), diffGreyLevels.end());
-	diffGreyLevels.erase(unique(diffGreyLevels.begin(), diffGreyLevels.end()), diffGreyLevels.end());
+	diffGreyLevels.erase(unique(diffGreyLevels.begin(), diffGreyLevels.end()), diffGreyLevels.end()); // 중복 제거
 
 	return vector2DofDiscretizedPixels;
-}
-void GLSZM::getXYDirections(int &directionX, int &directionY, int angle) {
-
-	if (angle == 0) {
-		directionX = 0;
-		directionY = 0;
-	}
-	if (angle == 180) {
-		directionX = 1;
-		directionY = 0;
-	}
-	else if (angle == 90) {
-		directionX = 0;
-		directionY = 1;
-	}
-	else if (angle == 45) {
-		directionX = 1;
-		directionY = 1;
-	}
-	else if (angle == 135) {
-		directionX = -1;
-		directionY = 1;
-	}
-
 }
 int GLSZM::findIndex(vector<unsigned short> diffGreyLevels, int size, unsigned short target) {
 	int i = 0;
 	while ((i < size) && (diffGreyLevels[i] != target)) i++;
 	return (i < size) ? (i) : (-1);
 }
+void GLSZM::get360XYDirections(int &directionX, int &directionY, int angle) {
+
+	//if we only go in the depth (현재는 X)
+	if (angle == 360) {
+		directionX = 0;
+		directionY = 1;
+	}
+	//if angle is 180 degrees, only look in x direction
+	else if (angle == 315) {
+		directionX = 1;
+		directionY = 1;
+	}
+	//if angle is 90 degrees only look in y direction
+	else if (angle == 270) {
+		directionX = 1;
+		directionY = 0;
+	}
+	//if angle is in 45 degrees direction look in x and y direction
+	else if (angle == 225) {
+		directionX = 1;
+		directionY = -1;
+	}
+	else if (angle == 180) {
+		directionX = 0;
+		directionY = -1;
+	}
+	else if (angle == 135) {
+		directionX = -1;
+		directionY = -1;
+	}
+	else if (angle == 90) {
+		directionX = -1;
+		directionY = 0;
+	}
+	else if (angle == 45) {
+		directionX = -1;
+		directionY = 1;
+	}
+	else if (angle == 0) {
+		directionX = 0;
+		directionY = 0;
+	}
+	else {
+		std::cout << " incorrect angle" << std::endl;
+	}
+
+}
+void GLSZM::getNeighbours(vector<vector<unsigned short>> &vector2DofDiscretizedPixels, unsigned short actElement, vector<vector<int>> &matrixIndices) {
+
+	vector<int> actIndex;
+	vector<int> newIndex;
+	vector<int> tempIndex;
+	int neighborDist = 1;
+	int directionX;
+	int directionY;
+	vector<vector<int>> tempMatrixIndices = matrixIndices;
+	int ang;
+
+	//look at all indices which are saved in the vector matrix indices
+	while (tempMatrixIndices.size() > 0) {
+		//get the last element of the vector and delete it
+		actIndex = tempMatrixIndices.back();
+		tempMatrixIndices.pop_back();
+		tempIndex = actIndex;
+		for (int i = 0; i < 8; i++) { // 8인접 연결요소 체크
+			ang = 360 - i * 45;
+			get360XYDirections(directionX, directionY, ang);
+			actIndex = tempIndex;
+			if (actIndex[0] + directionX>-1 && actIndex[0] + directionX<nHeight && actIndex[1] + directionY>-1 && actIndex[1] + directionY<nWidth && actElement == vector2DofDiscretizedPixels[actIndex[0] + directionX][actIndex[1] + directionY]) {
+				vector2DofDiscretizedPixels[actIndex[0] + directionX][actIndex[1] + directionY] = NAN;
+				actIndex[0] += directionX;
+				actIndex[1] += directionY;
+				tempMatrixIndices.push_back(actIndex);
+				matrixIndices.push_back(actIndex);
+			}
+		}
+	}
+}
 void GLSZM::fill2DGLSZMatrix(vector<vector<unsigned short>> vector2DofDiscretizedPixels, vector<vector<float>> &GLSZMatrix) {
 
 	// vector2DofDiscretizedPixels : 멤버변수 copy (매개변수로 새 벡터 할당 후 값 조작)
 
 	unsigned short actualElement;
-	vector<vector<int> > matrixIndices;
+	vector<vector<int>> matrixIndices;
 	vector<int> actualIndex;
 	int actualGreyIndex;
 
@@ -229,19 +288,17 @@ void GLSZM::fill2DGLSZMatrix(vector<vector<unsigned short>> vector2DofDiscretize
 	//go element by element through the image
 	//look at the neighbors of every element and check if they have the same grey value
 	//set every element already seen to NAN
-	
 	for (int row = 0; row < nHeight; row++) {
 		for (int col = 0; col < nWidth; col++) {
 			actualElement = vector2DofDiscretizedPixels[row][col];
-			if (!isnan(actualElement)) {
+			if (!isnan((float)actualElement)) {
 				actualGreyIndex = findIndex(diffGreyLevels, diffGreyLevels.size(), actualElement);
 				vector2DofDiscretizedPixels[row][col] = NAN;
 				actualIndex.push_back(row);
 				actualIndex.push_back(col);
-				actualIndex.push_back(depth);
 				matrixIndices.push_back(actualIndex);
 				actualIndex.clear();
-				getNeighbors(vector2DofDiscretizedPixels, actualElement, matrixIndices);
+				getNeighbours(vector2DofDiscretizedPixels, actualElement, matrixIndices);
 			}
 			tempZoneSize = matrixIndices.size();
 			if (tempZoneSize > maxZoneSize) {
@@ -264,19 +321,6 @@ void GLSZM::fill2DprobMatrix(vector<vector<float>> GLSZMatrix, vector<vector<flo
 		transform(probMatrix[i].begin(), probMatrix[i].end(), probMatrix[i].begin(), bind2nd(divides<float>(), int(totalSum)));
 	}
 
-}
-void GLSZM::average4DirValues(vector<vector<float>> temp4DirVals2DVec, vector<float> &tempValues1DVec) {
-
-	for (int col = 0; col < temp4DirVals2DVec[0].size(); col++) {
-		float colSum = 0;
-		float colMean;
-
-		for (int row = 0; row < 4; row++) {
-			colSum += temp4DirVals2DVec[row][col];
-		}
-		colMean = colSum / 4;
-		tempValues1DVec.push_back(colMean);
-	}
 }
 
 // common calculation functions
@@ -346,165 +390,166 @@ float GLSZM::getMeanProbRun(vector<vector<float>> probMatrix) {
 	return mean;
 }
 
-void GLSZM::calcShortRunEmph() {
+// GLRLM과 동일 => 추후 상속으로 수정
+void GLSZM::calcSmallZoneEmph() { 
 	
-	shortRunEmph = 0;
+	smallZoneEmph = 0;
 
 	if (totalSum != 0) {
 		for (int j = 0; j < rowSums.size(); j++) {
-			shortRunEmph += rowSums[j] / pow(j + 1, 2);
+			smallZoneEmph += rowSums[j] / pow(j + 1, 2);
 		}
-		shortRunEmph /= totalSum;
+		smallZoneEmph /= totalSum;
 	}
 	
 }
-void GLSZM::calcLongRunEmph() {
+void GLSZM::calcLargeZoneEmph() {
 
-	longRunEmph = 0;
+	largeZoneEmph = 0;
 
 	if (totalSum != 0) {
 		for (int j = 0; j < rowSums.size(); j++) {
-			longRunEmph += rowSums[j] * pow(j + 1, 2);
+			largeZoneEmph += rowSums[j] * pow(j + 1, 2);
 		}
-		longRunEmph /= totalSum;
+		largeZoneEmph /= totalSum;
 	}
 
 }
-void GLSZM::calcLowGreyRunEmph() {
+void GLSZM::calcLowGreyZoneEmph() {
 
-	lowGreyRunEmph = 0;
+	lowGreyZoneEmph = 0;
 
 	if (totalSum != 0) {
 		for (int i = 0; i < colSums.size(); i++) {
-			lowGreyRunEmph += colSums[i] / pow(i + 1, 2);
+			lowGreyZoneEmph += colSums[i] / pow(i + 1, 2);
 		}
-		lowGreyRunEmph /= totalSum;
+		lowGreyZoneEmph /= totalSum;
 	}
 
 }
-void GLSZM::calcHighGreyRunEmph() {
+void GLSZM::calcHighGreyZoneEmph() {
 	
-	highGreyRunEmph = 0;
+	highGreyZoneEmph = 0;
 
 	if (totalSum != 0) {
 		for (int i = 0; i < colSums.size(); i++) {
-			highGreyRunEmph += colSums[i] * pow(i + 1, 2);
+			highGreyZoneEmph += colSums[i] * pow(i + 1, 2);
 		}
-		highGreyRunEmph /= totalSum;
+		highGreyZoneEmph /= totalSum;
 	}
 
 }
-void GLSZM::calcShortRunLowEmph(vector<vector<float>> GLSZMatrix) {
+void GLSZM::calcSmallZoneLowGreyEmph(vector<vector<float>> GLSZMatrix) {
 
-	shortRunLowEmph = 0;
+	smallZoneLowGreyEmph = 0;
 
 	if (totalSum != 0) {
 		for (int row = 0; row < GLSZMatrix.size(); row++) {
 			for (int col = 1; col < GLSZMatrix[0].size() + 1; col++) {
-				shortRunLowEmph += GLSZMatrix[row][col - 1] / (pow(row+1, 2) * pow(col, 2));
+				smallZoneLowGreyEmph += GLSZMatrix[row][col - 1] / (pow(row+1, 2) * pow(col, 2));
 			}
 		}
-		shortRunLowEmph /= totalSum;
+		smallZoneLowGreyEmph /= totalSum;
 	}
 
 }
-void GLSZM::calcShortRunHighEmph(vector<vector<float>> GLSZMatrix) {
+void GLSZM::calcSmallZoneHighGreyEmph(vector<vector<float>> GLSZMatrix) {
 
-	shortRunHighEmph = 0;
+	smallZoneHighGreyEmph = 0;
 
 	if (totalSum != 0) {
 		for (int row = 0; row < GLSZMatrix.size(); row++) {
 			for (int col = 1; col < GLSZMatrix[0].size() + 1; col++) {
-				shortRunHighEmph += pow(row+1, 2) * GLSZMatrix[row][col - 1] / pow(col, 2);
+				smallZoneHighGreyEmph += pow(row+1, 2) * GLSZMatrix[row][col - 1] / pow(col, 2);
 			}
 		}
-		shortRunHighEmph /= totalSum;
+		smallZoneHighGreyEmph /= totalSum;
 	}
 
 }
-void GLSZM::calcLongRunLowEmph(vector<vector<float>> GLSZMatrix) {
+void GLSZM::calcLargeZoneLowGreyEmph(vector<vector<float>> GLSZMatrix) {
 
-	longRunLowEmph = 0;
+	largeZoneLowGreyEmph = 0;
 
 	if (totalSum != 0) {
 		for (int row = 0; row < GLSZMatrix.size(); row++) {
 			for (int col = 1; col < GLSZMatrix[0].size() + 1; col++) {
-				longRunLowEmph += pow(col, 2) * GLSZMatrix[row][col - 1] / pow(row+1, 2);
+				largeZoneLowGreyEmph += pow(col, 2) * GLSZMatrix[row][col - 1] / pow(row+1, 2);
 			}
 		}
-		longRunLowEmph /= totalSum;
+		largeZoneLowGreyEmph /= totalSum;
 	}
 
 }
-void GLSZM::calcLongRunHighEmph(vector<vector<float>> GLSZMatrix) {
+void GLSZM::calcLargeZoneHighGreyEmph(vector<vector<float>> GLSZMatrix) {
 
-	longRunHighEmph = 0;
+	largeZoneHighGreyEmph = 0;
 
 	if (totalSum != 0) {
 		for (int row = 0; row < GLSZMatrix.size(); row++) {
 			for (int col = 1; col < GLSZMatrix[0].size() + 1; col++) {
-				longRunHighEmph += pow(col, 2) * pow(row+1, 2) * GLSZMatrix[row][col - 1];
+				largeZoneHighGreyEmph += pow(col, 2) * pow(row+1, 2) * GLSZMatrix[row][col - 1];
 			}
 		}
-		longRunHighEmph /= totalSum;
+		largeZoneHighGreyEmph /= totalSum;
 	}
 
 }
-void GLSZM::calcGreyNonUnimformity() {
+void GLSZM::calcGreyNonUniformity() {
 
-	greyNonUnimformity = 0;
+	greyNonUniformity = 0;
 
 	if (totalSum != 0) {
 		for (int i = 0; i < colSums.size(); i++) {
-			greyNonUnimformity += pow(colSums[i], 2);
+			greyNonUniformity += pow(colSums[i], 2);
 		}
-		greyNonUnimformity /= totalSum;
+		greyNonUniformity /= totalSum;
 	}
 
 }
-void GLSZM::calcGreyNonUnimformityNorm() {
+void GLSZM::calcGreyNonUniformityNorm() {
 
-	greyNonUnimformityNorm = 0;
+	greyNonUniformityNorm = 0;
 
 	if (totalSum != 0) {
 		for (int i = 0; i < colSums.size(); i++) {
-			greyNonUnimformityNorm += pow(colSums[i], 2);
+			greyNonUniformityNorm += pow(colSums[i], 2);
 		}
-		greyNonUnimformityNorm /= pow(totalSum, 2);
+		greyNonUniformityNorm /= pow(totalSum, 2);
 	}
 
 }
-void GLSZM::calcRunLengthNonUniformity() {
+void GLSZM::calcZoneSizeNonUniformity() {
 	
-	runLengthNonUniformity = 0;
+	zoneSizeNonUniformity = 0;
 
 	if (totalSum != 0) {
 		for (int i = 0; i < rowSums.size(); i++) {
-			runLengthNonUniformity += pow(rowSums[i], 2);
+			zoneSizeNonUniformity += pow(rowSums[i], 2);
 		}
-		runLengthNonUniformity /= totalSum;
+		zoneSizeNonUniformity /= totalSum;
 	}
 	
 }
-void GLSZM::calcRunLengthNonUniformityNorm() {
+void GLSZM::calcZoneSizeNonUniformityNorm() {
 
-	runLengthNonUniformityNorm = 0;
+	zoneSizeNonUniformityNorm = 0;
 
 	if (totalSum != 0) {
 		for (int i = 0; i < rowSums.size(); i++) {
-			runLengthNonUniformityNorm += pow(rowSums[i], 2);
+			zoneSizeNonUniformityNorm += pow(rowSums[i], 2);
 		}
-		runLengthNonUniformityNorm /= pow(totalSum, 2);
+		zoneSizeNonUniformityNorm /= pow(totalSum, 2);
 	}
 
 }
-void GLSZM::calcRunPercentage() {
+void GLSZM::calcZonePercentage() {
 
 	if (nPixelsInROI != 0) {
-		runPercentage = totalSum / nPixelsInROI;
+		zonePercentage = totalSum / nPixelsInROI;
 	}
 	else {
-		runPercentage = 0;
+		zonePercentage = 0;
 	}
 	
 }
@@ -514,28 +559,30 @@ void GLSZM::calcGreyLevelVar(vector<vector<float>> probMatrix) {
 
 	for (int i = 0; i<probMatrix.size(); i++) {
 		for (int j = 0; j<probMatrix[0].size(); j++) {
-			greyLevelVar += pow((i+1 - meanGrey), 2)*probMatrix[i][j];
+			if (!isnan(pow((diffGreyLevels[i] - meanGrey), 2)*probMatrix[i][j])) {
+				greyLevelVar += pow((diffGreyLevels[i] - meanGrey), 2)*probMatrix[i][j];
+			}
 		}
 	}
 }
-void GLSZM::calcRunLengthVar(vector<vector<float>> probMatrix) {
+void GLSZM::calcZoneSizeVar(vector<vector<float>> probMatrix) {
 
-	runLengthVar = 0;
+	zoneSizeVar = 0;
 
 	for (int i = 0; i<probMatrix.size(); i++) {
 		for (int j = 0; j<probMatrix[0].size(); j++) {
-			runLengthVar += pow((j - meanRun), 2)*probMatrix[i][j];
+			zoneSizeVar += pow((j - meanRun), 2)*probMatrix[i][j];
 		}
 	}
 }
-void GLSZM::calcRunEntropy(vector<vector<float>> probMatrix) {
+void GLSZM::calcZoneSizeEntropy(vector<vector<float>> probMatrix) {
 
-	runEntropy = 0;
+	zoneSizeEntropy = 0;
 
 	for (int i = 0; i<probMatrix.size(); i++) {
 		for (int j = 0; j<probMatrix[0].size(); j++) {
 			if (probMatrix[i][j] > 0) {
-				runEntropy -= probMatrix[i][j] * log2(probMatrix[i][j]);
+				zoneSizeEntropy -= probMatrix[i][j] * log2(probMatrix[i][j]);
 			}
 		}
 	}
@@ -546,68 +593,68 @@ void GLSZM::calcFeature(int FEATURE_IDX, vector<float> &temp1DirVals1DVec, vecto
 	switch (FEATURE_IDX)
 	{
 	case SZE:
-		calcShortRunEmph();
-		temp1DirVals1DVec.push_back(shortRunEmph);
+		calcSmallZoneEmph();
+		temp1DirVals1DVec.push_back(smallZoneEmph);
 		break;
 
 	case LZE:
-		calcLongRunEmph();
-		temp1DirVals1DVec.push_back(longRunEmph);
+		calcLargeZoneEmph();
+		temp1DirVals1DVec.push_back(largeZoneEmph);
 		break;
 
 	case LGZE:
-		calcLowGreyRunEmph();
-		temp1DirVals1DVec.push_back(lowGreyRunEmph);
+		calcLowGreyZoneEmph();
+		temp1DirVals1DVec.push_back(lowGreyZoneEmph);
 		break;
 
 	case HGZE:
-		calcHighGreyRunEmph();
-		temp1DirVals1DVec.push_back(highGreyRunEmph);
+		calcHighGreyZoneEmph();
+		temp1DirVals1DVec.push_back(highGreyZoneEmph);
 		break; 
 
 	case SZLGE:
-		calcShortRunLowEmph(GLSZMatrix);
-		temp1DirVals1DVec.push_back(shortRunLowEmph);
+		calcSmallZoneLowGreyEmph(GLSZMatrix);
+		temp1DirVals1DVec.push_back(smallZoneLowGreyEmph);
 		break;
 
 	case SZHGE:
-		calcShortRunHighEmph(GLSZMatrix);
-		temp1DirVals1DVec.push_back(shortRunHighEmph);
+		calcSmallZoneHighGreyEmph(GLSZMatrix);
+		temp1DirVals1DVec.push_back(smallZoneHighGreyEmph);
 		break;
 
 	case LZLGE:
-		calcLongRunLowEmph(GLSZMatrix);
-		temp1DirVals1DVec.push_back(longRunLowEmph);
+		calcLargeZoneLowGreyEmph(GLSZMatrix);
+		temp1DirVals1DVec.push_back(largeZoneLowGreyEmph);
 		break;
 
 	case LZHGE:
-		calcLongRunHighEmph(GLSZMatrix);
-		temp1DirVals1DVec.push_back(longRunHighEmph);
+		calcLargeZoneHighGreyEmph(GLSZMatrix);
+		temp1DirVals1DVec.push_back(largeZoneHighGreyEmph);
 		break;
 
 	case GNU:
-		calcGreyNonUnimformity();
-		temp1DirVals1DVec.push_back(greyNonUnimformity);
+		calcGreyNonUniformity();
+		temp1DirVals1DVec.push_back(greyNonUniformity);
 		break;
 
 	case GNUN:
-		calcGreyNonUnimformityNorm();
-		temp1DirVals1DVec.push_back(greyNonUnimformityNorm);
+		calcGreyNonUniformityNorm();
+		temp1DirVals1DVec.push_back(greyNonUniformityNorm);
 		break;
 
 	case ZSNU:
-		calcRunLengthNonUniformity();
-		temp1DirVals1DVec.push_back(runLengthNonUniformity);
+		calcZoneSizeNonUniformity();
+		temp1DirVals1DVec.push_back(zoneSizeNonUniformity);
 		break;
 
 	case ZSNUN:
-		calcRunLengthNonUniformityNorm();
-		temp1DirVals1DVec.push_back(runLengthNonUniformityNorm);
+		calcZoneSizeNonUniformityNorm();
+		temp1DirVals1DVec.push_back(zoneSizeNonUniformityNorm);
 		break;
 
 	case ZP:
-		calcRunPercentage();
-		temp1DirVals1DVec.push_back(runPercentage);
+		calcZonePercentage();
+		temp1DirVals1DVec.push_back(zonePercentage);
 		break;
 
 	case GLV:
@@ -616,13 +663,13 @@ void GLSZM::calcFeature(int FEATURE_IDX, vector<float> &temp1DirVals1DVec, vecto
 		break;
 
 	case ZSV:
-		calcRunLengthVar(probMatrix);
-		temp1DirVals1DVec.push_back(runLengthVar);
+		calcZoneSizeVar(probMatrix);
+		temp1DirVals1DVec.push_back(zoneSizeVar);
 		break;
 
 	case ZSE:
-		calcRunEntropy(probMatrix);
-		temp1DirVals1DVec.push_back(runEntropy);
+		calcZoneSizeEntropy(probMatrix);
+		temp1DirVals1DVec.push_back(zoneSizeEntropy);
 		break;
 
 	default:
@@ -643,13 +690,10 @@ void GLSZM::featureExtraction(short* psImage, unsigned char* pucMask, int nHeigh
 	// calculate checked feature
 	sizeMatrix = maxIntensity; // maxIntensity만 clearVariable()을 통해 매번 초기화
 	maxZoneSize = nHeight * nWidth;
-
-	clearVariable();					// 방향마다 초기화
-	vector<float> temp1DirVals1DVec;	// 방향마다 초기화
 		
 	// calculate GLSZM matrix
 	vector<vector<float>> GLSZMatrix(sizeMatrix, vector<float>(maxZoneSize, 0));
-	fill2DGLSZMatrix(vector2DofDiscretizedPixels, GLSZMatrix); 
+	fill2DGLSZMatrix(vector2DofDiscretizedPixels, GLSZMatrix); // getNeighbours에서 vec, maxZoneSize 변경됨
 
 	totalSum = getTotalSum(GLSZMatrix);
 	rowSums = getRowSums(GLSZMatrix);
@@ -661,16 +705,15 @@ void GLSZM::featureExtraction(short* psImage, unsigned char* pucMask, int nHeigh
 	meanGrey = getMeanProbGrey(probMatrix);
 	meanRun = getMeanProbRun(probMatrix);
 
+
+	vector<float> tempValues1DVec; // 슬라이스마다 초기화
+
 	// calculate feature for each dir
 	for (int i = 0; i < FEATURE_COUNT; i++) {
-		if (isCheckedFeature[i]) calcFeature(i, temp1DirVals1DVec, GLSZMatrix, probMatrix);
+		if (isCheckedFeature[i]) calcFeature(i, tempValues1DVec, GLSZMatrix, probMatrix);
 	}
-	//temp4DirVals2DVec.push_back(temp1DirVals1DVec); // 4행
-	
 
-	//average4DirValues(temp4DirVals2DVec, tempValues1DVec); // 4방향 평균 특징값
-
-	//final2DVec.push_back(tempValues1DVec); // 모든 ROI 슬라이스 들어올 때까지 누적 (시리즈마다 초기화)
+	final2DVec.push_back(tempValues1DVec); // 모든 ROI 슬라이스 들어올 때까지 누적 (시리즈마다 초기화)
 	
 }
 

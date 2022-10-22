@@ -132,6 +132,7 @@ vector<vector<unsigned short>> GLRLM::get2DVectorOfDiscretizedPixels_FBN(short* 
 
 	// get diffGreyLevels (vector containing the different grey levels of the matrix -> extract every element only once)
 	sort(diffGreyLevels.begin(), diffGreyLevels.end());
+	diffGreyLevels.erase(unique(diffGreyLevels.begin(), diffGreyLevels.end()), diffGreyLevels.end()); // 중복 제거
 
 	return vector2DofDiscretizedPixels;
 }
@@ -527,7 +528,9 @@ void GLRLM::calcGreyLevelVar(vector<vector<float>> probMatrix) {
 
 	for (int i = 0; i<probMatrix.size(); i++) {
 		for (int j = 0; j<probMatrix[0].size(); j++) {
-			greyLevelVar += pow((i+1 - meanGrey), 2)*probMatrix[i][j];
+			if (!isnan(pow((diffGreyLevels[i] - meanGrey), 2)*probMatrix[i][j])) {
+				greyLevelVar += pow((diffGreyLevels[i] - meanGrey), 2)*probMatrix[i][j];
+			}
 		}
 	}
 }
