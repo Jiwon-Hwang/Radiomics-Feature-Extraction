@@ -1639,7 +1639,7 @@ void CPlatform::setCheckedFamilyState() { // check box 클릭될 때마다(시그널) 호�
 	}
 
 }
-void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth, float pixelSpacingX, float pixelSpacingY) {
+void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, vector<vector<unsigned char>> mask_morph, int nHeight, int nWidth, float pixelSpacingX, float pixelSpacingY) {
 	// for loop으로 대체 가능 (for auto, break)
 	if (morphology.isActivatedFamily) {
 		morphology.featureExtraction(psImage, pucMask, nHeight, nWidth, pixelSpacingX, pixelSpacingY);
@@ -1667,6 +1667,10 @@ void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, int nH
 
 	if (glszm.isActivatedFamily) {
 		glszm.featureExtraction(psImage, pucMask, nHeight, nWidth);
+	}
+
+	if (gldzm.isActivatedFamily) {
+		gldzm.featureExtraction(psImage, pucMask, mask_morph, nHeight, nWidth); // mask_morph : morpological mask (original)
 	}
 }
 
@@ -2071,17 +2075,6 @@ void CPlatform::run()
 				throw std::exception("copy masks fail");
 			}
 
-
-			// 3D Morphological Feature Family - [3.1] Morphology, [3.9] GLDZM(?) //
-			// [3.9]는 2d slice 단위 추출 가능!
-			/*
-			if (morph){
-				
-				continue;
-			}
-			*/
-
-
 			// slice by slice //
 			for (int j = 0; j < nImageCnt; j++) {
 				// ROI slice check //
@@ -2105,13 +2098,24 @@ void CPlatform::run()
 					ppucMasks[j] = (unsigned char*)mask_resampled.data;
 
 					// Resegmentation (Outlier Filteration) //
+					// get morphological mask (3D Morphological Feature Family) => [3.9] GLDZM
+					vector<vector<unsigned char>> mask_morph(nHeight_new, vector<unsigned char>(nWidth_new, 0));
+					for (int row = 0; row < nHeight_new; row++) {
+						for (int col = 0; col < nWidth_new; col++) {
+							int index = row * nWidth + col;
+							unsigned char maskValue = ppucMasks[j][index];
+							mask_morph[row][col] = maskValue;
+						}
+					}
+
+					// get intensity mask => except [3.9] GLDZM
 					Mat mask_resegmented;
 					resegmentation(ppsImages[j], ppucMasks[j], nWidth_new, nHeight_new, mask_resegmented);
 					ppucMasks[j] = (unsigned char*)mask_resegmented.data;
 
 					// feature extraction //
 					if (!isEmptyMask(ppucMasks[j], nWidth_new, nHeight_new, nPixelsInMask)) {   // resegmentation 후의 mask 재확인
-						featureExtraction(ppsImages[j], ppucMasks[j], nHeight_new, nWidth_new, pixelSpacingX, pixelSpacingY); // final2DVec에 각 슬라이스들 값 누적
+						featureExtraction(ppsImages[j], ppucMasks[j], mask_morph, nHeight_new, nWidth_new, pixelSpacingX, pixelSpacingY); // final2DVec에 각 슬라이스들 값 누적
 					}
 				}
 				else { // ***isEmptyMask가 아닌 경우에도 메모리 소멸 (1차원 배열)***

@@ -63,6 +63,8 @@
 #include "popup_Morph.h"
 #include "ui_popup_GLSZM.h"
 #include "popup_GLSZM.h"
+#include "ui_popup_GLDZM.h"
+#include "popup_GLDZM.h"
 
 #include "imageView.h"
 #include "data.h"
@@ -73,6 +75,7 @@
 #include "localIntensity.h"
 #include "morphology.h"
 #include "glszm.h"
+#include "gldzm.h"
 
 
 #define MAX_FILE_LENGTH 64
@@ -107,7 +110,7 @@ public:
 	void setThread();
 
 public:	
-	enum FAMILY { E_MORPHOLOGY, E_LOCALINTENSE, E_INTENSESTAT, E_INTENSEHISTO, E_GLCM, E_GLRLM, E_GLSZM, FAMILY_COUNT };
+	enum FAMILY { E_MORPHOLOGY, E_LOCALINTENSE, E_INTENSESTAT, E_INTENSEHISTO, E_GLCM, E_GLRLM, E_GLSZM, E_GLDZM, FAMILY_COUNT };
 
 	// Feature Family objects
 	Morphology morphology;
@@ -117,6 +120,7 @@ public:
 	GLCM glcm;
 	GLRLM glrlm;
 	GLSZM glszm;
+	GLDZM gldzm;
 
 	// pop-up objects
 	popup_Morph *ppopup_Morph;
@@ -126,6 +130,7 @@ public:
 	popup_GLCM *ppopup_GLCM;
 	popup_GLRLM *ppopup_GLRLM;
 	popup_GLSZM *ppopup_GLSZM;
+	popup_GLDZM *ppopup_GLDZM;
 
 
 // QT layout, action º¯¼ö
@@ -153,7 +158,7 @@ public:
 	void resampling(short* psImage, unsigned char* pucMask, int &nWidth, int &nHeight, int nPixelsInMask, float pixelSpacingX, float pixelSpacingY, cv::Mat &image_resampled, cv::Mat &mask_resampled);
 
 	// feature extraction //
-	void featureExtraction(short* psImage, unsigned char* pucMask, int nHeight, int nWidth, float pixelSpacingX, float pixelSpacingY);
+	void featureExtraction(short* psImage, unsigned char* pucMask, vector<vector<unsigned char>> mask_morph, int nHeight, int nWidth, float pixelSpacingX, float pixelSpacingY);
 	void averageAllSlices();
 					
 	// write CSV //

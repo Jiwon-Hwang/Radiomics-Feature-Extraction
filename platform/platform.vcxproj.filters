@@ -155,6 +155,18 @@
     <ClCompile Include="popup_GLSZM.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_popup_GLDZM.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_popup_GLDZM.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="gldzm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="popup_GLDZM.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="platform.h">
@@ -217,6 +229,12 @@
     <CustomBuild Include="popup_GLSZM.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="popup_GLDZM.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="popup_GLDZM.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_platform.h">
@@ -266,6 +284,12 @@
     </ClInclude>
     <ClInclude Include="glszm.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gldzm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_popup_GLDZM.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

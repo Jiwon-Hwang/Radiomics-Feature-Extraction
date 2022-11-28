@@ -255,7 +255,7 @@ void GLSZM::getNeighbours(vector<vector<unsigned short>> &vector2DofDiscretizedP
 			get360XYDirections(directionX, directionY, ang);
 			actIndex = tempIndex;
 			if (actIndex[0] + directionX>-1 && actIndex[0] + directionX<nHeight && actIndex[1] + directionY>-1 && actIndex[1] + directionY<nWidth && actElement == vector2DofDiscretizedPixels[actIndex[0] + directionX][actIndex[1] + directionY]) {
-				vector2DofDiscretizedPixels[actIndex[0] + directionX][actIndex[1] + directionY] = NAN;
+				vector2DofDiscretizedPixels[actIndex[0] + directionX][actIndex[1] + directionY] = 0; // NAN말고 0으로 교체
 				actIndex[0] += directionX;
 				actIndex[1] += directionY;
 				tempMatrixIndices.push_back(actIndex);
