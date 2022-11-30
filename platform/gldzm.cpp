@@ -395,7 +395,7 @@ int GLDZM::checkNeighbors(vector<vector<unsigned short>> distanceMap, vector<int
 	return distance;
 }
 vector<vector<unsigned short>> GLDZM::generateDistanceMap() {
-
+	// ***반드시 속도 개선 필요!!!***
 	vector<vector<unsigned short>> distanceMap(nHeight, vector<unsigned short>(nWidth, 0));
 	vector<int> actualIndex;
 	for (int row = 0; row < nHeight; row++) {
@@ -476,7 +476,7 @@ void GLDZM::fill2DGLDZMatrix(vector<vector<unsigned short>> vector2DofDiscretize
 	// vector2DofDiscretizedPixels : 멤버변수 copy (매개변수로 새 벡터 할당 후 값 변경)
 	// vector2DofDiscretizedPixels_morph : 전역 변수(morphological ROI mask 이용) => only distanceMap 생성 시에만 이용
 	
-	vector<vector<unsigned short>> distanceMap = generateDistanceMap(); 
+	vector<vector<unsigned short>> distanceMap = generateDistanceMap(); // ***반드시 속도 개선 필요!!!***
 
 	//store the matrix indices of a neighborhood in a vector
 	vector<vector<int>> matrixIndices;
