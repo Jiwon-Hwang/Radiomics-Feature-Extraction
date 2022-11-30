@@ -48,14 +48,17 @@ public:
 	bool isFBN = false;
 	int nBins = -1;			// FBN (Fixed Bin Number) => by. platform pop-up
 	float sBin = NAN;		// FBS (Fixed Bin Size) => by. platform pop-up
-	int sizeMatrix;			// sizeMatrix == diffGreyLevels.size() (maxIntensity X)
-	int maxRunLength;		// N_r
+	int sizeGreyLevels;		// sizeGreyLevels == diffGreyLevels.size() (maxIntensity X)
+	int nrCols;				
 	int nHeight;
 	int nWidth;
 	int nPixelsInROI;
 	std::vector<short> vector1DofOriPixelsInROI;							// ROI 안에 있는 픽셀들만
+	std::vector<short> vector1DofOriPixelsInROI_morph;
 	std::vector<short> vector1DofOriPixels;									// psImage 전체 픽셀들
+	std::vector<short> vector1DofOriPixels_morph;
 	std::vector<std::vector<unsigned short>> vector2DofDiscretizedPixels;	// 양자화한 psImage 전체 픽셀들(0 & 1~nBins) == inputMatrix(2d vector)
+	std::vector<std::vector<unsigned short>> vector2DofDiscretizedPixels_morph;
 	std::vector<unsigned short> diffGreyLevels;
 	// 방향마다 초기화
 	float totalSum;
@@ -65,13 +68,19 @@ public:
 	float meanRun;
 
 	std::vector<short> get1DVectorOfPixels(short* psImage, unsigned char* pucMask);
+	std::vector<short> get1DVectorOfPixels(short* psImage, std::vector<std::vector<unsigned char>> pucMask);
 	std::vector<std::vector<unsigned short>> get2DVectorOfDiscretizedPixels_FBN(short* psImage, unsigned char* pucMask);
+	std::vector<std::vector<unsigned short>> get2DVectorOfDiscretizedPixels_FBN(short* psImage, std::vector<std::vector<unsigned char>> pucMask);
 	std::vector<std::vector<unsigned short>> get2DVectorOfDiscretizedPixels_FBS(short* psImage, unsigned char* pucMask);
-	void getXYDirections(int &directionX, int &directionY, int angle);
+	std::vector<std::vector<unsigned short>> get2DVectorOfDiscretizedPixels_FBS(short* psImage, std::vector<std::vector<unsigned char>> pucMask);
+	void get360XYDirections(int &directionX, int &directionY, int angle);
+	int checkNeighbors(std::vector<std::vector<unsigned short>> distanceMap, std::vector<int> actIndex);
+	std::vector<std::vector<unsigned short>> generateDistanceMap();
 	int findIndex(std::vector<unsigned short> diffGreyLevels, int size, unsigned short target);
-	void fill2DGLDZMatrix(std::vector<std::vector<unsigned short>> vector2DofDiscretizedPixels, std::vector<std::vector<float>> &GLDZMatrix, int angle);
+	void getNeighbours(std::vector<std::vector<unsigned short>> &vector2DofDiscretizedPixels, unsigned short actElement, std::vector<std::vector<int>> &matrixIndices);
+	int getMinimalDistance(std::vector<std::vector<unsigned short>> distanceMap, std::vector<std::vector<int>> matrixIndices);
+	void fill2DGLDZMatrix(std::vector<std::vector<unsigned short>> vector2DofDiscretizedPixels, std::vector<std::vector<float>> &GLDZMatrix);
 	void fill2DprobMatrix(std::vector<std::vector<float>> GLDZMatrix, std::vector<std::vector<float>> &probMatrix);
-	void average4DirValues(std::vector<std::vector<float>> temp4DirVals2DVec, std::vector<float> &tempValues1DVec);
 
 	// common calculation functions
 	float getTotalSum(std::vector<std::vector<float>> matrix);

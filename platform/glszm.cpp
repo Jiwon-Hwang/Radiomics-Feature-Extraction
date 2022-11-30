@@ -366,7 +366,7 @@ float GLSZM::getMeanProbGrey(vector<vector<float>> probMatrix) {
 	float mean = 0;
 	for (int i = 0; i<probMatrix.size(); i++) {
 		for (int j = 0; j<probMatrix[0].size(); j++) {
-			mean += (i+1) * probMatrix[i][j];
+			mean += diffGreyLevels[i] * probMatrix[i][j];
 		}
 	}
 

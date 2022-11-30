@@ -560,7 +560,7 @@
               <item>
                <widget class="QCheckBox" name="checkBox_GLDZM">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="focusPolicy">
                  <enum>Qt::NoFocus</enum>
@@ -655,7 +655,7 @@
      <x>0</x>
      <y>0</y>
      <width>1235</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

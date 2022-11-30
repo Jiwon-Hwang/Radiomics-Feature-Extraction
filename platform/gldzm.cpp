@@ -9,13 +9,23 @@ GLDZM::~GLDZM() {
 
 }
 void GLDZM::clearVariable() {
-	// 슬라이스마다, 방향마다 초기화
+	// 슬라이스마다 초기화
 	vector1DofOriPixelsInROI.clear();
 	vector<short>().swap(vector1DofOriPixelsInROI); // size & capacity 모두 0으로 초기화
+	vector1DofOriPixelsInROI_morph.clear();
+	vector<short>().swap(vector1DofOriPixelsInROI_morph); // size & capacity 모두 0으로 초기화
 	rowSums.clear();
 	vector<float>().swap(rowSums);
 	colSums.clear();
 	vector<float>().swap(colSums);
+	vector1DofOriPixels.clear();
+	vector<short>().swap(vector1DofOriPixels);
+	vector1DofOriPixels_morph.clear();
+	vector<short>().swap(vector1DofOriPixels_morph);
+	vector2DofDiscretizedPixels.clear();
+	vector<vector<unsigned short>>().swap(vector2DofDiscretizedPixels);
+	vector2DofDiscretizedPixels_morph.clear();
+	vector<vector<unsigned short>>().swap(vector2DofDiscretizedPixels_morph);
 
 	shortRunEmph = NAN;
 	longRunEmph = NAN;
@@ -69,6 +79,26 @@ vector<short> GLDZM::get1DVectorOfPixels(short* psImage, unsigned char* pucMask)
 	nPixelsInROI = vector1DofOriPixelsInROI.size();
 
 	return vector1DofOriPixels;
+}
+vector<short> GLDZM::get1DVectorOfPixels(short* psImage, vector<vector<unsigned char>> pucMask) {
+
+	vector<short> vector1DofOriPixels_morph(nHeight*nWidth, 0); // 0으로 초기화 후, ROI 바깥 영역은 그대로 0. 미리 크기 할당해 두는게 훨씬 안정적
+	for (int row = 0; row < nHeight; row++) {
+		for (int col = 0; col < nWidth; col++) {
+			int index = row * nWidth + col;
+			unsigned char maskValue = pucMask[row][col];
+			short imageValue = psImage[index];
+
+			// ROI 밖(0)과 안 픽셀값들 모두 할당 (in 1d vector => for fast discretising!)
+			vector1DofOriPixels_morph[index] = (maskValue >(unsigned char)0) ? imageValue : 0;
+			// ROI 내부값 push (ROI가 없으면 계속 pass => for min, max)
+			if (maskValue >(unsigned char)0) {
+				vector1DofOriPixelsInROI_morph.push_back(imageValue); // 슬라이스마다 초기화 해줘야 함! (clearVariable)
+			}
+		}
+	}
+
+	return vector1DofOriPixels_morph;
 }
 vector<vector<unsigned short>> GLDZM::get2DVectorOfDiscretizedPixels_FBN(short* psImage, unsigned char* pucMask) {
 
@@ -131,6 +161,57 @@ vector<vector<unsigned short>> GLDZM::get2DVectorOfDiscretizedPixels_FBN(short* 
 
 	return vector2DofDiscretizedPixels;
 }
+vector<vector<unsigned short>> GLDZM::get2DVectorOfDiscretizedPixels_FBN(short* psImage, vector<vector<unsigned char>> pucMask) {
+
+	// min(front) : -1, max(back) : 180
+	float min = (float)*min_element(vector1DofOriPixelsInROI_morph.begin(), vector1DofOriPixelsInROI_morph.end()); // min_element() : pointer return
+	float max = (float)*max_element(vector1DofOriPixelsInROI_morph.begin(), vector1DofOriPixelsInROI_morph.end());
+	vector<float> tempFloatVec(vector1DofOriPixels_morph.begin(), vector1DofOriPixels_morph.end()); // short -> float 형변환
+
+	if (min == 0 && min == max) {
+		cout << "error in calculating discretization, VOI contains only 0" << endl;
+		exit(0);
+	}
+	else if (min > 0 && min == max) {
+		cout << "error in calculating discretization, VOI contains only one intensity value, minimum value is set to 0" << endl;
+		min = 0;
+	}
+
+
+	// 우선 ROI 밖의 부분까지 모두 양자화 후, 맨 마지막에 if문으로 ROI 밖 영역은 0 처리
+
+	//subtract minimum value from every matrix element
+	transform(tempFloatVec.begin(), tempFloatVec.end(), tempFloatVec.begin(), bind2nd(minus<float>(), min)); // minus<T> : 이항 연산 함수 객체 (-) / bind2nd : 2번째 인수를 고정해 함수 객체로 변환 / transform : 일괄 연산
+
+	//get the range
+	float range = (max - min) / nBins; // range : 몫 (width of a bin) => ***float이 들어가면 / 는 몫이 아니라 진짜 "나누기" 연산!!!***
+
+	//divide every element of the matrix by the range
+	transform(tempFloatVec.begin(), tempFloatVec.end(), tempFloatVec.begin(), bind2nd(divides<float>(), range));
+
+	//replace 0 to 1 => ibsi 핑크색 마킹 부분! (min - min = 0이 되므로 최소인 1로 바꿔줘야 뒤에 ceil에서 min value of each bin : 1 유지)
+	replace(tempFloatVec.begin(), tempFloatVec.end(), 0, 1);
+
+	//do rounding(ceil), type casting(unsigned short) and asigning to 2D Vec (with ROI)
+	vector<vector<unsigned short>> vector2DofDiscretizedPixels_morph(nHeight, vector<unsigned short>(nWidth, 0)); // 양자화한 최종 결과 픽셀값들 담을 벡터
+	for (int row = 0; row < nHeight; row++) {
+		for (int col = 0; col < nWidth; col++) {
+			int index = row * nWidth + col;
+			unsigned char maskValue = pucMask[row][col];
+			unsigned short imageValue_discretized = (unsigned short)ceil(tempFloatVec[index]); // psImage (ori) -> tempFloatVec (discretized)
+
+			// ROI 밖(0)과 안(discretized) 픽셀값들 2D Vec에 할당
+			if (maskValue >(unsigned char)0) {
+				vector2DofDiscretizedPixels_morph[row][col] = imageValue_discretized;
+			}
+			else {
+				vector2DofDiscretizedPixels_morph[row][col] = 0;
+			}
+		}
+	}
+
+	return vector2DofDiscretizedPixels_morph;
+}
 vector<vector<unsigned short>> GLDZM::get2DVectorOfDiscretizedPixels_FBS(short* psImage, unsigned char* pucMask) {
 
 	float min = (float)*min_element(vector1DofOriPixelsInROI.begin(), vector1DofOriPixelsInROI.end());
@@ -177,90 +258,257 @@ vector<vector<unsigned short>> GLDZM::get2DVectorOfDiscretizedPixels_FBS(short* 
 
 	return vector2DofDiscretizedPixels;
 }
-void GLDZM::getXYDirections(int &directionX, int &directionY, int angle) {
+vector<vector<unsigned short>> GLDZM::get2DVectorOfDiscretizedPixels_FBS(short* psImage, vector<vector<unsigned char>> pucMask) {
 
-	if (angle == 0) {
-		directionX = 0;
-		directionY = 0;
+	float min = (float)*min_element(vector1DofOriPixelsInROI_morph.begin(), vector1DofOriPixelsInROI_morph.end());
+	float max = (float)*max_element(vector1DofOriPixelsInROI_morph.begin(), vector1DofOriPixelsInROI_morph.end());
+	vector<float> tempFloatVec(vector1DofOriPixels_morph.begin(), vector1DofOriPixels_morph.end());
+
+	//subtract minimum value from every matrix element
+	transform(tempFloatVec.begin(), tempFloatVec.end(), tempFloatVec.begin(), bind2nd(minus<float>(), min));
+
+	//divide every element of the matrix by the sBin (width of bin)
+	if (isnan(sBin)) {
+		cout << "invalid value error : sBin! It will be replaced with nBins=32..." << endl;
+		sBin = (max - min) / 32; // range
 	}
-	if (angle == 180) {
-		directionX = 1;
-		directionY = 0;
+	transform(tempFloatVec.begin(), tempFloatVec.end(), tempFloatVec.begin(), bind2nd(divides<float>(), sBin));
+
+	//do rounding(floor) +1, type casting(unsigned short) and asigning to 2D Vec (with ROI)
+	vector<vector<unsigned short>> vector2DofDiscretizedPixels_morph(nHeight, vector<unsigned short>(nWidth, 0));
+	for (int row = 0; row < nHeight; row++) {
+		for (int col = 0; col < nWidth; col++) {
+			int index = row * nWidth + col;
+			unsigned char maskValue = pucMask[row][col];
+			unsigned short imageValue_discretized = (unsigned short)floor(tempFloatVec[index]) + 1;
+
+			// ROI 밖(0)과 안(discretized) 픽셀값들 2D Vec에 할당
+			if (maskValue >(unsigned char)0) {
+				vector2DofDiscretizedPixels_morph[row][col] = imageValue_discretized;
+			}
+			else {
+				vector2DofDiscretizedPixels_morph[row][col] = 0;
+			}
+		}
 	}
-	else if (angle == 90) {
+
+	return vector2DofDiscretizedPixels_morph;
+}
+void GLDZM::get360XYDirections(int &directionX, int &directionY, int angle) {
+
+	if (angle == 360) {
 		directionX = 0;
 		directionY = 1;
 	}
-	else if (angle == 45) {
+	else if (angle == 315) {
 		directionX = 1;
 		directionY = 1;
+	}
+	else if (angle == 270) {
+		directionX = 1;
+		directionY = 0;
+	}
+	else if (angle == 225) {
+		directionX = 1;
+		directionY = -1;
+	}
+	else if (angle == 180) {
+		directionX = 0;
+		directionY = -1;
 	}
 	else if (angle == 135) {
 		directionX = -1;
+		directionY = -1;
+	}
+	else if (angle == 90) {
+		directionX = -1;
+		directionY = 0;
+	}
+	else if (angle == 45) {
+		directionX = -1;
 		directionY = 1;
 	}
+	else if (angle == 0) {
+		directionX = 0;
+		directionY = 0;
+	}
 
+	else {
+		std::cout << " incorrect angle" << std::endl;
+	}
+
+}
+int GLDZM::checkNeighbors(vector<vector<unsigned short>> distanceMap, vector<int> actIndex) {
+	
+	vector<int> neighborElements;
+	int tempMin = 0;
+	int neighborDist = 1;
+	float actMatrElement;
+	int directionX;
+	int directionY;
+	int ang;
+	int distance;
+	int actMatrElementDist;
+	//look at all indices which are saved in the vector matrix indices
+	int actPoint, distBorder2;
+
+	actPoint = min(actIndex[0], actIndex[1]);
+
+	for (int i = 0; i < 8; i++) {
+		
+		ang = 360 - i * 45;
+		get360XYDirections(directionX, directionY, ang);
+		
+		if (actIndex[0] + directionX>-1 && actIndex[0] + directionX<nHeight && actIndex[1] + directionY>-1 && actIndex[1] + directionY<nWidth) {
+			actMatrElement = vector2DofDiscretizedPixels_morph[actIndex[0] + directionX][actIndex[1] + directionY];
+			actMatrElementDist = distanceMap[actIndex[0] + directionX][actIndex[1] + directionY];
+			actPoint = min(actIndex[0], actIndex[1]);
+			distBorder2 = nWidth - actIndex[1] - 1;
+			actPoint = min(actPoint, distBorder2);
+			distBorder2 = nHeight - actIndex[0] - 1;
+			actPoint = min(actPoint, distBorder2);
+			if (vector2DofDiscretizedPixels_morph[actIndex[0]][actIndex[1]] == 0) {
+				distance = 0;
+				break;
+			}
+			if (actMatrElement == 0) {
+				distance = 1;
+				neighborElements.clear();
+				break;
+			}
+
+			else if (actPoint == 0) {
+				distance = 1;
+				break;
+
+			}
+			else if (actMatrElementDist>0) {
+				neighborElements.push_back(actMatrElementDist);
+			}
+		}
+	}
+
+	if (neighborElements.size() > 0) {
+		distance = *min_element(neighborElements.begin(), neighborElements.end()) + 1;
+	}
+	
+	return distance;
+}
+vector<vector<unsigned short>> GLDZM::generateDistanceMap() {
+
+	vector<vector<unsigned short>> distanceMap(nHeight, vector<unsigned short>(nWidth, 0));
+	vector<int> actualIndex;
+	for (int row = 0; row < nHeight; row++) {
+		for (int col = 0; col < nWidth; col++) {
+			actualIndex.push_back(row);
+			actualIndex.push_back(col);
+
+			distanceMap[row][col] = checkNeighbors(distanceMap, actualIndex);
+			actualIndex.clear();
+		}
+	}
+	return distanceMap;
 }
 int GLDZM::findIndex(vector<unsigned short> diffGreyLevels, int size, unsigned short target) {
 	int i = 0;
 	while ((i < size) && (diffGreyLevels[i] != target)) i++; 
 	return (i < size) ? (i) : (-1);
 }
-void GLDZM::fill2DGLDZMatrix(vector<vector<unsigned short>> vector2DofDiscretizedPixels, vector<vector<float>> &GLDZMatrix, int angle) {
+void GLDZM::getNeighbours(vector<vector<unsigned short>> &vector2DofDiscretizedPixels, unsigned short actElement, vector<vector<int>> &matrixIndices) {
 
-	// vector2DofDiscretizedPixels : 멤버변수 copy (매개변수로 새 벡터 할당)
-
-	unsigned short actElement = 0;
-	int runLength = 0;
+	vector<int> actIndex;
+	vector<int> newIndex;
+	vector<int> tempIndex;
+	int neighborDist = 1;
 	int directionX;
 	int directionY;
+	vector<vector<int>> tempMatrixIndices = matrixIndices;
+	int ang;
 
-	//define in which direction you have to look for a neighbor
-	getXYDirections(directionX, directionY, angle); // 방향 당 1회씩만
+	//look at all indices which are saved in the vector matrix indices
+	while (tempMatrixIndices.size() > 0) {
+		//get the last element of the vector and delete it
+		actIndex = tempMatrixIndices.back();
+		tempMatrixIndices.pop_back();
+		tempIndex = actIndex;
+		for (int i = 0; i < 8; i++) { // 8인접 연결요소 체크
+			ang = 360 - i * 45;
+			get360XYDirections(directionX, directionY, ang);
+			actIndex = tempIndex;
+			if (actIndex[0] + directionX>-1 && actIndex[0] + directionX<nHeight && actIndex[1] + directionY>-1 && actIndex[1] + directionY<nWidth && actElement == vector2DofDiscretizedPixels[actIndex[0] + directionX][actIndex[1] + directionY]) {
+				vector2DofDiscretizedPixels[actIndex[0] + directionX][actIndex[1] + directionY] = 0; // NAN말고 0으로 교체
+				actIndex[0] += directionX;
+				actIndex[1] += directionY;
+				tempMatrixIndices.push_back(actIndex);
+				matrixIndices.push_back(actIndex);
+			}
+		}
+	}
+}
+int GLDZM::getMinimalDistance(vector<vector<unsigned short>> distanceMap, vector<vector<int>> matrixIndices) {
 
-	//get the grey level we are interested at the moment
-	int actGreyIndex;
+	vector<int> distances;
+	int actualX;
+	int actualY;
+	int actualZ;
+	int actualDistance;
+	int minDistance;
+	vector<int> actualIndex;
+	//check for every element of the vector matrix indices the distance
+	while (matrixIndices.size()>0) {
+		actualIndex = matrixIndices.back();
+		matrixIndices.pop_back();
+		actualX = actualIndex[0];
+		actualY = actualIndex[1];
+		actualDistance = distanceMap[actualX][actualY];
+		if (actualDistance > 0) {
+			distances.push_back(actualDistance);
+		}
+
+	}
+	//get minimum of all distances of the actual neighborhood
+	minDistance = *min_element(distances.begin(), distances.end());
+
+	return minDistance;
+}
+void GLDZM::fill2DGLDZMatrix(vector<vector<unsigned short>> vector2DofDiscretizedPixels, vector<vector<float>> &GLDZMatrix) {
+
+	// vector2DofDiscretizedPixels : 멤버변수 copy (매개변수로 새 벡터 할당 후 값 변경)
+	// vector2DofDiscretizedPixels_morph : 전역 변수(morphological ROI mask 이용) => only distanceMap 생성 시에만 이용
+	
+	vector<vector<unsigned short>> distanceMap = generateDistanceMap(); 
+
+	//store the matrix indices of a neighborhood in a vector
+	vector<vector<int>> matrixIndices;
+	//vector with indices of actual position
+	vector<int> actualIndex;
+	unsigned short actualElement = 0;
+	int minDistance = 0;
+
+	//get zones for every grey level present in ROI
+	int actualGreyIndex;
 
 	for (int row = 0; row<nHeight; row++) {
 		for (int col = 0; col<nWidth; col++) {
-			//at the beginning the run length =0
-			runLength = 0;
-			//get the actual matrix element
-			actElement = vector2DofDiscretizedPixels[nHeight - row - 1][col];
-			actGreyIndex = findIndex(diffGreyLevels, diffGreyLevels.size(), actElement); // in ROI : 0~(nBins-1), not in ROI : -1 return
-			//if the actual matrix element is not 0(NAN) (=is in ROI)
-			if (actElement) {
-				//set the run length to 1
-				runLength = 1;
-				//to avoid to take an element more than once, set the element to 0 => 다시 체크 안하도록 ROI 밖 픽셀처럼 0으로 바꾸기
-				vector2DofDiscretizedPixels[nHeight - row - 1][col] = 0;
-				//now look at the matrix element in the actual direction (depends on the
-				//angle we are interested at the moment)
-				int colValue = col + directionX;
-				int rowValue = nHeight - 1 - (row + directionY);
-				//now have a look at the following elements in the desired direction
-				//stop as soon as we look at an element diifferent from our actual element
-				while (colValue<nWidth && rowValue>-1 && colValue>-1 && vector2DofDiscretizedPixels[rowValue][colValue] == actElement) {
-					//for every element we find, count the runLength
-					runLength += 1;
-					vector2DofDiscretizedPixels[rowValue][colValue] = 0;
-					//go further in the desired direction
-					colValue += 1 * directionX;
-					rowValue -= 1 * directionY;
-				}
+			actualElement = vector2DofDiscretizedPixels[row][col];
+			
+			if (actualElement) {
+				actualGreyIndex = findIndex(diffGreyLevels, diffGreyLevels.size(), actualElement); // in ROI : 0~(nBins-1), not in ROI : -1 return
+				vector2DofDiscretizedPixels[row][col] = 0;
+				actualIndex.push_back(row);
+				actualIndex.push_back(col);
+				matrixIndices.push_back(actualIndex);
+				actualIndex.clear();
+				getNeighbours(vector2DofDiscretizedPixels, actualElement, matrixIndices);
 			}
-			//as soon as we cannot find an element in the desired direction, count one up in the desired
-			//position of the glrl-matrix
-			// if not in ROI, runLengh = 0 (actGreyIndex = -1)
-			if (runLength > 0 && runLength < maxRunLength + 1) {
-
-				GLDZMatrix[actGreyIndex][runLength - 1] += 1;
+			if (matrixIndices.size() > 0) {
+				minDistance = getMinimalDistance(distanceMap, matrixIndices);
+				matrixIndices.clear();
+				GLDZMatrix[actualGreyIndex][minDistance - 1] += 1;
 			}
-
 		}
 	}
 	
-
 }
 void GLDZM::fill2DprobMatrix(vector<vector<float>> GLDZMatrix, vector<vector<float>> &probMatrix) {
 	
@@ -269,19 +517,6 @@ void GLDZM::fill2DprobMatrix(vector<vector<float>> GLDZMatrix, vector<vector<flo
 		transform(probMatrix[i].begin(), probMatrix[i].end(), probMatrix[i].begin(), bind2nd(divides<float>(), int(totalSum)));
 	}
 
-}
-void GLDZM::average4DirValues(vector<vector<float>> temp4DirVals2DVec, vector<float> &tempValues1DVec) {
-
-	for (int col = 0; col < temp4DirVals2DVec[0].size(); col++) {
-		float colSum = 0;
-		float colMean;
-
-		for (int row = 0; row < 4; row++) {
-			colSum += temp4DirVals2DVec[row][col];
-		}
-		colMean = colSum / 4;
-		tempValues1DVec.push_back(colMean);
-	}
 }
 
 // common calculation functions
@@ -333,7 +568,7 @@ float GLDZM::getMeanProbGrey(vector<vector<float>> probMatrix) {
 	float mean = 0;
 	for (int i = 0; i<probMatrix.size(); i++) {
 		for (int j = 0; j<probMatrix[0].size(); j++) {
-			mean += (i+1) * probMatrix[i][j];
+			mean += diffGreyLevels[i] * probMatrix[i][j];
 		}
 	}
 
@@ -637,7 +872,7 @@ void GLDZM::calcFeature(int FEATURE_IDX, vector<float> &temp1DirVals1DVec, vecto
 	}
 }
 void GLDZM::featureExtraction(short* psImage, unsigned char* pucMask, vector<vector<unsigned char>> mask_morph, int nHeight_, int nWidth_) {
-
+	
 	// claer all values
 	clearVariable(); // 슬라이스마다 초기화
 
@@ -645,44 +880,34 @@ void GLDZM::featureExtraction(short* psImage, unsigned char* pucMask, vector<vec
 	nHeight = nHeight_;
 	nWidth = nWidth_;
 	vector1DofOriPixels = get1DVectorOfPixels(psImage, pucMask);  // 슬라이스마다 초기화, nPixelsInROI 산출
-	vector2DofDiscretizedPixels = isFBN? get2DVectorOfDiscretizedPixels_FBN(psImage, pucMask) : get2DVectorOfDiscretizedPixels_FBS(psImage, pucMask); // 슬라이스마다 초기화
+	vector1DofOriPixels_morph = get1DVectorOfPixels(psImage, mask_morph);  // 슬라이스마다 초기화, nPixelsInROI 산출
+	vector2DofDiscretizedPixels = isFBN? get2DVectorOfDiscretizedPixels_FBN(psImage, pucMask) : get2DVectorOfDiscretizedPixels_FBS(psImage, pucMask); // 슬라이스마다 초기화, diffGreyLevels 산출
+	vector2DofDiscretizedPixels_morph = isFBN ? get2DVectorOfDiscretizedPixels_FBN(psImage, mask_morph) : get2DVectorOfDiscretizedPixels_FBS(psImage, mask_morph); // 슬라이스마다 초기화, diffGreyLevels 산출
 	
-	vector<vector<float>> temp4DirVals2DVec;	// 슬라이스마다 초기화 (for. 4방향 1d vec 평균내기)
-	vector<float> tempValues1DVec;				// 슬라이스마다 초기화 (for. final2DVec에 누적)
-
-	// calculate checked feature (4 directions)
-	int ang;
-	sizeMatrix = diffGreyLevels.size(); // ***GLDZM에서는 Matrix의 row 크기인 sizeMatrix가 maxIntensity가 아닌 diffGreyLevels의 size가 정확!!***
-	maxRunLength = max(nHeight, nWidth);
-	for (int dir = 0; dir < 4; dir++) {
-
-		clearVariable();					// 방향마다 초기화
-		vector<float> temp1DirVals1DVec;	// 방향마다 초기화
+	sizeGreyLevels = diffGreyLevels.size(); // ***GLDZM에서는 Matrix의 row 크기인 sizeGreyLevels가 maxIntensity가 아닌 diffGreyLevels의 size가 정확!!***
+	nrCols = min(ceil(nHeight / 2), ceil(nWidth / 2)) + 1;
+	
+	// calculate GLDZM matrix
+	vector<vector<float>> GLDZMatrix(sizeGreyLevels, vector<float>(nrCols, 0));
+	fill2DGLDZMatrix(vector2DofDiscretizedPixels, GLDZMatrix); 
+	
+	totalSum = getTotalSum(GLDZMatrix);
+	rowSums = getRowSums(GLDZMatrix);
+	colSums = getColSums(GLDZMatrix);
 		
-		// calculate GLDZM matrix for each dir
-		ang = 180 - dir * 45;
-		vector<vector<float>> GLDZMatrix(sizeMatrix, vector<float>(maxRunLength, 0));
-		fill2DGLDZMatrix(vector2DofDiscretizedPixels, GLDZMatrix, ang); 
+	vector<vector<float>> probMatrix(sizeGreyLevels, vector<float>(nrCols, 0));
+	fill2DprobMatrix(GLDZMatrix, probMatrix);
 
-		totalSum = getTotalSum(GLDZMatrix);
-		rowSums = getRowSums(GLDZMatrix);
-		colSums = getColSums(GLDZMatrix);
-		
-		vector<vector<float>> probMatrix(sizeMatrix, vector<float>(maxRunLength, 0));
-		fill2DprobMatrix(GLDZMatrix, probMatrix);
+	meanGrey = getMeanProbGrey(probMatrix);
+	meanRun = getMeanProbRun(probMatrix);
 
-		meanGrey = getMeanProbGrey(probMatrix);
-		meanRun = getMeanProbRun(probMatrix);
-
-		// calculate feature for each dir
-		for (int i = 0; i < FEATURE_COUNT; i++) {
-			if (isCheckedFeature[i]) calcFeature(i, temp1DirVals1DVec, GLDZMatrix, probMatrix);
-		}
-		temp4DirVals2DVec.push_back(temp1DirVals1DVec); // 4행
+	vector<float> tempValues1DVec; // 슬라이스마다 초기화 (for. final2DVec에 누적)
+	
+	// calculate feature
+	for (int i = 0; i < FEATURE_COUNT; i++) {
+		if (isCheckedFeature[i]) calcFeature(i, tempValues1DVec, GLDZMatrix, probMatrix);
 	}
-
-	average4DirValues(temp4DirVals2DVec, tempValues1DVec); // 4방향 평균 특징값
-
+	
 	final2DVec.push_back(tempValues1DVec); // 모든 ROI 슬라이스 들어올 때까지 누적 (시리즈마다 초기화)
 	
 }
@@ -723,21 +948,21 @@ void GLDZM::defineFeatureNames(vector<string> &features) {
 	features[RLV] = "Run length variance";
 	features[RE] = "Run entropy";
 	*/
-	features[SRE] = "SRE";
-	features[LRE] = "LRE";
-	features[LGRE] = "LGRE";
-	features[HGRE] = "HGRE";
-	features[SRLE] = "SRLE";
-	features[SRHE] = "SRHE";
-	features[LRLE] = "LRLE";
-	features[LRHE] = "LRHE";
+	features[SRE] = "SDE";
+	features[LRE] = "LDE";
+	features[LGRE] = "LGZE";
+	features[HGRE] = "HGZE";
+	features[SRLE] = "SDLGE";
+	features[SRHE] = "SDHGE";
+	features[LRLE] = "LDLGE";
+	features[LRHE] = "LDHGE";
 	features[GNU] = "GNU";
 	features[GNUN] = "GNUN";
-	features[RLNU] = "RLNU";
-	features[RLNUN] = "RLNUN";
-	features[RP] = "RP";
+	features[RLNU] = "ZDNU";
+	features[RLNUN] = "ZDNUN";
+	features[RP] = "ZP";
 	features[GLV] = "GLV";
-	features[RLV] = "RLV";
-	features[RE] = "RE";
+	features[RLV] = "ZDV";
+	features[RE] = "ZDE";
 }
 

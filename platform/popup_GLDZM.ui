@@ -72,7 +72,7 @@
        <bool>true</bool>
       </property>
       <property name="text">
-       <string>Long Run Emphasis</string>
+       <string>Large Distance Emphasis</string>
       </property>
       <property name="checkable">
        <bool>true</bool>
@@ -91,7 +91,7 @@
        <bool>true</bool>
       </property>
       <property name="text">
-       <string>Low Grey Run Emphasis</string>
+       <string>Low Grey Zone Emphasis</string>
       </property>
      </widget>
     </item>
@@ -101,7 +101,7 @@
        <bool>true</bool>
       </property>
       <property name="text">
-       <string>Long Run Low Emphasis</string>
+       <string>Large Distance Low Emphasis</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -114,7 +114,7 @@
        <bool>false</bool>
       </property>
       <property name="text">
-       <string>Short Run Emphasis</string>
+       <string>Small Distance Emphasis</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -130,7 +130,7 @@
        <bool>true</bool>
       </property>
       <property name="text">
-       <string>Short Run High Emphasis</string>
+       <string>Small Distance High Emphasis</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -146,7 +146,7 @@
        <bool>false</bool>
       </property>
       <property name="text">
-       <string>Run Length Non-Uniform Norm</string>
+       <string>Zone Dist Non-Uniform Norm</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -171,7 +171,7 @@
        <bool>false</bool>
       </property>
       <property name="text">
-       <string>Run Entropy</string>
+       <string>Zone Distance Entropy</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -196,7 +196,7 @@
        <bool>false</bool>
       </property>
       <property name="text">
-       <string>Run Percentage</string>
+       <string>Zone Percentage</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -212,7 +212,7 @@
        <bool>true</bool>
       </property>
       <property name="text">
-       <string>Short Run Low Emphasis</string>
+       <string>Small Distance Low Emphasis</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -261,7 +261,7 @@
        <bool>false</bool>
       </property>
       <property name="text">
-       <string>Run Length Variance</string>
+       <string>Zone Distance Variance</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -305,7 +305,7 @@
        <bool>true</bool>
       </property>
       <property name="text">
-       <string>Long Run High Emphasis</string>
+       <string>Large Distance High Emphasis</string>
       </property>
       <property name="checked">
        <bool>false</bool>
@@ -372,7 +372,7 @@
        <bool>false</bool>
       </property>
       <property name="text">
-       <string>Run Length Non-Uniform</string>
+       <string>Zone Dist Non-Uniform</string>
       </property>
       <property name="checked">
        <bool>false</bool>

@@ -280,23 +280,23 @@ public:
     {
         popup_GLDZM->setWindowTitle(QApplication::translate("popup_GLDZM", "Set Measurements", Q_NULLPTR));
         groupBox_Features->setTitle(QApplication::translate("popup_GLDZM", "Features", Q_NULLPTR));
-        checkBox_LRE->setText(QApplication::translate("popup_GLDZM", "Long Run Emphasis", Q_NULLPTR));
-        checkBox_LGRE->setText(QApplication::translate("popup_GLDZM", "Low Grey Run Emphasis", Q_NULLPTR));
-        checkBox_LRLE->setText(QApplication::translate("popup_GLDZM", "Long Run Low Emphasis", Q_NULLPTR));
-        checkBox_SRE->setText(QApplication::translate("popup_GLDZM", "Short Run Emphasis", Q_NULLPTR));
-        checkBox_SRHE->setText(QApplication::translate("popup_GLDZM", "Short Run High Emphasis", Q_NULLPTR));
-        checkBox_RLNUN->setText(QApplication::translate("popup_GLDZM", "Run Length Non-Uniform Norm", Q_NULLPTR));
-        checkBox_RE->setText(QApplication::translate("popup_GLDZM", "Run Entropy", Q_NULLPTR));
-        checkBox_RP->setText(QApplication::translate("popup_GLDZM", "Run Percentage", Q_NULLPTR));
-        checkBox_SRLE->setText(QApplication::translate("popup_GLDZM", "Short Run Low Emphasis", Q_NULLPTR));
+        checkBox_LRE->setText(QApplication::translate("popup_GLDZM", "Large Distance Emphasis", Q_NULLPTR));
+        checkBox_LGRE->setText(QApplication::translate("popup_GLDZM", "Low Grey Zone Emphasis", Q_NULLPTR));
+        checkBox_LRLE->setText(QApplication::translate("popup_GLDZM", "Large Distance Low Emphasis", Q_NULLPTR));
+        checkBox_SRE->setText(QApplication::translate("popup_GLDZM", "Small Distance Emphasis", Q_NULLPTR));
+        checkBox_SRHE->setText(QApplication::translate("popup_GLDZM", "Small Distance High Emphasis", Q_NULLPTR));
+        checkBox_RLNUN->setText(QApplication::translate("popup_GLDZM", "Zone Dist Non-Uniform Norm", Q_NULLPTR));
+        checkBox_RE->setText(QApplication::translate("popup_GLDZM", "Zone Distance Entropy", Q_NULLPTR));
+        checkBox_RP->setText(QApplication::translate("popup_GLDZM", "Zone Percentage", Q_NULLPTR));
+        checkBox_SRLE->setText(QApplication::translate("popup_GLDZM", "Small Distance Low Emphasis", Q_NULLPTR));
         checkBox_All->setText(QApplication::translate("popup_GLDZM", "All", Q_NULLPTR));
-        checkBox_RLV->setText(QApplication::translate("popup_GLDZM", "Run Length Variance", Q_NULLPTR));
+        checkBox_RLV->setText(QApplication::translate("popup_GLDZM", "Zone Distance Variance", Q_NULLPTR));
         checkBox_GLV->setText(QApplication::translate("popup_GLDZM", "Grey Level Variance", Q_NULLPTR));
-        checkBox_LRHE->setText(QApplication::translate("popup_GLDZM", "Long Run High Emphasis", Q_NULLPTR));
+        checkBox_LRHE->setText(QApplication::translate("popup_GLDZM", "Large Distance High Emphasis", Q_NULLPTR));
         checkBox_GNU->setText(QApplication::translate("popup_GLDZM", "Grey Non-Uniform", Q_NULLPTR));
         checkBox_HGRE->setText(QApplication::translate("popup_GLDZM", "High Grey Run Emphasis", Q_NULLPTR));
         checkBox_GNUN->setText(QApplication::translate("popup_GLDZM", "Grey Non-Uniform Norm", Q_NULLPTR));
-        checkBox_RLNU->setText(QApplication::translate("popup_GLDZM", "Run Length Non-Uniform", Q_NULLPTR));
+        checkBox_RLNU->setText(QApplication::translate("popup_GLDZM", "Zone Dist Non-Uniform", Q_NULLPTR));
         groupBox_Bins->setTitle(QApplication::translate("popup_GLDZM", "Discretization", Q_NULLPTR));
         comboBox_nBins->clear();
         comboBox_nBins->insertItems(0, QStringList()
