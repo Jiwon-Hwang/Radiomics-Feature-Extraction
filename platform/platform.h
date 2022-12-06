@@ -67,6 +67,8 @@
 #include "popup_GLDZM.h"
 #include "ui_popup_NGTDM.h"
 #include "popup_NGTDM.h"
+#include "ui_popup_NGLDM.h"
+#include "popup_NGLDM.h"
 
 #include "imageView.h"
 #include "data.h"
@@ -79,6 +81,7 @@
 #include "glszm.h"
 #include "gldzm.h"
 #include "ngtdm.h"
+#include "ngldm.h"
 
 
 #define MAX_FILE_LENGTH 64
@@ -113,7 +116,7 @@ public:
 	void setThread();
 
 public:	
-	enum FAMILY { E_MORPHOLOGY, E_LOCALINTENSE, E_INTENSESTAT, E_INTENSEHISTO, E_GLCM, E_GLRLM, E_GLSZM, E_GLDZM, E_NGTDM, FAMILY_COUNT };
+	enum FAMILY { E_MORPHOLOGY, E_LOCALINTENSE, E_INTENSESTAT, E_INTENSEHISTO, E_GLCM, E_GLRLM, E_GLSZM, E_GLDZM, E_NGTDM, E_NGLDM, FAMILY_COUNT };
 
 	// Feature Family objects
 	Morphology morphology;
@@ -125,6 +128,7 @@ public:
 	GLSZM glszm;
 	GLDZM gldzm;
 	NGTDM ngtdm;
+	NGLDM ngldm;
 
 	// pop-up objects
 	popup_Morph *ppopup_Morph;
@@ -136,6 +140,7 @@ public:
 	popup_GLSZM *ppopup_GLSZM;
 	popup_GLDZM *ppopup_GLDZM;
 	popup_NGTDM *ppopup_NGTDM;
+	popup_NGLDM *ppopup_NGLDM;
 
 
 // QT layout, action º¯¼ö

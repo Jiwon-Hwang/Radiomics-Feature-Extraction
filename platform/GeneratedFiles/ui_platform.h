@@ -388,7 +388,7 @@ public:
 
         checkBox_NGLDM = new QCheckBox(groupBox_Families);
         checkBox_NGLDM->setObjectName(QStringLiteral("checkBox_NGLDM"));
-        checkBox_NGLDM->setEnabled(false);
+        checkBox_NGLDM->setEnabled(true);
         checkBox_NGLDM->setFocusPolicy(Qt::NoFocus);
         checkBox_NGLDM->setCheckable(true);
 
@@ -421,7 +421,7 @@ public:
         platformClass->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(platformClass);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1235, 22));
+        menuBar->setGeometry(QRect(0, 0, 1235, 21));
         platformClass->setMenuBar(menuBar);
         statusBar = new QStatusBar(platformClass);
         statusBar->setObjectName(QStringLiteral("statusBar"));

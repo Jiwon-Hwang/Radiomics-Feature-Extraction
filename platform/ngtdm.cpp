@@ -166,7 +166,7 @@ float NGTDM::getNeighborhood(vector<vector<unsigned short>> vector2DofDiscretize
 	vector<float> neighborhood;
 	unsigned short actElement;
 	//float weight;
-	int dist = 1; // 임의로 지정 (distance = 1이면, 8인접)
+	int dist = 1; // 임의로 지정 (distance = 1이면, 8인접 => Chebyshev distance)
 	for (int i = -dist; i < dist + 1; i++) {
 		for (int j = -dist; j < dist + 1; j++) {
 			if (i != 0 || j != 0) {

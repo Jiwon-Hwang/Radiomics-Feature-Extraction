@@ -35,7 +35,7 @@ public:
 	std::vector<bool> isCheckedFeature;		// by. platform pop-up
 	int nCheckedFeatures;
 
-	// get GLRL-matrix //
+	// get NGTD-matrix //
 	bool isFBN = false;
 	int nBins = -1;			// FBN (Fixed Bin Number) => by. platform pop-up
 	float sBin = NAN;		// FBS (Fixed Bin Size) => by. platform pop-up
