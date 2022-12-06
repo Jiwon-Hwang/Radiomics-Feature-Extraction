@@ -380,7 +380,7 @@ public:
 
         checkBox_NGTDM = new QCheckBox(groupBox_Families);
         checkBox_NGTDM->setObjectName(QStringLiteral("checkBox_NGTDM"));
-        checkBox_NGTDM->setEnabled(false);
+        checkBox_NGTDM->setEnabled(true);
         checkBox_NGTDM->setFocusPolicy(Qt::NoFocus);
         checkBox_NGTDM->setCheckable(true);
 

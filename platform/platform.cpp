@@ -214,6 +214,7 @@ void CPlatform::init()
 	ppopup_GLRLM = NULL;
 	ppopup_GLSZM = NULL;
 	ppopup_GLDZM = NULL;
+	ppopup_NGTDM = NULL;
 
 }
 void CPlatform::clear()
@@ -235,6 +236,7 @@ void CPlatform::clear()
 	SAFE_DELETE(ppopup_GLRLM);
 	SAFE_DELETE(ppopup_GLSZM);
 	SAFE_DELETE(ppopup_GLDZM);
+	SAFE_DELETE(ppopup_NGTDM);
 }
 
 
@@ -265,6 +267,9 @@ void CPlatform::createPopup() {
 
 	ppopup_GLDZM = new popup_GLDZM;
 	ppopup_GLDZM->setModal(true);
+
+	ppopup_NGTDM = new popup_NGTDM;
+	ppopup_NGTDM->setModal(true);
 
 }
 void CPlatform::createProgressBar()
@@ -386,6 +391,17 @@ void CPlatform::setSignalSlot()
 	connect(ppopup_GLDZM->ui->radioButton_FBN, SIGNAL(clicked()), this, SLOT(checkBinOption()));
 	connect(ppopup_GLDZM->ui->radioButton_FBS, SIGNAL(clicked()), this, SLOT(checkBinOption()));
 
+	// NGTDM (popup)
+	connect(ppopup_NGTDM->ui->checkBox_All, SIGNAL(clicked(bool)), this, SLOT(selectAll(bool)));
+	featureBox = ppopup_NGTDM->ui->groupBox_Features->findChildren<QCheckBox *>();
+	for (int i = 0; i < featureBox.size(); i++) {
+		if (featureBox[i]->objectName() == "checkBox_All") continue;
+		connect(featureBox[i], SIGNAL(clicked()), this, SLOT(checkFeatureBoxState()));
+	}
+	featureBox.clear();
+	connect(ppopup_NGTDM->ui->radioButton_FBN, SIGNAL(clicked()), this, SLOT(checkBinOption()));
+	connect(ppopup_NGTDM->ui->radioButton_FBS, SIGNAL(clicked()), this, SLOT(checkBinOption()));
+
 }
 void CPlatform::showPopUp(QObject* sender) {
 	// for loop으로 대체 가능 (for auto, break)
@@ -419,6 +435,10 @@ void CPlatform::showPopUp(QObject* sender) {
 
 	if (sender == ui.checkBox_GLDZM) {
 		ppopup_GLDZM->show();
+	}
+
+	if (sender == ui.checkBox_NGTDM) {
+		ppopup_NGTDM->show();
 	}
 
 }
@@ -571,6 +591,21 @@ void CPlatform::loadSettings() {
 		ppopup_GLDZM->ui->radioButton_FBS->setChecked(settings.value(ppopup_GLDZM->ui->radioButton_FBS->objectName(), false).toBool());
 		ppopup_GLDZM->ui->lineEdit_sBin->setText(settings.value(ppopup_GLDZM->ui->lineEdit_sBin->objectName()).toString());
 		ppopup_GLDZM->ui->lineEdit_sBin->setEnabled(settings.value(ppopup_GLDZM->ui->radioButton_FBS->objectName()).toBool());
+		settings.endGroup();
+
+
+		// NGTDM (popup) 
+		settings.beginGroup("popup_NGTDM");
+		int nfeatures_NGTDM = NGTDM::FEATURE_COUNT;
+		for (int i = 0; i < nfeatures_NGTDM + 1; i++) {
+			ppopup_NGTDM->filterGroup->button(i)->setChecked(settings.value(ppopup_NGTDM->filterGroup->button(i)->objectName(), false).toBool());
+		}
+		ppopup_NGTDM->ui->radioButton_FBN->setChecked(settings.value(ppopup_NGTDM->ui->radioButton_FBN->objectName(), false).toBool());
+		ppopup_NGTDM->ui->comboBox_nBins->setCurrentText(settings.value(ppopup_NGTDM->ui->comboBox_nBins->objectName(), "32").toString());
+		ppopup_NGTDM->ui->comboBox_nBins->setEnabled(settings.value(ppopup_NGTDM->ui->radioButton_FBN->objectName()).toBool());
+		ppopup_NGTDM->ui->radioButton_FBS->setChecked(settings.value(ppopup_NGTDM->ui->radioButton_FBS->objectName(), false).toBool());
+		ppopup_NGTDM->ui->lineEdit_sBin->setText(settings.value(ppopup_NGTDM->ui->lineEdit_sBin->objectName()).toString());
+		ppopup_NGTDM->ui->lineEdit_sBin->setEnabled(settings.value(ppopup_NGTDM->ui->radioButton_FBS->objectName()).toBool());
 		settings.endGroup();
 
 
@@ -778,6 +813,31 @@ void CPlatform::saveSettings() {
 	settings.endGroup();
 
 
+	// NGTDM (popup)
+	settings.beginGroup("popup_NGTDM");
+	ngtdm.isCheckedFeature.assign(NGTDM::FEATURE_COUNT, false);
+	ngtdm.nCheckedFeatures = 0;
+	int nfeatures_NGTDM = NGTDM::FEATURE_COUNT;
+	for (int i = 0; i < nfeatures_NGTDM + 1; i++) {
+		settings.setValue(ppopup_NGTDM->filterGroup->button(i)->objectName(), QVariant(ppopup_NGTDM->filterGroup->button(i)->isChecked()));
+		if (i == nfeatures_NGTDM) break; // exclude 'All' btn
+		ngtdm.isCheckedFeature[i] = ppopup_NGTDM->filterGroup->button(i)->isChecked();
+		if (ngtdm.isCheckedFeature[i] == true) ngtdm.nCheckedFeatures++;
+	}
+	settings.setValue(ppopup_NGTDM->ui->radioButton_FBN->objectName(), QVariant(ppopup_NGTDM->ui->radioButton_FBN->isChecked()));
+	settings.setValue(ppopup_NGTDM->ui->comboBox_nBins->objectName(), ppopup_NGTDM->ui->comboBox_nBins->currentText());
+	settings.setValue(ppopup_NGTDM->ui->radioButton_FBS->objectName(), QVariant(ppopup_NGTDM->ui->radioButton_FBS->isChecked()));
+	settings.setValue(ppopup_NGTDM->ui->lineEdit_sBin->objectName(), ppopup_NGTDM->ui->lineEdit_sBin->text());
+	ngtdm.isFBN = ppopup_NGTDM->ui->radioButton_FBN->isChecked() ? true : false;
+	if (ngtdm.isFBN) {
+		ngtdm.nBins = ppopup_NGTDM->ui->comboBox_nBins->currentText().toInt();
+	}
+	else {
+		ngtdm.sBin = ppopup_NGTDM->ui->lineEdit_sBin->text().toInt();
+	}
+	settings.endGroup();
+
+
 }
 void CPlatform::initIsActivatedFamily(int FAMILY_IDX)
 {
@@ -832,6 +892,12 @@ void CPlatform::initIsActivatedFamily(int FAMILY_IDX)
 		case E_GLDZM:
 			if (settings.value(ui.checkBox_GLDZM->objectName()).toBool() == true) {
 				gldzm.isActivatedFamily = true;
+			}
+			break;
+
+		case E_NGTDM:
+			if (settings.value(ui.checkBox_NGTDM->objectName()).toBool() == true) {
+				ngtdm.isActivatedFamily = true;
 			}
 			break;
 
@@ -1712,6 +1778,14 @@ void CPlatform::setCheckedFamilyState() { // check box 클릭될 때마다(시그널) 호�
 		}
 	}
 
+	if (obj == ui.checkBox_NGTDM) {
+		ngtdm.isActivatedFamily = !ngtdm.isActivatedFamily;
+
+		if (ngtdm.isActivatedFamily == true) {
+			showPopUp(obj); // pop-up
+		}
+	}
+
 }
 void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, vector<vector<unsigned char>> mask_morph, int nHeight, int nWidth, float pixelSpacingX, float pixelSpacingY) {
 	// for loop으로 대체 가능 (for auto, break)
@@ -1745,6 +1819,10 @@ void CPlatform::featureExtraction(short* psImage, unsigned char* pucMask, vector
 
 	if (gldzm.isActivatedFamily) {
 		gldzm.featureExtraction(psImage, pucMask, mask_morph, nHeight, nWidth); // mask_morph : morpological mask (original)
+	}
+
+	if (ngtdm.isActivatedFamily) {
+		ngtdm.featureExtraction(psImage, pucMask, nHeight, nWidth);
 	}
 }
 
@@ -1782,6 +1860,9 @@ void CPlatform::averageAllSlices() {
 		gldzm.averageAllValues();
 	}
 
+	if (ngtdm.isActivatedFamily) {
+		ngtdm.averageAllValues();
+	}
 }
 
 
@@ -1841,6 +1922,11 @@ void CPlatform::presetCSVFile(string csvName) {
 	if (gldzm.isActivatedFamily) {
 		for (int i = 0; i < gldzm.nCheckedFeatures; i++) {
 			resultCSV << "GLDZM" << ",";
+		}
+	}
+	if (ngtdm.isActivatedFamily) {
+		for (int i = 0; i < ngtdm.nCheckedFeatures; i++) {
+			resultCSV << "NGTDM" << ",";
 		}
 	}
 
@@ -1929,6 +2015,16 @@ void CPlatform::presetCSVFile(string csvName) {
 		}
 	}
 
+	if (ngtdm.isActivatedFamily) {
+		vector<string> featureNames(NGTDM::FEATURE_COUNT, "");
+		ngtdm.defineFeatureNames(featureNames); // 일단 전체 feature name들 get
+		for (int i = 0; i < featureNames.size(); i++) {
+			if (ngtdm.isCheckedFeature[i]) {
+				resultCSV << featureNames[i] << ",";
+			}
+		}
+	}
+
 	resultCSV.close();
 
 }
@@ -1997,6 +2093,9 @@ void CPlatform::writeCSVFeatureValue(string csvName) {
 		writeCSVCheckedValue(gldzm.final1DVec, csvName);
 	}
 
+	if (ngtdm.isActivatedFamily) {
+		writeCSVCheckedValue(ngtdm.final1DVec, csvName);
+	}
 }
 void CPlatform::writeCSVFile(int seriesIdx, string csvName) {
 
@@ -2017,6 +2116,7 @@ void CPlatform::clearAll(int seriesIdx) {
 	glrlm.clearVector();
 	glszm.clearVector();
 	gldzm.clearVector();
+	ngtdm.clearVector();
 	
 	cout << "clear series[" << seriesIdx << "]'s all values!" << endl;
 
